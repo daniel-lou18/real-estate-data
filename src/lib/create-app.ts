@@ -3,7 +3,7 @@ import notFound from "@/middlewares/not-found";
 import onError from "@/middlewares/on-error";
 import { pinoLoggerMiddleware as pinoLogger } from "@/middlewares/pino-logger";
 import serveEmojiFavicon from "@/middlewares/serve-favicon";
-import type { AppBindings } from "@/types";
+import type { AppBindings, AppOpenAPI } from "@/types";
 import defaultHook from "@/openapi/default-hook";
 
 export function createRouter() {
@@ -23,4 +23,11 @@ export default function createApp() {
   app.onError(onError);
 
   return app;
+}
+
+export function createTestApp(router: AppOpenAPI) {
+  const testApp = createApp();
+  testApp.route("/", router);
+
+  return testApp;
 }

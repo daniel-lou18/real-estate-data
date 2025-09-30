@@ -4,6 +4,7 @@ import jsonContent from "@/openapi/helpers/json-content";
 import { SelectPropertySaleSchema } from "@/db/schema";
 import IdParamsSchema from "@/openapi/schemas/id-params";
 import createErrorSchema from "@/openapi/schemas/create-error-schema";
+import { notFoundSchema } from "@/lib/constants";
 
 const tags = ["Sales"];
 
@@ -32,15 +33,7 @@ export const getOne = createRoute({
       "The requested property sale"
     ),
     [HttpStatusCodes.NOT_FOUND]: jsonContent(
-      z
-        .object({
-          message: z.string(),
-        })
-        .openapi({
-          example: {
-            message: "Not found",
-          },
-        }),
+      notFoundSchema,
       "Property sale not found"
     ),
     [HttpStatusCodes.UNPROCESSABLE_ENTITY]: jsonContent(

@@ -1,6 +1,7 @@
 import type { GetOneRoute, ListRoute } from "./sales.routes";
 import type { AppRouteHandler } from "@/types";
 import * as HttpStatusCodes from "@/config/http-status-codes";
+import * as HttpStatusPhrases from "@/config/http-status-phrases";
 
 import { db } from "@/db";
 import { propertySales } from "@/db/schema";
@@ -18,7 +19,10 @@ export const getOne: AppRouteHandler<GetOneRoute> = async (c) => {
   });
 
   if (!sale) {
-    return c.json({ message: "Not found" }, HttpStatusCodes.NOT_FOUND);
+    return c.json(
+      { message: HttpStatusPhrases.NOT_FOUND },
+      HttpStatusCodes.NOT_FOUND
+    );
   }
 
   return c.json(sale, HttpStatusCodes.OK);
