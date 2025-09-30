@@ -1,25 +1,23 @@
+import * as HttpStatusCodes from "@/config/http-status-codes";
 import { createRouter } from "@/lib/create-app";
-import { createRoute, z } from "@hono/zod-openapi";
+import jsonContent from "@/openapi/helpers/json-content";
+import { createRoute } from "@hono/zod-openapi";
+import createMessageObjectSchema from "@/openapi/schemas/create-message-object";
 
-const route = createRoute({
+const indexRoute = createRoute({
+  tags: ["Index"],
   method: "get",
   path: "/",
   responses: {
-    200: {
-      content: {
-        "application/json": {
-          schema: z.object({
-            message: z.string(),
-          }),
-        },
-      },
-      description: "Property Sales API Index",
-    },
+    [HttpStatusCodes.OK]: jsonContent(
+      createMessageObjectSchema("Property Sales API"),
+      "Property Sales API Index"
+    ),
   },
 });
 
-const router = createRouter().openapi(route, (c) => {
-  return c.json({ message: "Property Sales API" });
+const router = createRouter().openapi(indexRoute, (c) => {
+  return c.json({ message: "Property Sales API" }, HttpStatusCodes.OK);
 });
 
 export default router;
