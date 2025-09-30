@@ -1,20 +1,25 @@
-import type { ListRoute } from "./sales.routes";
+import type { GetOneRoute, ListRoute } from "./sales.routes";
 import type { AppRouteHandler } from "@/types";
 import * as HttpStatusCodes from "@/config/http-status-codes";
 
-export const list: AppRouteHandler<ListRoute> = (c) => {
-  return c.json(
-    [
-      {
-        year: 2025,
-        month: 9,
-        date: "2025-09-30",
-        nbApartments: 2,
-        nbHouses: 0,
-        price: 1000000,
-        floorArea: 100,
-      },
-    ],
-    HttpStatusCodes.OK
-  );
+import { db } from "@/db";
+import { propertySales } from "@/db/schema";
+import { eq } from "drizzle-orm";
+
+export const list: AppRouteHandler<ListRoute> = async (c) => {
+  const sales = await db.select().from(propertySales).limit(10);
+  return c.json(sales, HttpStatusCodes.OK);
+};
+
+export const getOne: AppRouteHandler<GetOneRoute> = async (c) => {
+  const id = c.req.valid("param").id;
+  const sale = await db.query.propertySales.findFirst({
+    where: eq(propertySales.id, id),
+  });
+
+  if (!sale) {
+    return c.json({ message: "Not found" }, HttpStatusCodes.NOT_FOUND);
+  }
+
+  return c.json(sale, HttpStatusCodes.OK);
 };

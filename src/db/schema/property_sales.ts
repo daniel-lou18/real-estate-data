@@ -10,6 +10,7 @@ import {
   timestamp,
   varchar,
 } from "drizzle-orm/pg-core";
+import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 
 export const propertySales = pgTable(
   "property_sales",
@@ -31,7 +32,7 @@ export const propertySales = pgTable(
     // Transaction details
     libnatmut: varchar("libnatmut", { length: 100 }),
     vefa: boolean("vefa"),
-    price: numeric("valeurfonc", { precision: 12, scale: 2 }),
+    price: numeric("valeurfonc", { precision: 12, scale: 2, mode: "number" }),
 
     // Counts
     nbdispo: smallint("nbdispo"),
@@ -49,7 +50,7 @@ export const propertySales = pgTable(
 
     // Property details
     nbsuf: smallint("nbsuf"),
-    sterr: numeric("sterr", { precision: 10, scale: 2 }),
+    sterr: numeric("sterr", { precision: 10, scale: 2, mode: "number" }),
     nbvolmut: smallint("nbvolmut"),
     nblocmut: smallint("nblocmut"),
     lIdlocmut: jsonb("l_idlocmut").$type<string[]>(),
@@ -75,20 +76,28 @@ export const propertySales = pgTable(
     nbmai5pp: smallint("nbmai5pp"),
 
     // Surface areas (m²)
-    floorArea: numeric("sbati", { precision: 10, scale: 2 }),
+    floorArea: numeric("sbati", { precision: 10, scale: 2, mode: "number" }),
     HouseFloorArea: numeric("sbatmai", { precision: 10, scale: 2 }),
-    ApartmentFloorArea: numeric("sbatapt", { precision: 10, scale: 2 }),
-    WorkspaceFloorArea: numeric("sbatact", { precision: 10, scale: 2 }),
-    sapt1pp: numeric("sapt1pp", { precision: 10, scale: 2 }),
-    sapt2pp: numeric("sapt2pp", { precision: 10, scale: 2 }),
-    sapt3pp: numeric("sapt3pp", { precision: 10, scale: 2 }),
-    sapt4pp: numeric("sapt4pp", { precision: 10, scale: 2 }),
-    sapt5pp: numeric("sapt5pp", { precision: 10, scale: 2 }),
-    smai1pp: numeric("smai1pp", { precision: 10, scale: 2 }),
-    smai2pp: numeric("smai2pp", { precision: 10, scale: 2 }),
-    smai3pp: numeric("smai3pp", { precision: 10, scale: 2 }),
-    smai4pp: numeric("smai4pp", { precision: 10, scale: 2 }),
-    smai5pp: numeric("smai5pp", { precision: 10, scale: 2 }),
+    ApartmentFloorArea: numeric("sbatapt", {
+      precision: 10,
+      scale: 2,
+      mode: "number",
+    }),
+    WorkspaceFloorArea: numeric("sbatact", {
+      precision: 10,
+      scale: 2,
+      mode: "number",
+    }),
+    sapt1pp: numeric("sapt1pp", { precision: 10, scale: 2, mode: "number" }),
+    sapt2pp: numeric("sapt2pp", { precision: 10, scale: 2, mode: "number" }),
+    sapt3pp: numeric("sapt3pp", { precision: 10, scale: 2, mode: "number" }),
+    sapt4pp: numeric("sapt4pp", { precision: 10, scale: 2, mode: "number" }),
+    sapt5pp: numeric("sapt5pp", { precision: 10, scale: 2, mode: "number" }),
+    smai1pp: numeric("smai1pp", { precision: 10, scale: 2, mode: "number" }),
+    smai2pp: numeric("smai2pp", { precision: 10, scale: 2, mode: "number" }),
+    smai3pp: numeric("smai3pp", { precision: 10, scale: 2, mode: "number" }),
+    smai4pp: numeric("smai4pp", { precision: 10, scale: 2, mode: "number" }),
+    smai5pp: numeric("smai5pp", { precision: 10, scale: 2, mode: "number" }),
 
     // Property type
     propertyTypeCode: smallint("codtypbien"),
@@ -108,5 +117,8 @@ export const propertySales = pgTable(
   })
 );
 
-export type PropertySale = typeof propertySales.$inferSelect;
-export type NewPropertySale = typeof propertySales.$inferInsert;
+export type SelectPropertySale = typeof propertySales.$inferSelect;
+export type InsertPropertySale = typeof propertySales.$inferInsert;
+
+export const SelectPropertySaleSchema = createSelectSchema(propertySales);
+export const InsertPropertySaleSchema = createInsertSchema(propertySales);

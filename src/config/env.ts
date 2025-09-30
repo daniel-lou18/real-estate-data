@@ -10,7 +10,7 @@ const EnvSchema = z.object({
   DB_PASSWORD: z.string(),
   DB_NAME: z.string(),
   DB_PORT: z.coerce.number().default(5432),
-  DB_URL: z.string(),
+  DB_URL: z.url(),
 });
 
 type Env = z.infer<typeof EnvSchema>;
