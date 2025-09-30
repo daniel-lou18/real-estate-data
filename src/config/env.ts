@@ -5,6 +5,12 @@ const EnvSchema = z.object({
   NODE_ENV: z.string().default("development"),
   PORT: z.coerce.number().default(3000),
   LOG_LEVEL: z.enum(["trace", "debug", "info", "warn", "error", "fatal"]),
+  DB_HOST: z.string().default("localhost"),
+  DB_USER: z.string().default("postgres"),
+  DB_PASSWORD: z.string(),
+  DB_NAME: z.string(),
+  DB_PORT: z.coerce.number().default(5432),
+  DB_URL: z.string(),
 });
 
 type Env = z.infer<typeof EnvSchema>;
