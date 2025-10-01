@@ -1,3 +1,4 @@
+import { SQL, sql } from "drizzle-orm";
 import {
   boolean,
   date,
@@ -41,6 +42,10 @@ export const propertySales = pgTable(
 
     // Location arrays (stored as JSONB)
     inseeCodes: jsonb("l_codinsee").$type<string[]>(),
+    // Add generated column
+    primaryInseeCode: varchar("primary_insee_code", {
+      length: 10,
+    }).generatedAlwaysAs((): SQL => sql`l_codinsee->>0`),
     nbsection: smallint("nbsection"),
     sections: jsonb("l_section").$type<string[]>(),
     nbpar: smallint("nbpar"),
@@ -77,7 +82,11 @@ export const propertySales = pgTable(
 
     // Surface areas (m²)
     floorArea: numeric("sbati", { precision: 10, scale: 2, mode: "number" }),
-    HouseFloorArea: numeric("sbatmai", { precision: 10, scale: 2 }),
+    HouseFloorArea: numeric("sbatmai", {
+      precision: 10,
+      scale: 2,
+      mode: "number",
+    }),
     ApartmentFloorArea: numeric("sbatapt", {
       precision: 10,
       scale: 2,
