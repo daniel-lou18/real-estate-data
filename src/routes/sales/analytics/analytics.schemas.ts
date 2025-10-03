@@ -124,26 +124,6 @@ const HouseSpecificStats = z.object({
     .describe("Average price per m² for houses"),
 });
 
-/**
- * Detailed statistics for a specific property type
- * Used when breaking down apartments vs houses
- */
-const PropertyTypeStats = z.object({
-  count: z.number().int().describe("Number of units of this type"),
-  totalPrice: z.number().describe("Total price for this property type"),
-  avgPrice: z.number().describe("Average price for this property type"),
-  totalFloorArea: z
-    .number()
-    .describe("Total floor area for this property type"),
-  avgFloorArea: z
-    .number()
-    .describe("Average floor area for this property type"),
-  avgPricePerM2: z
-    .number()
-    .nullable()
-    .describe("Average price per m² for this property type"),
-});
-
 // ============================================================================
 // Analytics Response Schemas
 // ============================================================================
@@ -157,37 +137,28 @@ export const SalesByInseeCodeSchema = BaseAggregationMetrics.extend({
     .string()
     .describe("INSEE code (French postal/administrative code)"),
 
-  // Property type breakdown (flat fields)
   ...PropertyTypeBreakdown.shape,
-
-  // Apartment-specific statistics (flat fields)
   ...ApartmentSpecificStats.shape,
-
-  // House-specific statistics (flat fields)
   ...HouseSpecificStats.shape,
-
-  // Apartment room distribution (flat fields)
   ...ApartmentRoomDistribution.shape,
-
-  // House room distribution (flat fields)
   ...HouseRoomDistribution.shape,
 });
 
 /**
- * Schema for sales grouped by department
- * Each object represents aggregated sales data for one department
+ * Schema for sales grouped by section (French administrative division)
+ * Each object represents aggregated sales data for one section
  */
-export const SalesByDepartmentSchema = BaseAggregationMetrics.extend({
-  depCode: z
+export const SalesByInseeCodeAndSectionSchema = BaseAggregationMetrics.extend({
+  inseeCode: z
     .string()
-    .describe("Department code (French administrative division)"),
+    .describe("INSEE code (French postal/administrative code)"),
+  section: z.string().describe("Section code (French administrative division)"),
 
-  // Optional: Property type breakdown
-  propertyTypes: PropertyTypeBreakdown.optional(),
-
-  // Optional: Detailed stats by property type
-  apartmentStats: PropertyTypeStats.optional(),
-  houseStats: PropertyTypeStats.optional(),
+  ...PropertyTypeBreakdown.shape,
+  ...ApartmentSpecificStats.shape,
+  ...HouseSpecificStats.shape,
+  ...ApartmentRoomDistribution.shape,
+  ...HouseRoomDistribution.shape,
 });
 
 /**
@@ -208,8 +179,8 @@ export const SalesByPropertyTypeSchema = BaseAggregationMetrics.extend({
 export const SalesByYearSchema = BaseAggregationMetrics.extend({
   year: z.number().int().describe("Year of transactions"),
 
-  // Optional: Property type breakdown
-  propertyTypes: PropertyTypeBreakdown.optional(),
+  // Property type breakdown (flat fields)
+  ...PropertyTypeBreakdown.shape,
 
   // Optional: Monthly distribution
   monthlyDistribution: z
@@ -236,8 +207,8 @@ export const SalesByMonthSchema = BaseAggregationMetrics.extend({
     .max(12)
     .describe("Month of transactions (1-12)"),
 
-  // Optional: Property type breakdown
-  propertyTypes: PropertyTypeBreakdown.optional(),
+  // Property type breakdown (flat fields)
+  ...PropertyTypeBreakdown.shape,
 });
 
 /**
@@ -266,9 +237,8 @@ export const SalesSummarySchema = BaseAggregationMetrics.extend({
     .int()
     .optional()
     .describe("Number of unique INSEE codes"),
-
-  // Property type breakdown
-  propertyTypes: PropertyTypeBreakdown,
+  // Property type breakdown (flat fields)
+  ...PropertyTypeBreakdown.shape,
 });
 
 // ============================================================================
@@ -342,7 +312,9 @@ export const AnalyticsQueryParamsSchema = z.object({
 // ============================================================================
 
 export type SalesByInseeCode = z.infer<typeof SalesByInseeCodeSchema>;
-export type SalesByDepartment = z.infer<typeof SalesByDepartmentSchema>;
+export type SalesByInseeCodeAndSection = z.infer<
+  typeof SalesByInseeCodeAndSectionSchema
+>;
 export type SalesByPropertyType = z.infer<typeof SalesByPropertyTypeSchema>;
 export type SalesByYear = z.infer<typeof SalesByYearSchema>;
 export type SalesByMonth = z.infer<typeof SalesByMonthSchema>;

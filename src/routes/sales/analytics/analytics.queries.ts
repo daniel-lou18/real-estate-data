@@ -17,6 +17,11 @@ import { sql, eq, and, gte, lte, between, isNotNull } from "drizzle-orm";
 import type {
   AnalyticsQueryParams,
   SalesByInseeCode,
+  SalesByInseeCodeAndSection,
+  SalesByPropertyType,
+  SalesByYear,
+  SalesByMonth,
+  SalesSummary,
 } from "./analytics.schemas";
 
 // ============================================================================
@@ -325,21 +330,28 @@ export async function getSalesByInseeCode(
 }
 
 /**
- * Get sales grouped by department code
+ * Get sales grouped by insee code and section code
  */
-export async function getSalesByDepartment(params: AnalyticsQueryParams) {
+export async function getSalesByInseeCodeAndSection(
+  params: AnalyticsQueryParams
+): Promise<SalesByInseeCodeAndSection[]> {
   const whereClause = buildWhereClause(params);
   const orderByClause = buildOrderByClause(params);
 
   const results = await db
     .select({
-      depCode: propertySales.depCode,
+      inseeCode: sql<string>`${propertySales.primaryInseeCode}`,
+      section: sql<string>`${propertySales.primarySection}`,
       ...baseAggregationFields,
       ...propertyTypeFields,
+      ...apartmentSpecificFields,
+      ...houseSpecificFields,
+      ...apartmentRoomDistributionFields,
+      ...houseRoomDistributionFields,
     })
     .from(propertySales)
-    .where(and(whereClause, isNotNull(propertySales.depCode)))
-    .groupBy(propertySales.depCode)
+    .where(and(whereClause, isNotNull(propertySales.primarySection)))
+    .groupBy(propertySales.primaryInseeCode, propertySales.primarySection)
     .orderBy(orderByClause)
     .limit(params.limit)
     .offset(params.offset);
@@ -350,14 +362,16 @@ export async function getSalesByDepartment(params: AnalyticsQueryParams) {
 /**
  * Get sales grouped by property type
  */
-export async function getSalesByPropertyType(params: AnalyticsQueryParams) {
+export async function getSalesByPropertyType(
+  params: AnalyticsQueryParams
+): Promise<SalesByPropertyType[]> {
   const whereClause = buildWhereClause(params);
   const orderByClause = buildOrderByClause(params);
 
   const results = await db
     .select({
-      propertyTypeCode: propertySales.propertyTypeCode,
-      propertyTypeLabel: propertySales.propertyTypeLabel,
+      propertyTypeCode: sql<number>`${propertySales.propertyTypeCode}`,
+      propertyTypeLabel: sql<string>`${propertySales.propertyTypeLabel}`,
       ...baseAggregationFields,
     })
     .from(propertySales)
@@ -373,13 +387,15 @@ export async function getSalesByPropertyType(params: AnalyticsQueryParams) {
 /**
  * Get sales grouped by year
  */
-export async function getSalesByYear(params: AnalyticsQueryParams) {
+export async function getSalesByYear(
+  params: AnalyticsQueryParams
+): Promise<SalesByYear[]> {
   const whereClause = buildWhereClause(params);
   const orderByClause = buildOrderByClause(params);
 
   const results = await db
     .select({
-      year: propertySales.year,
+      year: sql<number>`${propertySales.year}`,
       ...baseAggregationFields,
       ...propertyTypeFields,
     })
@@ -396,14 +412,16 @@ export async function getSalesByYear(params: AnalyticsQueryParams) {
 /**
  * Get sales grouped by year and month
  */
-export async function getSalesByMonth(params: AnalyticsQueryParams) {
+export async function getSalesByMonth(
+  params: AnalyticsQueryParams
+): Promise<SalesByMonth[]> {
   const whereClause = buildWhereClause(params);
   const orderByClause = buildOrderByClause(params);
 
   const results = await db
     .select({
-      year: propertySales.year,
-      month: propertySales.month,
+      year: sql<number>`${propertySales.year}`,
+      month: sql<number>`${propertySales.month}`,
       ...baseAggregationFields,
       ...propertyTypeFields,
     })
@@ -429,7 +447,7 @@ export async function getSalesByMonth(params: AnalyticsQueryParams) {
  */
 export async function getSalesSummary(
   params: Partial<AnalyticsQueryParams> = {}
-) {
+): Promise<SalesSummary> {
   const whereClause = buildWhereClause(params);
 
   const results = await db
@@ -438,8 +456,8 @@ export async function getSalesSummary(
       ...propertyTypeFields,
 
       // Additional summary fields
-      earliestDate: sql<string | null>`min(${propertySales.date})::text`,
-      latestDate: sql<string | null>`max(${propertySales.date})::text`,
+      earliestDate: sql<string | undefined>`min(${propertySales.date})::text`,
+      latestDate: sql<string | undefined>`max(${propertySales.date})::text`,
       uniqueDepartments: sql<number>`count(distinct ${propertySales.depCode})::int`,
 
       // Count unique primary INSEE codes
