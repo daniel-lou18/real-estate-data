@@ -60,7 +60,7 @@ export const propertySales = pgTable(
     nbsuf: smallint("nbsuf"),
     sterr: numeric("sterr", { precision: 10, scale: 2, mode: "number" }),
     nbvolmut: smallint("nbvolmut"),
-    nblocmut: smallint("nblocmut"),
+    nbProperties: smallint("nblocmut"),
     lIdlocmut: jsonb("l_idlocmut").$type<string[]>(),
 
     // Property type counts

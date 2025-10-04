@@ -270,6 +270,7 @@ export const AnalyticsQueryParamsSchema = z.object({
   // Location filters
   depCode: z.string().optional().describe("Filter by department code"),
   inseeCode: z.string().optional().describe("Filter by specific INSEE code"),
+  section: z.string().optional().describe("Filter by section code"),
 
   // Property type filters
   propertyTypeCode: z.coerce

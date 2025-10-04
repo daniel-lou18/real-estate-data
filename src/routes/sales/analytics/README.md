@@ -29,7 +29,7 @@ Import schemas in your routes:
 ```typescript
 import {
   SalesByInseeCodeSchema,
-  SalesByDepartmentSchema,
+  SalesByInseeCodeAndSectionSchema,
   AnalyticsQueryParamsSchema,
 } from "./analytics.schemas";
 ```
@@ -46,7 +46,7 @@ All schemas are:
 #### Response Schemas
 
 - `SalesByInseeCodeSchema` - Sales grouped by postal code
-- `SalesByDepartmentSchema` - Sales grouped by department
+- `SalesByInseeCodeAndSectionSchema` - Sales grouped by postal code + section
 - `SalesByPropertyTypeSchema` - Sales grouped by property type
 - `SalesByYearSchema` - Sales grouped by year
 - `SalesByMonthSchema` - Sales grouped by month
@@ -56,7 +56,7 @@ All schemas are:
 
 - `AnalyticsQueryParamsSchema` - Common filters for all analytics endpoints
   - Time filters: `year`, `startYear`, `endYear`, `startDate`, `endDate`
-  - Location filters: `depCode`, `inseeCode`
+  - Location filters: `depCode`, `inseeCode`, `section`
   - Property filters: `propertyTypeCode`
   - Pagination: `limit`, `offset`
   - Sorting: `sortBy`, `sortOrder`

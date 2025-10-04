@@ -11,6 +11,8 @@ const EnvSchema = z.object({
   DB_NAME: z.string(),
   DB_PORT: z.coerce.number().default(5432),
   DB_URL: z.url(),
+  OPENAI_API_KEY: z.string(),
+  GOOGLE_GENERATIVE_AI_API_KEY: z.string(),
 });
 
 type Env = z.infer<typeof EnvSchema>;

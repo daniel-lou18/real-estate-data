@@ -22,7 +22,7 @@ import type {
   SalesByYear,
   SalesByMonth,
   SalesSummary,
-} from "./analytics.schemas";
+} from "../../routes/sales/analytics/analytics.schemas";
 
 // ============================================================================
 // Shared Utilities
@@ -70,6 +70,11 @@ function buildWhereClause(filters: Partial<AnalyticsQueryParams>) {
   if (filters.inseeCode) {
     // Use primaryInseeCode for fast indexed filtering
     conditions.push(eq(propertySales.primaryInseeCode, filters.inseeCode));
+  }
+
+  if (filters.section) {
+    // Use primarySection for fast indexed filtering
+    conditions.push(eq(propertySales.primarySection, filters.section));
   }
 
   // Property type filters
@@ -145,7 +150,7 @@ const baseAggregationFields = {
  * Total counts of different property types sold
  */
 const propertyTypeFields = {
-  totalProperties: sql<number>`coalesce(sum(${propertySales.nblocmut}), 0)::int`,
+  totalProperties: sql<number>`coalesce(sum(${propertySales.nbProperties}), 0)::int`,
   totalApartments: sql<number>`coalesce(sum(${propertySales.nbApartments}), 0)::int`,
   totalHouses: sql<number>`coalesce(sum(${propertySales.nbHouses}), 0)::int`,
   totalWorkspaces: sql<number>`coalesce(sum(${propertySales.nbWorkspaces}), 0)::int`,
