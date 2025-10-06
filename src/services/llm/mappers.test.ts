@@ -8,8 +8,9 @@ import {
   compileSelect,
   compileGroupBy,
   compileMetrics,
+  compileComputations,
 } from "./mappers";
-import type { AllowedColumns } from "./schemas";
+import type { AllowedColumns, ComputationType } from "./schemas";
 
 describe("mappers", () => {
   describe("COLUMN_MAP", () => {
@@ -451,116 +452,105 @@ describe("mappers", () => {
         "Unsupported metric field: invalidField"
       );
     });
+  });
 
-    it("should compile percentile metric", () => {
-      const metrics = [
+  describe("compileComputations", () => {
+    it("should compile avgPricePerM2 computation", () => {
+      const computations: ComputationType[] = [{ name: "avgPricePerM2" }];
+      const result = compileComputations(computations);
+      expect(result).toBeDefined();
+      expect(result).toHaveProperty("avgPricePerM2");
+    });
+
+    it("should compile percentile computation", () => {
+      const computations: ComputationType[] = [
         {
-          metric: "percentile" as const,
+          name: "percentile",
           field: "price" as AllowedColumns,
           percentile: 50,
         },
       ];
-      const result = compileMetrics(metrics);
+      const result = compileComputations(computations);
       expect(result).toBeDefined();
       expect(result).toHaveProperty("percentile_price_50");
     });
 
-    it("should compile multiple percentile metrics with different values", () => {
-      const metrics = [
+    it("should compile multiple percentile computations", () => {
+      const computations: ComputationType[] = [
         {
-          metric: "percentile" as const,
+          name: "percentile",
           field: "price" as AllowedColumns,
           percentile: 25,
         },
         {
-          metric: "percentile" as const,
+          name: "percentile",
           field: "price" as AllowedColumns,
           percentile: 75,
         },
         {
-          metric: "percentile" as const,
-          field: "price" as AllowedColumns,
-          percentile: 90,
-        },
-      ];
-      const result = compileMetrics(metrics);
-      expect(result).toBeDefined();
-      expect(result).toHaveProperty("percentile_price_25");
-      expect(result).toHaveProperty("percentile_price_75");
-      expect(result).toHaveProperty("percentile_price_90");
-    });
-
-    it("should compile percentile metric for different fields", () => {
-      const metrics = [
-        {
-          metric: "percentile" as const,
-          field: "price" as AllowedColumns,
-          percentile: 50,
-        },
-        {
-          metric: "percentile" as const,
+          name: "percentile",
           field: "floorArea" as AllowedColumns,
           percentile: 50,
         },
       ];
-      const result = compileMetrics(metrics);
+      const result = compileComputations(computations);
       expect(result).toBeDefined();
-      expect(result).toHaveProperty("percentile_price_50");
+      expect(result).toHaveProperty("percentile_price_25");
+      expect(result).toHaveProperty("percentile_price_75");
       expect(result).toHaveProperty("percentile_floorArea_50");
     });
 
-    it("should handle edge case percentile values", () => {
-      const metrics = [
+    it("should compile mixed computations", () => {
+      const computations: ComputationType[] = [
+        { name: "avgPricePerM2" },
         {
-          metric: "percentile" as const,
+          name: "percentile",
+          field: "price" as AllowedColumns,
+          percentile: 50,
+        },
+      ];
+      const result = compileComputations(computations);
+      expect(result).toBeDefined();
+      expect(result).toHaveProperty("avgPricePerM2");
+      expect(result).toHaveProperty("percentile_price_50");
+    });
+
+    it("should return undefined for empty computations array", () => {
+      const computations: ComputationType[] = [];
+      const result = compileComputations(computations);
+      expect(result).toBeUndefined();
+    });
+
+    it("should throw error for unsupported computation field in percentile", () => {
+      const computations: ComputationType[] = [
+        {
+          name: "percentile",
+          field: "invalidField" as any,
+          percentile: 50,
+        },
+      ];
+      expect(() => compileComputations(computations)).toThrow(
+        "Unsupported computation field: invalidField"
+      );
+    });
+
+    it("should handle edge case percentile values", () => {
+      const computations: ComputationType[] = [
+        {
+          name: "percentile",
           field: "price" as AllowedColumns,
           percentile: 0,
         },
         {
-          metric: "percentile" as const,
+          name: "percentile",
           field: "price" as AllowedColumns,
           percentile: 100,
         },
       ];
-      const result = compileMetrics(metrics);
+      const result = compileComputations(computations);
       expect(result).toBeDefined();
       expect(result).toHaveProperty("percentile_price_0");
       expect(result).toHaveProperty("percentile_price_100");
-    });
-
-    it("should throw error for percentile metric without percentile parameter", () => {
-      const metrics = [
-        {
-          metric: "percentile" as const,
-          field: "price" as AllowedColumns,
-        } as any,
-      ];
-      expect(() => compileMetrics(metrics)).toThrow(
-        "Percentile metric requires percentile parameter"
-      );
-    });
-
-    it("should compile mixed metrics including percentiles", () => {
-      const metrics = [
-        { metric: "count" as const, field: "price" as AllowedColumns },
-        { metric: "avg" as const, field: "price" as AllowedColumns },
-        {
-          metric: "percentile" as const,
-          field: "price" as AllowedColumns,
-          percentile: 50,
-        },
-        {
-          metric: "percentile" as const,
-          field: "price" as AllowedColumns,
-          percentile: 95,
-        },
-      ];
-      const result = compileMetrics(metrics);
-      expect(result).toBeDefined();
-      expect(result).toHaveProperty("count_price");
-      expect(result).toHaveProperty("avg_price");
-      expect(result).toHaveProperty("percentile_price_50");
-      expect(result).toHaveProperty("percentile_price_95");
     });
   });
 });

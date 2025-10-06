@@ -1,6 +1,12 @@
 import { sql, and, asc, desc, SQL } from "drizzle-orm";
 import { propertySales } from "@/db/schema/property_sales";
-import type { AllowedColumns, Filter, Metric, Sort } from "./schemas";
+import type {
+  AllowedColumns,
+  ComputationType,
+  Filter,
+  Metric,
+  Sort,
+} from "./schemas";
 import type { PgColumn } from "drizzle-orm/pg-core";
 
 export const DEFAULT_SELECT = {
@@ -195,4 +201,47 @@ export function compileMetrics(
     }
   }
   return select;
+}
+
+export function compileComputations(
+  computations: ComputationType[]
+): Record<string, SQL> | undefined {
+  const select: Record<string, SQL> = {};
+
+  for (const computation of computations) {
+    switch (computation.name) {
+      case "percentile": {
+        const col = COLUMN_MAP[computation.field];
+        if (!col)
+          throw new Error(
+            `Unsupported computation field: ${computation.field}`
+          );
+
+        const percentileValue = computation.percentile;
+        const key = `percentile_${computation.field}_${percentileValue}`;
+        select[key] = sql`percentile_cont(${
+          percentileValue / 100
+        }) within group (order by ${col})`;
+        break;
+      }
+      case "avgPricePerM2": {
+        const priceCol = propertySales.price;
+        const floorAreaCol = propertySales.floorArea;
+
+        const numerator = sql`sum(${priceCol})`;
+        const denominator = sql`sum(${floorAreaCol})`;
+
+        select[
+          "avgPricePerM2"
+        ] = sql`case when ${denominator} > 0 then ${numerator} / ${denominator} else null end`;
+        break;
+      }
+      default:
+        throw new Error(
+          `Unsupported computation: ${(computation as any).name}`
+        );
+    }
+  }
+
+  return Object.keys(select).length > 0 ? select : undefined;
 }

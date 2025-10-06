@@ -3,7 +3,7 @@ import z from "zod";
 const IntentCategorySchema = z.enum([
   "query",
   "aggregate",
-  "calculate",
+  "compute",
   "schema",
   "explain",
   "compare",
@@ -90,6 +90,20 @@ const SortSchema = z.array(
   })
 );
 
+const LimitSchema = z
+  .number()
+  .int()
+  .min(1)
+  .max(500)
+  .optional()
+  .describe("Limit the number of results");
+const OffsetSchema = z
+  .number()
+  .int()
+  .min(0)
+  .optional()
+  .describe("Offset the results");
+
 export const QuerySchema = z.object({
   select: z
     .array(AllowedColumnsSchema)
@@ -97,14 +111,8 @@ export const QuerySchema = z.object({
     .describe("Columns to select."),
   filters: z.array(FilterSchema).optional().describe("Filters to apply"),
   sort: SortSchema.optional().describe("Sort to apply"),
-  limit: z
-    .number()
-    .int()
-    .min(1)
-    .max(1000)
-    .optional()
-    .describe("Limit the number of results"),
-  offset: z.number().int().min(0).optional().describe("Offset the results"),
+  limit: LimitSchema,
+  offset: OffsetSchema,
 });
 
 const AllowedGroupBySchema = z
@@ -136,19 +144,41 @@ export const AggregationSchema = z.object({
   metrics: z.array(MetricSchema).optional().describe("Metrics to compute"),
   filters: z.array(FilterSchema).optional().describe("Filters to apply"),
   sort: SortSchema.optional().describe("Sort to apply"),
-  limit: z
-    .number()
-    .int()
-    .min(1)
-    .max(500)
+  limit: LimitSchema,
+});
+
+const PercentileSchema = z.object({
+  name: z.literal("percentile"),
+  percentile: z.number().min(0).max(100).describe("Percentile to compute"),
+  field: AllowedColumnsSchema,
+});
+
+const AvgPricePerM2Schema = z.object({
+  name: z.literal("avgPricePerM2"),
+});
+
+export const ComputationTypeSchema = z.discriminatedUnion("name", [
+  PercentileSchema,
+  AvgPricePerM2Schema,
+]);
+
+export const ComputationSchema = z.object({
+  computations: z.array(ComputationTypeSchema),
+  groupBy: z
+    .array(AllowedGroupBySchema)
     .optional()
-    .describe("Limit the number of results"),
+    .describe("Column(s) to group by"),
+  filters: z.array(FilterSchema).optional().describe("Filters to apply"),
+  sort: SortSchema.optional().describe("Sort to apply"),
+  limit: LimitSchema,
 });
 
 export type AllowedColumns = z.infer<typeof AllowedColumnsSchema>;
 export type AllowedGroupBy = z.infer<typeof AllowedGroupBySchema>;
 export type AggregationArgs = z.infer<typeof AggregationSchema>;
 export type QueryArgs = z.infer<typeof QuerySchema>;
+export type ComputationArgs = z.infer<typeof ComputationSchema>;
+export type ComputationType = z.infer<typeof ComputationTypeSchema>;
 export type Metric = z.infer<typeof MetricSchema>;
 export type Filter = z.infer<typeof FilterSchema>;
 export type Sort = z.infer<typeof SortSchema>;
