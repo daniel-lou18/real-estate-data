@@ -22,7 +22,7 @@ import type {
   SalesByYear,
   SalesByMonth,
   SalesSummary,
-} from "../../routes/sales/analytics/analytics.schemas";
+} from "../routes/sales/analytics/analytics.schemas";
 
 // ============================================================================
 // Shared Utilities

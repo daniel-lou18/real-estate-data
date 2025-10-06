@@ -26,8 +26,9 @@ export async function generateCommandService(
     ...(options?.requireTool ? { toolChoice: "required" as const } : {}),
   });
 
-  console.log("toolCalls", result.toolCalls);
-  console.log("toolResults", result.toolResults);
+  for (const toolCall of result.toolCalls) {
+    console.log("toolCall", toolCall.toolName);
+  }
   // Process the unified tool result
   for (const toolResult of result.toolResults) {
     if (toolResult.dynamic) {
@@ -36,6 +37,7 @@ export async function generateCommandService(
 
     if (toolResult.toolName in tools) {
       const result = toolResult.output;
+      console.log("result", result);
 
       return result;
     }

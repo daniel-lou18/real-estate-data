@@ -6,12 +6,33 @@ import {
   integer,
   jsonb,
   numeric,
+  pgEnum,
   pgTable,
   smallint,
   timestamp,
   varchar,
 } from "drizzle-orm/pg-core";
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
+
+export const propertyTypeLabelEnum = pgEnum("property_type_label", [
+  "ACTIVITE",
+  "APPARTEMENT INDETERMINE",
+  "BATI - INDETERMINE : Vefa sans descriptif",
+  "BATI - INDETERMINE : Vente avec volume(s)",
+  "BATI MIXTE - LOGEMENT/ACTIVITE",
+  "BATI MIXTE - LOGEMENTS",
+  "DES DEPENDANCES",
+  "DES MAISONS",
+  "DEUX APPARTEMENTS",
+  "MAISON - INDETERMINEE",
+  "TERRAIN ARTIFICIALISE MIXTE",
+  "TERRAIN D'AGREMENT",
+  "TERRAIN DE TYPE RESEAU",
+  "TERRAIN DE TYPE TAB",
+  "UN APPARTEMENT",
+  "UNE DEPENDANCE",
+  "UNE MAISON",
+]);
 
 export const propertySales = pgTable(
   "property_sales",
@@ -113,7 +134,7 @@ export const propertySales = pgTable(
 
     // Property type
     propertyTypeCode: smallint("codtypbien"),
-    propertyTypeLabel: varchar("libtypbien", { length: 200 }),
+    propertyTypeLabel: propertyTypeLabelEnum("libtypbien"),
 
     // Metadata
     createdAt: timestamp("created_at").defaultNow(),

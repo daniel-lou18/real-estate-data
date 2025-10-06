@@ -119,20 +119,21 @@ const AllowedGroupBySchema = z
   ])
   .describe("Allowed group by columns to use in the aggregation");
 
-const MetricSchema = z
-  .enum(["count", "sum", "avg", "min", "max", "percentile"])
+const AggregationMetricSchema = z
+  .enum(["count", "sum", "avg", "min", "max"])
   .describe("Allowed metrics to use in the aggregation");
 
+const MetricSchema = z.object({
+  metric: AggregationMetricSchema,
+  field: AllowedColumnsSchema,
+});
+
 export const AggregationSchema = z.object({
-  groupBy: z.array(AllowedGroupBySchema).describe("Column(s) to group by"),
-  metrics: z
-    .array(
-      z.object({
-        metric: MetricSchema,
-        field: AllowedColumnsSchema,
-      })
-    )
-    .describe("Metrics to compute"),
+  groupBy: z
+    .array(AllowedGroupBySchema)
+    .optional()
+    .describe("Column(s) to group by"),
+  metrics: z.array(MetricSchema).optional().describe("Metrics to compute"),
   filters: z.array(FilterSchema).optional().describe("Filters to apply"),
   sort: SortSchema.optional().describe("Sort to apply"),
   limit: z
@@ -146,3 +147,8 @@ export const AggregationSchema = z.object({
 
 export type AllowedColumns = z.infer<typeof AllowedColumnsSchema>;
 export type AllowedGroupBy = z.infer<typeof AllowedGroupBySchema>;
+export type AggregationArgs = z.infer<typeof AggregationSchema>;
+export type QueryArgs = z.infer<typeof QuerySchema>;
+export type Metric = z.infer<typeof MetricSchema>;
+export type Filter = z.infer<typeof FilterSchema>;
+export type Sort = z.infer<typeof SortSchema>;

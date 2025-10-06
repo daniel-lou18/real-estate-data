@@ -1,5 +1,7 @@
 import { tool } from "ai";
 import { AggregationSchema, IntentSchema, QuerySchema } from "./schemas";
+import { runQueryPlan } from "@/repositories/llm.query.repo";
+import { runAggregationPlan } from "@/repositories/llm.aggregation.repo";
 
 export const classifyIntent = tool({
   description:
@@ -12,20 +14,22 @@ export const classifyIntent = tool({
 });
 
 export const executeQuery = tool({
-  description: "Plan the query to be executed on the data",
+  description: "Execute a validated query plan against property sales",
   inputSchema: QuerySchema,
-  execute: (args) => {
-    console.log("planQuery", args);
-    return { ...args };
+  execute: async (args) => {
+    console.log(`Executing query with args: ${JSON.stringify(args, null, 2)}`);
+    return await runQueryPlan(args);
   },
 });
 
 export const executeAggregation = tool({
-  description: "Plan the aggregation to be executed on the data",
+  description: "Execute a validated aggregation plan against property sales",
   inputSchema: AggregationSchema,
-  execute: (args) => {
-    console.log("planAggregation", args);
-    return { ...args };
+  execute: async (args) => {
+    console.log(
+      `Executing aggregation with args: ${JSON.stringify(args, null, 2)}`
+    );
+    return await runAggregationPlan(args);
   },
 });
 

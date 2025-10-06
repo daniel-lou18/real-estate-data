@@ -14,7 +14,7 @@ import {
   getSalesByInseeCodeAndSection,
   getSalesByYear,
   getSalesSummary,
-} from "../../../db/queries/analytics.queries";
+} from "../../../repositories/analytics.queries";
 import * as HttpStatusCodes from "@/config/http-status-codes";
 
 export const groupedByInseeCode: AppRouteHandler<
