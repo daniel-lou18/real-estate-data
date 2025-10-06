@@ -33,13 +33,131 @@ Table context (read-only; do not restate it in the output):
 ${salesTableInfo}
 `;
 
-function createOperationSystemPrompt(operation: "query" | "aggregation") {
+type OperationType = "query" | "aggregation" | "computation";
+
+type OperationConfig = {
+  description: string;
+  sqlContext: string;
+  conversionRules: Array<{
+    property: string;
+    description: string;
+  }>;
+};
+
+const operationConfigs: Record<OperationType, OperationConfig> = {
+  query: {
+    description:
+      "Convert the user's natural language into a SINGLE query tool call.",
+    sqlContext:
+      "This query will be used in a SELECT postgresql query with or without WHERE, ORDER BY, and LIMIT clauses.",
+    conversionRules: [
+      {
+        property: "select",
+        description:
+          "If the user specifies 1 or more columns to select, include them in the select property. If not specified, omit it. Omit columns that don't exist or aren't allowed.",
+      },
+      {
+        property: "filters",
+        description:
+          "If the user specifies 1 or more filters, include them in the filters property. If not specified, omit it. Omit filters on columns that don't exist or aren't allowed.",
+      },
+      {
+        property: "sort",
+        description:
+          "If the user specifies 1 or more sort fields, include them in the sort property. If not specified, omit it.",
+      },
+      {
+        property: "limit",
+        description:
+          "If the user specifies a limit, include it in the limit property. If not specified, omit it.",
+      },
+      {
+        property: "offset",
+        description:
+          "If the user specifies an offset, include it in the offset property. If not specified, omit it.",
+      },
+    ],
+  },
+  aggregation: {
+    description:
+      "Convert the user's natural language into a SINGLE aggregation tool call.",
+    sqlContext:
+      "This aggregation will be used in a GROUP BY postgresql query with or without WHERE, ORDER BY, and LIMIT clauses.",
+    conversionRules: [
+      {
+        property: "groupBy",
+        description:
+          "If the user specifies 1 or more group by fields, include them in the groupBy property. If not specified, omit it. Omit fields that don't exist or aren't allowed.",
+      },
+      {
+        property: "filters",
+        description:
+          "If the user specifies 1 or more filters, include them in the filters property. If not specified, omit it. Omit filters on columns that don't exist or aren't allowed.",
+      },
+      {
+        property: "metrics",
+        description:
+          "If the user specifies 1 or more metrics (avg, sum, count, min, max), include them in the metrics property. If not specified, omit it. Omit metrics that don't exist or aren't allowed.",
+      },
+      {
+        property: "sort",
+        description:
+          "If the user specifies 1 or more sort fields, include them in the sort property. If not specified, omit it.",
+      },
+      {
+        property: "limit",
+        description:
+          "If the user specifies a limit, include it in the limit property. If not specified, omit it.",
+      },
+      {
+        property: "offset",
+        description:
+          "If the user specifies an offset, include it in the offset property. If not specified, omit it.",
+      },
+    ],
+  },
+  computation: {
+    description:
+      "Convert the user's natural language into a SINGLE computation tool call.",
+    sqlContext:
+      "This computation will be used to calculate derived metrics (e.g., avgPricePerM2) or percentiles in a postgresql query with or without GROUP BY, WHERE, ORDER BY, and LIMIT clauses.",
+    conversionRules: [
+      {
+        property: "computations",
+        description:
+          "If the user asks for derived metrics (avgPricePerM2) or percentiles, include them in the computations property. Each computation must specify its name and required parameters (e.g., percentile requires 'field' and 'percentile' value).",
+      },
+      {
+        property: "groupBy",
+        description:
+          "If the user specifies 1 or more group by fields, include them in the groupBy property. If not specified, omit it. Omit fields that don't exist or aren't allowed.",
+      },
+      {
+        property: "filters",
+        description:
+          "If the user specifies 1 or more filters, include them in the filters property. If not specified, omit it. Omit filters on columns that don't exist or aren't allowed.",
+      },
+      {
+        property: "sort",
+        description:
+          "If the user specifies 1 or more sort fields, include them in the sort property. If not specified, omit it.",
+      },
+      {
+        property: "limit",
+        description:
+          "If the user specifies a limit, include it in the limit property. If not specified, omit it.",
+      },
+    ],
+  },
+};
+
+function createOperationSystemPrompt(operation: OperationType) {
+  const schemaName = operation[0].toUpperCase() + operation.slice(1) + "Schema";
+
   return `
   Rules:
   - Use ONLY fields that actually exist in the table. Do not invent columns or aliases.
-  - Follow the exact input shape required by the ${
-    operation === "query" ? "QuerySchema" : "AggregationSchema"
-  }.
+  - Follow the exact input shape required by the ${schemaName}.
   - Keep outputs minimal and machine-readable. Do not include prose outside the tool call.
   - If a filter value is missing but clearly implied (e.g., a city code), infer conservatively; otherwise omit the filter.
   - If sort is not specified, omit it rather than guessing.
@@ -52,49 +170,31 @@ function createOperationSystemPrompt(operation: "query" | "aggregation") {
   - Volumes: counts are represented by "nbProperties", and subtype counts by the corresponding columns.
   - Areas: use the appropriate floor area column names.
 
-  Output: call the ${
-    operation === "query" ? "executeQuery" : "executeAggregation"
-  } tool with valid arguments only. Do not call any other tool.
+  Output: call the ${operation} tool with valid arguments only. Do not call any other tool.
 
   Table reference (for your reasoning only; do not echo it back):
   ${salesTableInfo}
   `;
 }
 
-function createQuerySystemPrompt() {
-  const operationSystemPrompt = createOperationSystemPrompt("query");
+function createSystemPrompt(operation: OperationType): string {
+  const config = operationConfigs[operation];
+  const operationSystemPrompt = createOperationSystemPrompt(operation);
+
+  const conversionMethodology = config.conversionRules
+    .map((rule) => `  - ${rule.description}`)
+    .join("\n");
 
   return `
-  You are a helpful data assistant. Convert the user's natural language into a SINGLE query tool call. This query will be used in a SELECT postgresql query with or without WHERE, GROUP BY, ORDER BY, and LIMIT clauses.
+  You are a helpful data assistant. ${config.description} ${config.sqlContext}
 
   Conversion methodology:
-  - If the user specifies 1 or more columns to select, include them in the select property of the tool payload. If the user does not specify any columns to select, omit the select property. If the user specifies a column that does not exist or is not allowed, omit the column.
-  - If the user specifies 1 or more filters, include them in the filters property of the tool payload. If the user does not specify any filters, omit the filters property. If the user specifies a filter on a column that does not exist or is not allowed, omit the filter.
-  - If the user specifies 1 or more sort fields, include them in the sort property of the tool payload. If the user does not specify any sort fields, omit the sort property.
-  - If the user specifies a limit, include it in the limit property of the tool payload. If the user does not specify a limit, omit the limit property.
-  - If the user specifies an offset, include it in the offset property of the tool payload. If the user does not specify an offset, omit the offset property.
+${conversionMethodology}
 
   ${operationSystemPrompt}
   `;
 }
 
-function createAggregationSystemPrompt() {
-  const operationSystemPrompt = createOperationSystemPrompt("aggregation");
-
-  return `
-  You are a helpful data assistant. Convert the user's natural language into a SINGLE aggregation tool call. This aggregation will be used in a GROUP BY postgresql query with or without WHERE, ORDER BY, and LIMIT clauses.
-
-  Conversion methodology:
-  - If the user specifies 1 or more group by fields, include them in the groupBy property of the tool payload. If the user does not specify any group by fields, omit the groupBy property. If the user specifies a group by field that does not exist or is not allowed, omit the group by field.
-  - If the user specifies 1 or more filter fields, include them in the filters property of the tool payload. If the user does not specify any filter fields, omit the filters property. If the user specifies a filter field that does not exist or is not allowed, omit the filter field.
-  - If the user specifies 1 or more metrics, include them in the metrics property of the tool payload. If the user does not specify any metrics, omit the metrics property. If the user specifies a metric that does not exist or is not allowed, omit the metric.
-  - If the user specifies 1 or more sort fields, include them in the sort property of the tool payload. If the user does not specify any sort fields, omit the sort property.
-  - If the user specifies a limit, include it in the limit property of the tool payload. If the user does not specify a limit, omit the limit property.
-  - If the user specifies an offset, include it in the offset property of the tool payload. If the user does not specify an offset, omit the offset property.
-
-  ${operationSystemPrompt}
-  `;
-}
-
-export const querySystemPrompt = createQuerySystemPrompt();
-export const aggregationSystemPrompt = createAggregationSystemPrompt();
+export const querySystemPrompt = createSystemPrompt("query");
+export const aggregationSystemPrompt = createSystemPrompt("aggregation");
+export const computationSystemPrompt = createSystemPrompt("computation");

@@ -211,14 +211,11 @@ export function compileComputations(
   for (const computation of computations) {
     switch (computation.name) {
       case "percentile": {
-        const col = COLUMN_MAP[computation.field];
-        if (!col)
-          throw new Error(
-            `Unsupported computation field: ${computation.field}`
-          );
+        const { field, percentileValue } = computation;
+        const col = COLUMN_MAP[field];
+        if (!col) throw new Error(`Unsupported computation field: ${field}`);
 
-        const percentileValue = computation.percentile;
-        const key = `percentile_${computation.field}_${percentileValue}`;
+        const key = `percentile_${field}_${percentileValue}`;
         select[key] = sql`percentile_cont(${
           percentileValue / 100
         }) within group (order by ${col})`;

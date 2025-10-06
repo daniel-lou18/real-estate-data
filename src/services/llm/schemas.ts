@@ -148,13 +148,17 @@ export const AggregationSchema = z.object({
 });
 
 const PercentileSchema = z.object({
-  name: z.literal("percentile"),
-  percentile: z.number().min(0).max(100).describe("Percentile to compute"),
+  name: z.literal("percentile").describe("Name of the computation"),
+  percentileValue: z
+    .number()
+    .min(0)
+    .max(100)
+    .describe("Value of the percentile"),
   field: AllowedColumnsSchema,
 });
 
 const AvgPricePerM2Schema = z.object({
-  name: z.literal("avgPricePerM2"),
+  name: z.literal("avgPricePerM2").describe("Name of the computation"),
 });
 
 export const ComputationTypeSchema = z.discriminatedUnion("name", [
@@ -163,7 +167,9 @@ export const ComputationTypeSchema = z.discriminatedUnion("name", [
 ]);
 
 export const ComputationSchema = z.object({
-  computations: z.array(ComputationTypeSchema),
+  computations: z
+    .array(ComputationTypeSchema)
+    .describe("Computations to execute"),
   groupBy: z
     .array(AllowedGroupBySchema)
     .optional()

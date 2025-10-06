@@ -2,9 +2,15 @@ import { generateCommandService } from "./generateCommandService";
 import {
   querySystemPrompt,
   aggregationSystemPrompt,
+  computationSystemPrompt,
   intentSystemPrompt,
 } from "./systemPrompts";
-import { classifyIntent, executeAggregation, executeQuery } from "./tools";
+import {
+  classifyIntent,
+  executeAggregation,
+  executeQuery,
+  executeComputation,
+} from "./tools";
 import type { Intent } from "./schemas";
 
 export async function planOperation(prompt: string) {
@@ -31,6 +37,15 @@ export async function planOperation(prompt: string) {
       prompt,
       aggregationSystemPrompt,
       { executeAggregation },
+      { requireTool: true }
+    );
+  }
+
+  if (intent.category === "compute") {
+    return await generateCommandService(
+      prompt,
+      computationSystemPrompt,
+      { executeComputation },
       { requireTool: true }
     );
   }

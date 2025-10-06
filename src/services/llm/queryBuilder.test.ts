@@ -1,6 +1,10 @@
 import { describe, it, expect } from "vitest";
 import { propertySales } from "@/db/schema/property_sales";
-import { buildAggregationArgs, buildQueryArgs } from "./queryBuilder";
+import {
+  buildAggregationArgs,
+  buildComputationArgs,
+  buildQueryArgs,
+} from "./queryBuilder";
 import { DEFAULT_METRICS } from "./mappers";
 
 describe("queryBuilder", () => {
@@ -441,6 +445,151 @@ describe("queryBuilder", () => {
       expect(built.select).toHaveProperty("avg_price");
       expect(built.select).toHaveProperty("avg_floorArea");
       expect(built.select).toHaveProperty("sum_nbProperties");
+    });
+  });
+
+  describe("buildComputationArgs", () => {
+    it("builds computation with avgPricePerM2", () => {
+      const args: any = {
+        computations: [{ name: "avgPricePerM2" }],
+      };
+      const built = buildComputationArgs(args);
+      expect(built.limit).toBe(50);
+      expect(built.offset).toBe(0);
+      expect(built.select).toHaveProperty("avgPricePerM2");
+      expect(built.groupBy).toBeUndefined();
+    });
+
+    it("builds computation with percentile", () => {
+      const args: any = {
+        computations: [
+          { name: "percentile", field: "price", percentileValue: 50 },
+        ],
+      };
+      const built = buildComputationArgs(args);
+      expect(built.select).toHaveProperty("percentile_price_50");
+    });
+
+    it("builds computation with multiple computations", () => {
+      const args: any = {
+        computations: [
+          { name: "avgPricePerM2" },
+          { name: "percentile", field: "price", percentileValue: 50 },
+          { name: "percentile", field: "floorArea", percentileValue: 75 },
+        ],
+      };
+      const built = buildComputationArgs(args);
+      expect(built.select).toHaveProperty("avgPricePerM2");
+      expect(built.select).toHaveProperty("percentile_price_50");
+      expect(built.select).toHaveProperty("percentile_floorArea_75");
+    });
+
+    it("builds computation with groupBy", () => {
+      const args: any = {
+        computations: [{ name: "avgPricePerM2" }],
+        groupBy: ["year", "propertyTypeLabel"],
+      };
+      const built = buildComputationArgs(args);
+      expect(built.select).toHaveProperty("year");
+      expect(built.select).toHaveProperty("propertyTypeLabel");
+      expect(built.select).toHaveProperty("avgPricePerM2");
+      expect(built.groupBy).toBeDefined();
+      expect(built.groupBy).toHaveLength(2);
+    });
+
+    it("builds computation with filters", () => {
+      const args: any = {
+        computations: [{ name: "avgPricePerM2" }],
+        filters: [{ field: "year", operator: ">=", value: 2020 }],
+      };
+      const built = buildComputationArgs(args);
+      expect(built.where).toBeDefined();
+      expect(built.select).toHaveProperty("avgPricePerM2");
+    });
+
+    it("builds computation with sort", () => {
+      const args: any = {
+        computations: [{ name: "avgPricePerM2" }],
+        groupBy: ["year"],
+        sort: [{ field: "year", dir: "desc" }],
+      };
+      const built = buildComputationArgs(args);
+      expect(built.orderBy).toBeDefined();
+    });
+
+    it("builds computation with custom limit", () => {
+      const args: any = {
+        computations: [{ name: "avgPricePerM2" }],
+        limit: 100,
+      };
+      const built = buildComputationArgs(args);
+      expect(built.limit).toBe(100);
+    });
+
+    it("throws error when no computations provided", () => {
+      const args: any = {
+        computations: [],
+      };
+      expect(() => buildComputationArgs(args)).toThrow(
+        "At least one computation is required"
+      );
+    });
+
+    it("handles undefined computations", () => {
+      const args: any = {
+        computations: undefined,
+      };
+      expect(() => buildComputationArgs(args)).toThrow();
+    });
+
+    it("handles null filters", () => {
+      const args: any = {
+        computations: [{ name: "avgPricePerM2" }],
+        filters: null,
+      };
+      const built = buildComputationArgs(args);
+      expect(built.where).toBeUndefined();
+    });
+
+    it("handles empty groupBy array", () => {
+      const args: any = {
+        computations: [{ name: "avgPricePerM2" }],
+        groupBy: [],
+      };
+      const built = buildComputationArgs(args);
+      expect(built.groupBy).toBeUndefined();
+    });
+
+    it("handles complex computation scenario", () => {
+      const args: any = {
+        computations: [
+          { name: "avgPricePerM2" },
+          { name: "percentile", field: "price", percentileValue: 25 },
+          { name: "percentile", field: "price", percentileValue: 75 },
+        ],
+        groupBy: ["year", "primaryInseeCode"],
+        filters: [
+          { field: "year", operator: "between", value: [2020, 2023] },
+          {
+            field: "propertyTypeLabel",
+            operator: "in",
+            value: ["UN APPARTEMENT", "DEUX APPARTEMENTS"],
+          },
+        ],
+        sort: [{ field: "year", dir: "asc" }],
+        limit: 200,
+      };
+      const built = buildComputationArgs(args);
+      expect(built.select).toHaveProperty("year");
+      expect(built.select).toHaveProperty("primaryInseeCode");
+      expect(built.select).toHaveProperty("avgPricePerM2");
+      expect(built.select).toHaveProperty("percentile_price_25");
+      expect(built.select).toHaveProperty("percentile_price_75");
+      expect(built.where).toBeDefined();
+      expect(built.groupBy).toBeDefined();
+      expect(built.orderBy).toBeDefined();
+      expect(built.limit).toBe(200);
+      expect(built.offset).toBe(0);
     });
   });
 });

@@ -1,7 +1,13 @@
 import { tool } from "ai";
-import { AggregationSchema, IntentSchema, QuerySchema } from "./schemas";
-import { runQueryPlan } from "@/repositories/llm.query.repo";
-import { runAggregationPlan } from "@/repositories/llm.aggregation.repo";
+import {
+  AggregationSchema,
+  ComputationSchema,
+  IntentSchema,
+  QuerySchema,
+} from "./schemas";
+import { runQueryPlan } from "@/repositories/llm.queries";
+import { runAggregationPlan } from "@/repositories/llm.queries";
+import { runComputationPlan } from "@/repositories/llm.queries";
 
 export const classifyIntent = tool({
   description:
@@ -33,10 +39,22 @@ export const executeAggregation = tool({
   },
 });
 
+export const executeComputation = tool({
+  description: "Execute a validated computation plan against property sales",
+  inputSchema: ComputationSchema,
+  execute: async (args) => {
+    console.log(
+      `Executing computation with args: ${JSON.stringify(args, null, 2)}`
+    );
+    return await runComputationPlan(args);
+  },
+});
+
 export const tools = {
   classifyIntent,
   executeQuery,
   executeAggregation,
+  executeComputation,
 } as const;
 
 export type Tools = typeof tools;
@@ -47,4 +65,5 @@ export type Tool = (typeof tools)[ToolName];
 export type SingleToolObject =
   | { classifyIntent: typeof classifyIntent }
   | { executeQuery: typeof executeQuery }
-  | { executeAggregation: typeof executeAggregation };
+  | { executeAggregation: typeof executeAggregation }
+  | { executeComputation: typeof executeComputation };
