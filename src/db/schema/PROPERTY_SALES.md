@@ -1,88 +1,205 @@
-# property_sales table - Key Fields Reference
+# property_sales Table - SQL Query Reference
 
-This document summarizes only the fields actively used across the app's analytics queries and raw endpoints. It is designed to be compact LLM context.
+This document provides the database schema for generating SQL queries against the `property_sales` table. Column names are the actual PostgreSQL column names.
 
-## Identifiers and Metadata
+## Table Name
 
-- `id` (int, pk): Unique mutation ID. Used by raw endpoints to fetch a single row.
-- `createdAt` (timestamp): Ingestion timestamp. Not used in analytics; present on raw rows.
+`property_sales`
 
-## Dates and Periods
+## Key Columns for Queries
 
-- `date` (date): Transaction date. Used for range filters and summary min/max date.
-- `year` (smallint): Extracted transaction year. Used for grouping and filtering.
-- `month` (smallint): Extracted transaction month. Used for grouping (year, month).
+### Identifiers
 
-## Location
+- `idmutation` (integer, PRIMARY KEY): Unique transaction/mutation ID
+- `idmutinvar` (varchar): Invariant mutation identifier
+- `idopendata` (varchar): Open data identifier
 
-- `depCode` (varchar): Department code. Used for filtering and summary unique count.
-- `inseeCodes` (jsonb text[]): Original array of INSEE codes (not used directly in queries).
-- `primaryInseeCode` (varchar, generated): First element of `inseeCodes`. Used for filtering, grouping by INSEE, and summary unique count.
-- `sections` (jsonb text[]): Original array of section codes (not used directly in queries).
-- `primarySection` (varchar, generated): First element of `sections`. Used for filtering and grouping by INSEE+section.
+### Dates and Time Periods
 
-Notes:
+- `datemut` (date): Transaction date (format: YYYY-MM-DD). Use for date range filters and temporal analysis
+- `anneemut` (smallint): Transaction year. Use for yearly grouping and filtering
+- `moismut` (smallint): Transaction month (1-12). Use for monthly grouping and seasonal analysis
 
-- Generated columns remove the need for JSONB unnesting and enable indexing.
+### Location Fields
 
-## Transaction Details
+- `coddep` (varchar): Department code (e.g., '75' for Paris). Use for filtering by department
+- `l_codinsee` (jsonb): Array of INSEE codes (commune codes). Direct use requires JSONB operators
+- `primary_insee_code` (varchar, GENERATED): First INSEE code from the array. **Prefer this for filtering and grouping by commune** (indexed)
+- `l_section` (jsonb): Array of cadastral section codes. Direct use requires JSONB operators
+- `primary_section` (varchar, GENERATED): First section code from the array. **Prefer this for filtering and grouping by cadastral section** (indexed)
 
-- `price` (numeric): Transaction price. Used in all aggregates (sum/avg/min/max) and price-per-m² calculations.
-- `vefa` (boolean): Present but not used in current analytics.
+**Note:** The `primary_insee_code` and `primary_section` columns are generated and indexed - always prefer these over the JSONB arrays for better performance.
 
-## Property Composition (counts per transaction)
+### Transaction Details
 
-- `nblocmut` (smallint): Total properties involved. Aggregated as `totalProperties`.
-- `nbApartments` (smallint): Count of apartments. Aggregated as `totalApartments`.
-- `nbHouses` (smallint): Count of houses. Aggregated as `totalHouses`.
-- `nbWorkspaces` (smallint): Count of work/commercial units. Aggregated as `totalWorkspaces`.
-- `nbSecondaryUnits` (smallint): Count of secondary units/dependencies. Aggregated as `totalSecondaryUnits`.
+- `valeurfonc` (numeric): Transaction price in euros. **Primary metric for price analysis, aggregations (SUM, AVG), and price-per-m² calculations**
+- `libnatmut` (varchar): Nature of mutation/transaction description
+- `vefa` (boolean): Sale under completion status (Vente en l'État Futur d'Achèvement)
 
-## Room Distribution (per transaction)
+### Property Composition (Counts)
 
-Apartments:
+These count the number of each property type involved in the transaction:
 
-- `nbapt1pp`, `nbapt2pp`, `nbapt3pp`, `nbapt4pp`, `nbapt5pp` (smallint): Aggregated as `apt{1..5}Room`.
+- `nblocmut` (smallint): **Total number of properties** in the transaction (sum of all property types)
+- `nblocapt` (smallint): Number of apartments in the transaction
+- `nblocmai` (smallint): Number of houses in the transaction
+- `nblocact` (smallint): Number of commercial/workspace units in the transaction
+- `nblocdep` (smallint): Number of secondary units/dependencies in the transaction
 
-Houses:
+### Room Distribution
 
-- `nbmai1pp`, `nbmai2pp`, `nbmai3pp`, `nbmai4pp`, `nbmai5pp` (smallint): Aggregated as `house{1..5}Room`.
+Apartments by room count (pp = "pièces principales" = main rooms):
 
-## Surface Areas (m²)
+- `nbapt1pp` (smallint): Number of 1-room apartments
+- `nbapt2pp` (smallint): Number of 2-room apartments
+- `nbapt3pp` (smallint): Number of 3-room apartments
+- `nbapt4pp` (smallint): Number of 4-room apartments
+- `nbapt5pp` (smallint): Number of 5+-room apartments
 
-- `floorArea` (numeric, `sbati`): Total built surface. Used for base totals/averages and overall price-per-m².
-- `ApartmentFloorArea` (numeric, `sbatapt`): Used for apartment-specific metrics and apartment price-per-m² via FILTER.
-- `HouseFloorArea` (numeric, `sbatmai`): Used for house-specific metrics and house price-per-m² via FILTER.
-- `WorkspaceFloorArea` (numeric, `sbatact`): Present; not directly aggregated in current analytics.
+Houses by room count:
 
-Room-area by type (used only indirectly via totals in specific contexts):
+- `nbmai1pp` (smallint): Number of 1-room houses
+- `nbmai2pp` (smallint): Number of 2-room houses
+- `nbmai3pp` (smallint): Number of 3-room houses
+- `nbmai4pp` (smallint): Number of 4-room houses
+- `nbmai5pp` (smallint): Number of 5+-room houses
 
-- `sapt1pp`..`sapt5pp`, `smai1pp`..`smai5pp` (numeric): Stored; not directly exposed in current analytics responses.
+### Surface Areas (m²)
 
-## Property Type
+Total built surface areas:
 
-- `propertyTypeCode` (smallint): Used for grouping by property type.
-- `propertyTypeLabel` (varchar): Used in FILTER clauses to compute accurate apartment/house-only aggregates.
+- `sbati` (numeric): **Total built floor area** in m². Use for overall surface calculations and price-per-m²
+- `sbatapt` (numeric): Total apartment floor area in m². Use for apartment-specific metrics
+- `sbatmai` (numeric): Total house floor area in m². Use for house-specific metrics
+- `sbatact` (numeric): Total commercial/workspace floor area in m²
 
-## Indexes of Interest
+Surface by room count for apartments:
 
-Defined in schema to support analytics queries:
+- `sapt1pp` (numeric): Total m² of 1-room apartments
+- `sapt2pp` (numeric): Total m² of 2-room apartments
+- `sapt3pp` (numeric): Total m² of 3-room apartments
+- `sapt4pp` (numeric): Total m² of 4-room apartments
+- `sapt5pp` (numeric): Total m² of 5+-room apartments
 
-- `idx_property_sales_datemut` on `date`
-- `idx_property_sales_coddep` on `depCode`
-- `idx_property_sales_anneemut` on `year`
-- `idx_property_sales_codtypbien` on `propertyTypeCode`
-- `idx_property_sales_valeurfonc` on `price`
+Surface by room count for houses:
 
-Recommendation: also index generated columns (if not already added in a later migration):
+- `smai1pp` (numeric): Total m² of 1-room houses
+- `smai2pp` (numeric): Total m² of 2-room houses
+- `smai3pp` (numeric): Total m² of 3-room houses
+- `smai4pp` (numeric): Total m² of 4-room houses
+- `smai5pp` (numeric): Total m² of 5+-room houses
 
-- `primaryInseeCode`
-- `primarySection`
+### Property Type Classification
 
-## Usage Patterns
+- `codtypbien` (smallint): Property type code (numeric classification)
+- `libtypbien` (varchar): Property type label/description (e.g., 'UN APPARTEMENT', 'UNE MAISON', 'BATI MIXTE - LOGEMENTS'). Use with ILIKE for flexible matching
 
-- Analytics groupings use: `primaryInseeCode`, `primarySection`, `year`, `month`, `propertyTypeCode`, `propertyTypeLabel`.
-- Aggregates use: `price`, `floorArea`, `ApartmentFloorArea`, `HouseFloorArea`.
-- Composition counts use: `nblocmut`, `nbApartments`, `nbHouses`, `nbWorkspaces`, `nbSecondaryUnits`.
-- Room distributions use: apartment `nbapt{1..5}pp`, house `nbmai{1..5}pp`.
-- Raw endpoints return full rows and use `id` for lookup.
+**Available property type labels:**
+
+- 'ACTIVITE'
+- 'APPARTEMENT INDETERMINE'
+- 'BATI - INDETERMINE : Vefa sans descriptif'
+- 'BATI - INDETERMINE : Vente avec volume(s)'
+- 'BATI MIXTE - LOGEMENT/ACTIVITE'
+- 'BATI MIXTE - LOGEMENTS'
+- 'DES DEPENDANCES'
+- 'DES MAISONS'
+- 'DEUX APPARTEMENTS'
+- 'MAISON - INDETERMINEE'
+- 'TERRAIN ARTIFICIALISE MIXTE'
+- 'TERRAIN D\'AGREMENT'
+- 'TERRAIN DE TYPE RESEAU'
+- 'TERRAIN DE TYPE TAB'
+- 'UN APPARTEMENT'
+- 'UNE DEPENDANCE'
+- 'UNE MAISON'
+
+### Other Fields
+
+- `sterr` (numeric): Land surface area in m²
+- `nbdispo` (smallint): Number of provisions
+- `nblot` (smallint): Number of lots
+- `nbcomm` (smallint): Number of communes
+- `created_at` (timestamp): Record insertion timestamp
+
+## Indexes
+
+The following columns are indexed for optimal query performance:
+
+- `datemut` - Use for date filtering and sorting
+- `coddep` - Use for department filtering
+- `anneemut` - Use for year filtering
+- `codtypbien` - Use for property type filtering
+- `valeurfonc` - Use for price filtering and sorting
+
+**Recommended for WHERE clauses:** `primary_insee_code` and `primary_section` (generated columns, should be indexed)
+
+## Common Query Patterns
+
+### Filtering
+
+```sql
+-- By location
+WHERE coddep = '75'
+WHERE primary_insee_code = '75101'
+
+-- By date
+WHERE datemut BETWEEN '2020-01-01' AND '2023-12-31'
+WHERE anneemut = 2022
+
+-- By property type
+WHERE libtypbien ILIKE '%APPARTEMENT%'
+WHERE codtypbien = 1
+
+-- By price
+WHERE valeurfonc > 100000 AND valeurfonc < 500000
+```
+
+### Aggregations
+
+```sql
+-- Total sales and average price by commune
+SELECT primary_insee_code, COUNT(*) as nb_sales, AVG(valeurfonc) as avg_price
+FROM property_sales
+GROUP BY primary_insee_code
+
+-- Price per m² by year
+SELECT anneemut, SUM(valeurfonc) / NULLIF(SUM(sbati), 0) as price_per_m2
+FROM property_sales
+WHERE sbati > 0
+GROUP BY anneemut
+
+-- Monthly transaction volume
+SELECT anneemut, moismut, COUNT(*) as nb_transactions, SUM(valeurfonc) as total_value
+FROM property_sales
+GROUP BY anneemut, moismut
+ORDER BY anneemut, moismut
+```
+
+### Property Composition
+
+```sql
+-- Average number of apartments per transaction by department
+SELECT coddep, AVG(nblocapt) as avg_apartments
+FROM property_sales
+WHERE nblocapt > 0
+GROUP BY coddep
+
+-- Distribution of apartment sizes (by room count)
+SELECT
+  SUM(nbapt1pp) as one_room,
+  SUM(nbapt2pp) as two_room,
+  SUM(nbapt3pp) as three_room,
+  SUM(nbapt4pp) as four_room,
+  SUM(nbapt5pp) as five_plus_room
+FROM property_sales
+WHERE anneemut = 2023
+```
+
+## Important Notes
+
+1. **NULL handling:** Surface area fields may be NULL. Use `NULLIF()` or `COALESCE()` when dividing to avoid errors
+2. **JSONB arrays:** Prefer generated columns (`primary_insee_code`, `primary_section`) over JSONB array fields for better performance
+3. **Case sensitivity:** Use `ILIKE` instead of `LIKE` for case-insensitive string matching on `libtypbien`
+4. **Price filtering:** Always consider adding reasonable price bounds (e.g., `valeurfonc > 0`) to filter out anomalies
+5. **Date formats:** Use ISO format 'YYYY-MM-DD' for date literals

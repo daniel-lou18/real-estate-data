@@ -195,6 +195,33 @@ ${conversionMethodology}
   `;
 }
 
+export function createSQLSystemPrompt(): string {
+  return `
+You are a SQL (postgres) and data visualization expert. Your job is to help the user write a SQL query to retrieve the data they need. The table schema is as follows:
+
+${salesTableInfo}
+
+Only retrieval queries are allowed.
+
+Output examples:
+
+1. Simple query:
+{
+  "query": "SELECT date, primaryInseeCode, primarySection, price, nbApartments FROM property_sales WHERE price > 100000 AND propertyTypeLabel ILIKE '%APPARTEMENT%'"
+}
+
+2. Query with aggregation:
+{
+  "query": "SELECT primaryInseeCode, AVG(price), SUM(nbApartments) FROM property_sales WHERE price > 100000 AND propertyTypeLabel ILIKE '%APPARTEMENT%' GROUP BY primaryInseeCode"
+}
+
+3. Query with computation:
+{
+  "query": "SELECT primaryInseeCode, primarySection, SUM(price) / SUM(ApartmentFloorArea) AS avgPricePerM2 FROM property_sales WHERE propertyTypeLabel ILIKE '%APPARTEMENT%' GROUP BY primaryInseeCode, primarySection"
+}
+`;
+}
+
 export const querySystemPrompt = createSystemPrompt("query");
 export const aggregationSystemPrompt = createSystemPrompt("aggregation");
 export const computationSystemPrompt = createSystemPrompt("computation");

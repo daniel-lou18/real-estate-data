@@ -10,6 +10,6 @@ const routes = [index, sales, chat];
 
 configureOpenAPI(app);
 
-routes.forEach((route) => app.route("/", route));
+routes.forEach((route) => app.route("/api/", route));
 
 export default app;

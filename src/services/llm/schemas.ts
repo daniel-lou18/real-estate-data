@@ -179,6 +179,10 @@ export const ComputationSchema = z.object({
   limit: LimitSchema,
 });
 
+export const SQLSchema = z.object({
+  query: z.string().describe("SQL retrieval query to execute"),
+});
+
 export type AllowedColumns = z.infer<typeof AllowedColumnsSchema>;
 export type AllowedGroupBy = z.infer<typeof AllowedGroupBySchema>;
 export type AggregationArgs = z.infer<typeof AggregationSchema>;
@@ -188,3 +192,4 @@ export type ComputationType = z.infer<typeof ComputationTypeSchema>;
 export type Metric = z.infer<typeof MetricSchema>;
 export type Filter = z.infer<typeof FilterSchema>;
 export type Sort = z.infer<typeof SortSchema>;
+export type SqlQuery = z.infer<typeof SQLSchema>;
