@@ -5,6 +5,7 @@ import { pinoLoggerMiddleware as pinoLogger } from "@/middlewares/pino-logger";
 import serveEmojiFavicon from "@/middlewares/serve-favicon";
 import type { AppBindings, AppOpenAPI } from "@/types";
 import defaultHook from "@/openapi/default-hook";
+import { corsMiddleware } from "@/middlewares/cors";
 
 export function createRouter() {
   return new OpenAPIHono<AppBindings>({
@@ -16,6 +17,7 @@ export function createRouter() {
 export default function createApp() {
   const app = createRouter();
 
+  app.use(corsMiddleware);
   app.use(serveEmojiFavicon("📊"));
   app.use(pinoLogger());
 

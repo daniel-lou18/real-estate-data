@@ -1,10 +1,7 @@
 import fs from "fs";
 import path from "path";
 
-const filePath = path.join(
-  import.meta.dirname,
-  "../../db/schema/PROPERTY_SALES.md"
-);
+const filePath = path.join(process.cwd(), "docs/PROPERTY_SALES.md");
 const salesTableInfo = fs.readFileSync(filePath, "utf8");
 
 export const intentSystemPrompt = `

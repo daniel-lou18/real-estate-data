@@ -15,6 +15,13 @@
       "when": 1759344913571,
       "tag": "0001_crazy_section",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1759344915581,
+      "tag": "0002_crazy_parcel",
+      "breakpoints": true
     }
   ]
 }

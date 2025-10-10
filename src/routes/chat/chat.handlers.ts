@@ -12,7 +12,7 @@ export const chat: AppRouteHandler<ChatRoute> = async (c) => {
   const result = await generateSqlQuery(prompt);
 
   return c.json(
-    { messages: [{ role: "assistant", content: JSON.stringify(result) }] },
+    { messages: [{ role: "assistant", content: result }] },
     HttpStatusCodes.OK
   );
 };

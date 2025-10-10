@@ -9,6 +9,7 @@ import {
   SalesByInseeCodeAndSectionSchema,
   SalesByYearSchema,
   SalesSummarySchema,
+  PricePerM2DecilesSchema,
 } from "./analytics.schemas";
 
 const tags = ["Analytics"];
@@ -102,6 +103,21 @@ export const summary = createRoute({
   },
 });
 
+export const pricePerM2Deciles = createRoute({
+  tags,
+  method: "get",
+  path: "/price-per-m2-deciles",
+  request: {
+    query: AnalyticsQueryParamsSchema,
+  },
+  responses: {
+    [HttpStatusCodes.OK]: jsonContent(
+      PricePerM2DecilesSchema,
+      "Price per m2 deciles"
+    ),
+  },
+});
+
 export type GroupedByInseeCodeRoute = typeof groupedByInseeCode;
 export type GroupedByInseeCodeAndSectionRoute =
   typeof groupedByInseeCodeAndSection;
@@ -109,3 +125,4 @@ export type GroupedByPropertyTypeRoute = typeof groupedByPropertyType;
 export type GroupedByYearRoute = typeof groupedByYear;
 export type GroupedByMonthRoute = typeof groupedByMonth;
 export type SummaryRoute = typeof summary;
+export type PricePerM2DecilesRoute = typeof pricePerM2Deciles;

@@ -13,6 +13,7 @@ const EnvSchema = z.object({
   DB_URL: z.url(),
   OPENAI_API_KEY: z.string(),
   GOOGLE_GENERATIVE_AI_API_KEY: z.string(),
+  CORS_ORIGIN: z.string().default("http://localhost:3000"),
 });
 
 type Env = z.infer<typeof EnvSchema>;

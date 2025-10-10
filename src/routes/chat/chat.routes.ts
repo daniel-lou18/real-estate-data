@@ -28,7 +28,7 @@ export const chat = createRoute({
         messages: z.array(
           z.object({
             role: z.enum(["user", "assistant"]),
-            content: z.string(),
+            content: z.array(z.record(z.string(), z.any())),
           })
         ),
       }),

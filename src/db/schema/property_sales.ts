@@ -74,6 +74,9 @@ export const propertySales = pgTable(
     }).generatedAlwaysAs((): SQL => sql`l_section->>0`),
     nbpar: smallint("nbpar"),
     lIdpar: jsonb("l_idpar").$type<string[]>(),
+    primaryParcelId: varchar("primary_parcel_id", {
+      length: 15,
+    }).generatedAlwaysAs((): SQL => sql`l_idpar->>0`),
     nbparmut: smallint("nbparmut"),
     lIdparmut: jsonb("l_idparmut").$type<string[]>(),
 

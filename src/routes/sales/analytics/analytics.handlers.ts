@@ -6,6 +6,7 @@ import type {
   GroupedByInseeCodeAndSectionRoute,
   GroupedByYearRoute,
   SummaryRoute,
+  PricePerM2DecilesRoute,
 } from "./analytics.routes";
 import {
   getSalesByInseeCode,
@@ -14,6 +15,7 @@ import {
   getSalesByInseeCodeAndSection,
   getSalesByYear,
   getSalesSummary,
+  getPricePerM2Deciles,
 } from "../../../repositories/analytics.queries";
 import * as HttpStatusCodes from "@/config/http-status-codes";
 
@@ -58,5 +60,13 @@ export const groupedByMonth: AppRouteHandler<GroupedByMonthRoute> = async (
 export const summary: AppRouteHandler<SummaryRoute> = async (c) => {
   const query = c.req.valid("query");
   const results = await getSalesSummary(query);
+  return c.json(results, HttpStatusCodes.OK);
+};
+
+export const pricePerM2Deciles: AppRouteHandler<
+  PricePerM2DecilesRoute
+> = async (c) => {
+  const query = c.req.valid("query");
+  const results = await getPricePerM2Deciles(query);
   return c.json(results, HttpStatusCodes.OK);
 };
