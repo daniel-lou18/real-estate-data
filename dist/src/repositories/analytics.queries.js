@@ -10,9 +10,9 @@
  * 3. Return type-safe results
  * 4. Reusable filter building logic
  */
+import { and, between, eq, gte, isNotNull, lte, sql } from "drizzle-orm";
 import { db } from "@/db";
 import { propertySales } from "@/db/schema";
-import { sql, eq, and, gte, lte, between, isNotNull } from "drizzle-orm";
 // ============================================================================
 // Shared Utilities
 // ============================================================================
@@ -361,7 +361,7 @@ export async function getSalesByYear(params) {
  */
 export async function getSalesByMonth(params) {
     const whereClause = buildWhereClause(params);
-    const orderByClause = buildOrderByClause(params);
+    const _orderByClause = buildOrderByClause(params);
     const results = await db
         .select({
         year: sql `${propertySales.year}`,
@@ -511,7 +511,23 @@ export async function getPricePerM2Deciles(params = {}) {
     })
         .from(propertySales)
         .where(and(whereClause, sql `${propertySales.floorArea} > 0`, sql `${propertySales.price} > 0`));
-    return results[0];
+    const result = results[0];
+    // Transform to new array-based format
+    return {
+        deciles: [
+            { percentile: 10, value: result.decile1 },
+            { percentile: 20, value: result.decile2 },
+            { percentile: 30, value: result.decile3 },
+            { percentile: 40, value: result.decile4 },
+            { percentile: 50, value: result.decile5 },
+            { percentile: 60, value: result.decile6 },
+            { percentile: 70, value: result.decile7 },
+            { percentile: 80, value: result.decile8 },
+            { percentile: 90, value: result.decile9 },
+            { percentile: 100, value: result.decile10 },
+        ],
+        totalTransactions: result.totalTransactions,
+    };
 }
 /**
  * Calculate 10 deciles for average price per square meter grouped by INSEE code
@@ -519,21 +535,7 @@ export async function getPricePerM2Deciles(params = {}) {
  */
 export async function getPricePerM2DecilesByInseeCode(params = {}) {
     const whereClause = buildWhereClause(params);
-    // First, get the aggregated data by INSEE code
-    const aggregatedData = await db
-        .select({
-        avgPricePerM2: sql `
-        case
-          when sum(${propertySales.floorArea}) > 0
-          then sum(${propertySales.price}) / sum(${propertySales.floorArea})
-          else null
-        end
-      `,
-    })
-        .from(propertySales)
-        .where(and(whereClause, isNotNull(propertySales.primaryInseeCode), sql `${propertySales.floorArea} > 0`, sql `${propertySales.price} > 0`))
-        .groupBy(propertySales.primaryInseeCode);
-    // Then calculate deciles from the aggregated data
+    // Calculate deciles from aggregated data by INSEE code
     const results = await db
         .select({
         decile1: sql `percentile_cont(0.1) within group (order by avg_price_per_m2)`,
@@ -555,7 +557,7 @@ export async function getPricePerM2DecilesByInseeCode(params = {}) {
               when sum(${propertySales.floorArea}) > 0
               then sum(${propertySales.price}) / sum(${propertySales.floorArea})
               else null
-            end
+            end as avg_price_per_m2
           `,
     })
         .from(propertySales)
@@ -563,7 +565,23 @@ export async function getPricePerM2DecilesByInseeCode(params = {}) {
         .groupBy(propertySales.primaryInseeCode)
         .as("aggregated_data"))
         .where(sql `avg_price_per_m2 is not null`);
-    return results[0];
+    const result = results[0];
+    // Transform to new array-based format
+    return {
+        deciles: [
+            { percentile: 10, value: result.decile1 },
+            { percentile: 20, value: result.decile2 },
+            { percentile: 30, value: result.decile3 },
+            { percentile: 40, value: result.decile4 },
+            { percentile: 50, value: result.decile5 },
+            { percentile: 60, value: result.decile6 },
+            { percentile: 70, value: result.decile7 },
+            { percentile: 80, value: result.decile8 },
+            { percentile: 90, value: result.decile9 },
+            { percentile: 100, value: result.decile10 },
+        ],
+        totalInseeCodes: result.totalInseeCodes,
+    };
 }
 /**
  * Calculate 10 deciles for average price per square meter grouped by INSEE code and section
@@ -601,7 +619,23 @@ export async function getPricePerM2DecilesByInseeCodeAndSection(params = {}) {
         .groupBy(propertySales.primaryInseeCode, propertySales.primarySection)
         .as("aggregated_data"))
         .where(sql `avg_price_per_m2 is not null`);
-    return results[0];
+    const result = results[0];
+    // Transform to new array-based format
+    return {
+        deciles: [
+            { percentile: 10, value: result.decile1 },
+            { percentile: 20, value: result.decile2 },
+            { percentile: 30, value: result.decile3 },
+            { percentile: 40, value: result.decile4 },
+            { percentile: 50, value: result.decile5 },
+            { percentile: 60, value: result.decile6 },
+            { percentile: 70, value: result.decile7 },
+            { percentile: 80, value: result.decile8 },
+            { percentile: 90, value: result.decile9 },
+            { percentile: 100, value: result.decile10 },
+        ],
+        totalSections: result.totalSections,
+    };
 }
 // Export utility functions for use in handlers if needed
-export { buildWhereClause, buildOrderByClause };
+export { buildOrderByClause, buildWhereClause };

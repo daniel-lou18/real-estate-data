@@ -244,41 +244,7 @@ export const SalesSummarySchema = BaseAggregationMetrics.extend({
 // ============================================================================
 // Query Parameter Schemas
 // ============================================================================
-
-/**
- * Common query parameters for filtering analytics
- */
-export const AnalyticsQueryParamsSchema = z.object({
-  // Time filters
-  year: z.coerce.number().int().optional().describe("Filter by specific year"),
-  startYear: z.coerce
-    .number()
-    .int()
-    .optional()
-    .describe("Filter by start year (inclusive)"),
-  endYear: z.coerce
-    .number()
-    .int()
-    .optional()
-    .describe("Filter by end year (inclusive)"),
-  startDate: z
-    .string()
-    .optional()
-    .describe("Filter by start date (YYYY-MM-DD)"),
-  endDate: z.string().optional().describe("Filter by end date (YYYY-MM-DD)"),
-
-  // Location filters
-  depCode: z.string().optional().describe("Filter by department code"),
-  inseeCode: z.string().optional().describe("Filter by specific INSEE code"),
-  section: z.string().optional().describe("Filter by section code"),
-
-  // Property type filters
-  propertyTypeCode: z.coerce
-    .number()
-    .int()
-    .optional()
-    .describe("Filter by property type code"),
-
+export const BaseQueryParamsSchema = z.object({
   // Pagination
   limit: z.coerce
     .number()
@@ -308,68 +274,71 @@ export const AnalyticsQueryParamsSchema = z.object({
   sortOrder: z.enum(["asc", "desc"]).default("desc").describe("Sort order"),
 });
 
+/**
+ * Common query parameters for filtering analytics
+ */
+export const AnalyticsQueryParamsSchema = BaseQueryParamsSchema.extend({
+  // Time filters
+  year: z.coerce.number().int().optional().describe("Filter by specific year"),
+  startYear: z.coerce
+    .number()
+    .int()
+    .optional()
+    .describe("Filter by start year (inclusive)"),
+  endYear: z.coerce
+    .number()
+    .int()
+    .optional()
+    .describe("Filter by end year (inclusive)"),
+  startDate: z
+    .string()
+    .optional()
+    .describe("Filter by start date (YYYY-MM-DD)"),
+  endDate: z.string().optional().describe("Filter by end date (YYYY-MM-DD)"),
+
+  // Location filters
+  depCode: z.string().optional().describe("Filter by department code"),
+  inseeCode: z.string().optional().describe("Filter by specific INSEE code"),
+  section: z.string().optional().describe("Filter by section code"),
+
+  // Property type filters
+  propertyTypeCode: z.coerce
+    .number()
+    .int()
+    .optional()
+    .describe("Filter by property type code"),
+});
+
 // ============================================================================
 // Type exports
 // ============================================================================
+
+/**
+ * Schema for a single decile value
+ */
+const DecileValueSchema = z.object({
+  percentile: z
+    .number()
+    .int()
+    .min(1)
+    .max(100)
+    .describe("Percentile value (10, 20, 30, etc.)"),
+  value: z.number().nullable().describe("The decile value (price per m²)"),
+});
 
 /**
  * Schema for price per m² deciles across the whole dataset
  * Each decile represents the price per m² value that divides the dataset into 10 equal groups
  */
 export const PricePerM2DecilesSchema = z.object({
-  decile1: z.number().nullable().describe("10th percentile (lowest 10%)"),
-  decile2: z.number().nullable().describe("20th percentile"),
-  decile3: z.number().nullable().describe("30th percentile"),
-  decile4: z.number().nullable().describe("40th percentile"),
-  decile5: z.number().nullable().describe("50th percentile (median)"),
-  decile6: z.number().nullable().describe("60th percentile"),
-  decile7: z.number().nullable().describe("70th percentile"),
-  decile8: z.number().nullable().describe("80th percentile"),
-  decile9: z.number().nullable().describe("90th percentile"),
-  decile10: z.number().nullable().describe("100th percentile (highest)"),
+  deciles: z
+    .array(DecileValueSchema)
+    .length(10)
+    .describe("Array of 10 decile values from 10th to 100th percentile"),
   totalTransactions: z
     .number()
     .int()
     .describe("Total number of transactions analyzed"),
-});
-
-/**
- * Schema for price per m² deciles grouped by INSEE code
- * Each decile represents the price per m² value that divides INSEE codes into 10 equal groups
- */
-export const PricePerM2DecilesByInseeCodeSchema = z.object({
-  decile1: z.number().nullable().describe("10th percentile (lowest 10%)"),
-  decile2: z.number().nullable().describe("20th percentile"),
-  decile3: z.number().nullable().describe("30th percentile"),
-  decile4: z.number().nullable().describe("40th percentile"),
-  decile5: z.number().nullable().describe("50th percentile (median)"),
-  decile6: z.number().nullable().describe("60th percentile"),
-  decile7: z.number().nullable().describe("70th percentile"),
-  decile8: z.number().nullable().describe("80th percentile"),
-  decile9: z.number().nullable().describe("90th percentile"),
-  decile10: z.number().nullable().describe("100th percentile (highest)"),
-  totalInseeCodes: z
-    .number()
-    .int()
-    .describe("Total number of INSEE codes analyzed"),
-});
-
-/**
- * Schema for price per m² deciles grouped by INSEE code and section
- * Each decile represents the price per m² value that divides sections into 10 equal groups
- */
-export const PricePerM2DecilesByInseeCodeAndSectionSchema = z.object({
-  decile1: z.number().nullable().describe("10th percentile (lowest 10%)"),
-  decile2: z.number().nullable().describe("20th percentile"),
-  decile3: z.number().nullable().describe("30th percentile"),
-  decile4: z.number().nullable().describe("40th percentile"),
-  decile5: z.number().nullable().describe("50th percentile (median)"),
-  decile6: z.number().nullable().describe("60th percentile"),
-  decile7: z.number().nullable().describe("70th percentile"),
-  decile8: z.number().nullable().describe("80th percentile"),
-  decile9: z.number().nullable().describe("90th percentile"),
-  decile10: z.number().nullable().describe("100th percentile (highest)"),
-  totalSections: z.number().int().describe("Total number of sections analyzed"),
 });
 
 export type SalesByInseeCode = z.infer<typeof SalesByInseeCodeSchema>;
@@ -380,11 +349,7 @@ export type SalesByPropertyType = z.infer<typeof SalesByPropertyTypeSchema>;
 export type SalesByYear = z.infer<typeof SalesByYearSchema>;
 export type SalesByMonth = z.infer<typeof SalesByMonthSchema>;
 export type SalesSummary = z.infer<typeof SalesSummarySchema>;
-export type AnalyticsQueryParams = z.infer<typeof AnalyticsQueryParamsSchema>;
 export type PricePerM2Deciles = z.infer<typeof PricePerM2DecilesSchema>;
-export type PricePerM2DecilesByInseeCode = z.infer<
-  typeof PricePerM2DecilesByInseeCodeSchema
->;
-export type PricePerM2DecilesByInseeCodeAndSection = z.infer<
-  typeof PricePerM2DecilesByInseeCodeAndSectionSchema
->;
+
+export type BaseQueryParams = z.infer<typeof BaseQueryParamsSchema>;
+export type AnalyticsQueryParams = z.infer<typeof AnalyticsQueryParamsSchema>;

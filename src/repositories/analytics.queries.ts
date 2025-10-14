@@ -14,8 +14,6 @@
 import type {
   AnalyticsQueryParams,
   PricePerM2Deciles,
-  PricePerM2DecilesByInseeCode,
-  PricePerM2DecilesByInseeCodeAndSection,
   SalesByInseeCode,
   SalesByInseeCodeAndSection,
   SalesByMonth,
@@ -588,8 +586,7 @@ export async function getHouseStats(
 // ============================================================================
 
 /**
- * Calculate 10 deciles for average price per square meter across the whole dataset
- * Returns the price per m² values that divide the dataset into 10 equal groups
+ * Generic function to calculate price per m² deciles
  */
 export async function getPricePerM2Deciles(
   params: Partial<AnalyticsQueryParams> = {}
@@ -639,175 +636,21 @@ export async function getPricePerM2Deciles(
       )
     );
 
-  return results[0];
+  const result = results[0];
+
+  return {
+    deciles: [
+      { percentile: 10, value: result.decile1 },
+      { percentile: 20, value: result.decile2 },
+      { percentile: 30, value: result.decile3 },
+      { percentile: 40, value: result.decile4 },
+      { percentile: 50, value: result.decile5 },
+      { percentile: 60, value: result.decile6 },
+      { percentile: 70, value: result.decile7 },
+      { percentile: 80, value: result.decile8 },
+      { percentile: 90, value: result.decile9 },
+      { percentile: 100, value: result.decile10 },
+    ],
+    totalTransactions: result.totalTransactions,
+  };
 }
-
-/**
- * Calculate 10 deciles for average price per square meter grouped by INSEE code
- * Returns deciles calculated from the avgPricePerM2 of each INSEE code group
- */
-export async function getPricePerM2DecilesByInseeCode(
-  params: Partial<AnalyticsQueryParams> = {}
-): Promise<PricePerM2DecilesByInseeCode> {
-  const whereClause = buildWhereClause(params);
-
-  // First, get the aggregated data by INSEE code
-  const _aggregatedData = await db
-    .select({
-      avgPricePerM2: sql<number | null>`
-        case
-          when sum(${propertySales.floorArea}) > 0
-          then sum(${propertySales.price}) / sum(${propertySales.floorArea})
-          else null
-        end
-      `,
-    })
-    .from(propertySales)
-    .where(
-      and(
-        whereClause,
-        isNotNull(propertySales.primaryInseeCode),
-        sql`${propertySales.floorArea} > 0`,
-        sql`${propertySales.price} > 0`
-      )
-    )
-    .groupBy(propertySales.primaryInseeCode);
-
-  // Then calculate deciles from the aggregated data
-  const results = await db
-    .select({
-      decile1: sql<
-        number | null
-      >`percentile_cont(0.1) within group (order by avg_price_per_m2)`,
-      decile2: sql<
-        number | null
-      >`percentile_cont(0.2) within group (order by avg_price_per_m2)`,
-      decile3: sql<
-        number | null
-      >`percentile_cont(0.3) within group (order by avg_price_per_m2)`,
-      decile4: sql<
-        number | null
-      >`percentile_cont(0.4) within group (order by avg_price_per_m2)`,
-      decile5: sql<
-        number | null
-      >`percentile_cont(0.5) within group (order by avg_price_per_m2)`,
-      decile6: sql<
-        number | null
-      >`percentile_cont(0.6) within group (order by avg_price_per_m2)`,
-      decile7: sql<
-        number | null
-      >`percentile_cont(0.7) within group (order by avg_price_per_m2)`,
-      decile8: sql<
-        number | null
-      >`percentile_cont(0.8) within group (order by avg_price_per_m2)`,
-      decile9: sql<
-        number | null
-      >`percentile_cont(0.9) within group (order by avg_price_per_m2)`,
-      decile10: sql<
-        number | null
-      >`percentile_cont(1.0) within group (order by avg_price_per_m2)`,
-      totalInseeCodes: sql<number>`count(*)::int`,
-    })
-    .from(
-      db
-        .select({
-          avgPricePerM2: sql<number | null>`
-            case
-              when sum(${propertySales.floorArea}) > 0
-              then sum(${propertySales.price}) / sum(${propertySales.floorArea})
-              else null
-            end
-          `,
-        })
-        .from(propertySales)
-        .where(
-          and(
-            whereClause,
-            isNotNull(propertySales.primaryInseeCode),
-            sql`${propertySales.floorArea} > 0`,
-            sql`${propertySales.price} > 0`
-          )
-        )
-        .groupBy(propertySales.primaryInseeCode)
-        .as("aggregated_data")
-    )
-    .where(sql`avg_price_per_m2 is not null`);
-
-  return results[0];
-}
-
-/**
- * Calculate 10 deciles for average price per square meter grouped by INSEE code and section
- * Returns deciles calculated from the avgPricePerM2 of each INSEE code + section group
- */
-export async function getPricePerM2DecilesByInseeCodeAndSection(
-  params: Partial<AnalyticsQueryParams> = {}
-): Promise<PricePerM2DecilesByInseeCodeAndSection> {
-  const whereClause = buildWhereClause(params);
-
-  // Calculate deciles from aggregated data by INSEE code and section
-  const results = await db
-    .select({
-      decile1: sql<
-        number | null
-      >`percentile_cont(0.1) within group (order by avg_price_per_m2)`,
-      decile2: sql<
-        number | null
-      >`percentile_cont(0.2) within group (order by avg_price_per_m2)`,
-      decile3: sql<
-        number | null
-      >`percentile_cont(0.3) within group (order by avg_price_per_m2)`,
-      decile4: sql<
-        number | null
-      >`percentile_cont(0.4) within group (order by avg_price_per_m2)`,
-      decile5: sql<
-        number | null
-      >`percentile_cont(0.5) within group (order by avg_price_per_m2)`,
-      decile6: sql<
-        number | null
-      >`percentile_cont(0.6) within group (order by avg_price_per_m2)`,
-      decile7: sql<
-        number | null
-      >`percentile_cont(0.7) within group (order by avg_price_per_m2)`,
-      decile8: sql<
-        number | null
-      >`percentile_cont(0.8) within group (order by avg_price_per_m2)`,
-      decile9: sql<
-        number | null
-      >`percentile_cont(0.9) within group (order by avg_price_per_m2)`,
-      decile10: sql<
-        number | null
-      >`percentile_cont(1.0) within group (order by avg_price_per_m2)`,
-      totalSections: sql<number>`count(*)::int`,
-    })
-    .from(
-      db
-        .select({
-          avgPricePerM2: sql<number | null>`
-            case
-              when sum(${propertySales.floorArea}) > 0
-              then sum(${propertySales.price}) / sum(${propertySales.floorArea})
-              else null
-            end
-          `,
-        })
-        .from(propertySales)
-        .where(
-          and(
-            whereClause,
-            isNotNull(propertySales.primaryInseeCode),
-            isNotNull(propertySales.primarySection),
-            sql`${propertySales.floorArea} > 0`,
-            sql`${propertySales.price} > 0`
-          )
-        )
-        .groupBy(propertySales.primaryInseeCode, propertySales.primarySection)
-        .as("aggregated_data")
-    )
-    .where(sql`avg_price_per_m2 is not null`);
-
-  return results[0];
-}
-
-// Export utility functions for use in handlers if needed
-export { buildOrderByClause, buildWhereClause };
