@@ -422,7 +422,6 @@ export async function getSalesByMonth(
   params: AnalyticsQueryParams
 ): Promise<SalesByMonth[]> {
   const whereClause = buildWhereClause(params);
-  const _orderByClause = buildOrderByClause(params);
 
   const results = await db
     .select({

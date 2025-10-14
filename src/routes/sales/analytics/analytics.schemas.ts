@@ -250,7 +250,7 @@ export const BaseQueryParamsSchema = z.object({
     .number()
     .int()
     .min(1)
-    .max(100)
+    .max(500)
     .default(50)
     .describe("Maximum number of results"),
   offset: z.coerce
