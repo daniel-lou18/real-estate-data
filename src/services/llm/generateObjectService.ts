@@ -3,6 +3,7 @@ import { createOpenAI } from "@ai-sdk/openai";
 import env from "@/config/env";
 import z from "zod";
 import { createGoogleGenerativeAI } from "@ai-sdk/google";
+import type { ModelMessage } from "ai";
 
 const openai = createOpenAI({
   apiKey: env.OPENAI_API_KEY,
@@ -13,7 +14,7 @@ const google = createGoogleGenerativeAI({
 });
 
 export async function generateObjectService<T extends z.ZodType>(
-  prompt: string,
+  messages: ModelMessage[],
   system: string,
   schema: T
 ) {
@@ -21,7 +22,7 @@ export async function generateObjectService<T extends z.ZodType>(
     const result = await generateObject({
       model: google("gemini-2.5-flash-preview-09-2025"),
       system,
-      prompt,
+      messages,
       schema,
     });
     console.log("result", result.object);

@@ -24,6 +24,20 @@ import type {
 import { and, between, eq, gte, isNotNull, lte, sql } from "drizzle-orm";
 import { db } from "@/db";
 import { propertySales } from "@/db/schema";
+import {
+  MIN_RESIDENTIAL_AREA,
+  MAX_RESIDENTIAL_AREA,
+  MIN_RESIDENTIAL_PRICE,
+  MAX_RESIDENTIAL_PRICE,
+  MIN_APARTMENT_AREA,
+  MAX_APARTMENT_AREA,
+  MIN_APARTMENT_PRICE,
+  MAX_APARTMENT_PRICE,
+  MIN_HOUSE_AREA,
+  MAX_HOUSE_AREA,
+  MIN_HOUSE_PRICE,
+  MAX_HOUSE_PRICE,
+} from "./constants";
 
 // ============================================================================
 // Shared Utilities
@@ -124,23 +138,37 @@ const baseAggregationFields = {
   // Transaction count
   count: sql<number>`count(*)::int`,
 
-  // Price aggregates (in euros)
-  totalPrice: sql<number>`coalesce(sum(${propertySales.price}), 0)`,
-  avgPrice: sql<number>`coalesce(avg(${propertySales.price}), 0)`,
-  minPrice: sql<number>`coalesce(min(${propertySales.price}), 0)`,
-  maxPrice: sql<number>`coalesce(max(${propertySales.price}), 0)`,
+  // Price aggregates (in euros) - rounded to nearest euro
+  totalPrice: sql<number>`coalesce(round(sum(${propertySales.price})), 0)`,
+  avgPrice: sql<number>`coalesce(round(avg(${propertySales.price})), 0)`,
+  minPrice: sql<number>`coalesce(round(min(${propertySales.price})), 0)`,
+  maxPrice: sql<number>`coalesce(round(max(${propertySales.price})), 0)`,
 
-  // Floor area aggregates (in m²)
-  totalFloorArea: sql<number>`coalesce(sum(${propertySales.floorArea}), 0)`,
-  avgFloorArea: sql<number>`coalesce(avg(${propertySales.floorArea}), 0)`,
+  // Floor area aggregates (in m²) - rounded to 1 decimal place
+  totalFloorArea: sql<number>`coalesce(round(sum(${propertySales.floorArea}), 1), 0)`,
+  avgFloorArea: sql<number>`coalesce(round(avg(${propertySales.floorArea}), 1), 0)`,
 
   // Computed metric: Average price per m² (AFTER aggregation - weighted average)
   // This is the CORRECT way: SUM(price) / SUM(floorArea)
   // NOT: AVG(price / floorArea) which would be wrong
+  // Rounded to nearest euro per m²
+  // Filter to main property types only (apartments and houses) and exclude outliers
   avgPricePerM2: sql<number | null>`
     case
-      when sum(${propertySales.floorArea}) > 0
-      then sum(${propertySales.price}) / sum(${propertySales.floorArea})
+      when sum(${propertySales.floorArea}) FILTER (
+        WHERE ${propertySales.propertyTypeLabel} IN ('UN APPARTEMENT', 'DEUX APPARTEMENTS', 'APPARTEMENT INDETERMINE', 'UNE MAISON', 'DES MAISONS', 'MAISON - INDETERMINEE')
+        AND ${propertySales.floorArea} >= ${MIN_RESIDENTIAL_AREA} AND ${propertySales.floorArea} <= ${MAX_RESIDENTIAL_AREA}
+        AND ${propertySales.price} >= ${MIN_RESIDENTIAL_PRICE} AND ${propertySales.price} <= ${MAX_RESIDENTIAL_PRICE}
+      ) > 0
+      then round(sum(${propertySales.price}) FILTER (
+        WHERE ${propertySales.propertyTypeLabel} IN ('UN APPARTEMENT', 'DEUX APPARTEMENTS', 'APPARTEMENT INDETERMINE', 'UNE MAISON', 'DES MAISONS', 'MAISON - INDETERMINEE')
+        AND ${propertySales.floorArea} >= ${MIN_RESIDENTIAL_AREA} AND ${propertySales.floorArea} <= ${MAX_RESIDENTIAL_AREA}
+        AND ${propertySales.price} >= ${MIN_RESIDENTIAL_PRICE} AND ${propertySales.price} <= ${MAX_RESIDENTIAL_PRICE}
+      ) / sum(${propertySales.floorArea}) FILTER (
+        WHERE ${propertySales.propertyTypeLabel} IN ('UN APPARTEMENT', 'DEUX APPARTEMENTS', 'APPARTEMENT INDETERMINE', 'UNE MAISON', 'DES MAISONS', 'MAISON - INDETERMINEE')
+        AND ${propertySales.floorArea} >= ${MIN_RESIDENTIAL_AREA} AND ${propertySales.floorArea} <= ${MAX_RESIDENTIAL_AREA}
+        AND ${propertySales.price} >= ${MIN_RESIDENTIAL_PRICE} AND ${propertySales.price} <= ${MAX_RESIDENTIAL_PRICE}
+      ))
       else null
     end
   `,
@@ -170,33 +198,33 @@ const apartmentSpecificFields = {
   `,
   apartmentTotalPrice: sql<number>`
     coalesce(
-      sum(${propertySales.price}) FILTER (
+      round(sum(${propertySales.price}) FILTER (
         WHERE ${propertySales.propertyTypeLabel} IN ('UN APPARTEMENT', 'DEUX APPARTEMENTS', 'APPARTEMENT INDETERMINE')
-      ),
+      )),
       0
     )
   `,
   apartmentAvgPrice: sql<number>`
     coalesce(
-      avg(${propertySales.price}) FILTER (
+      round(avg(${propertySales.price}) FILTER (
         WHERE ${propertySales.propertyTypeLabel} IN ('UN APPARTEMENT', 'DEUX APPARTEMENTS', 'APPARTEMENT INDETERMINE')
-      ),
+      )),
       0
     )
   `,
   apartmentTotalFloorArea: sql<number>`
     coalesce(
-      sum(${propertySales.ApartmentFloorArea}) FILTER (
+      round(sum(${propertySales.ApartmentFloorArea}) FILTER (
         WHERE ${propertySales.propertyTypeLabel} IN ('UN APPARTEMENT', 'DEUX APPARTEMENTS', 'APPARTEMENT INDETERMINE')
-      ),
+      ), 1),
       0
     )
   `,
   apartmentAvgFloorArea: sql<number>`
     coalesce(
-      avg(${propertySales.ApartmentFloorArea}) FILTER (
+      round(avg(${propertySales.ApartmentFloorArea}) FILTER (
         WHERE ${propertySales.propertyTypeLabel} IN ('UN APPARTEMENT', 'DEUX APPARTEMENTS', 'APPARTEMENT INDETERMINE')
-      ),
+      ), 1),
       0
     )
   `,
@@ -204,12 +232,18 @@ const apartmentSpecificFields = {
     case
       when sum(${propertySales.ApartmentFloorArea}) FILTER (
         WHERE ${propertySales.propertyTypeLabel} IN ('UN APPARTEMENT', 'DEUX APPARTEMENTS', 'APPARTEMENT INDETERMINE')
+        AND ${propertySales.ApartmentFloorArea} >= ${MIN_APARTMENT_AREA} AND ${propertySales.ApartmentFloorArea} <= ${MAX_APARTMENT_AREA}
+        AND ${propertySales.price} >= ${MIN_APARTMENT_PRICE} AND ${propertySales.price} <= ${MAX_APARTMENT_PRICE}
       ) > 0
-      then sum(${propertySales.price}) FILTER (
+      then round(sum(${propertySales.price}) FILTER (
         WHERE ${propertySales.propertyTypeLabel} IN ('UN APPARTEMENT', 'DEUX APPARTEMENTS', 'APPARTEMENT INDETERMINE')
+        AND ${propertySales.ApartmentFloorArea} >= ${MIN_APARTMENT_AREA} AND ${propertySales.ApartmentFloorArea} <= ${MAX_APARTMENT_AREA}
+        AND ${propertySales.price} >= ${MIN_APARTMENT_PRICE} AND ${propertySales.price} <= ${MAX_APARTMENT_PRICE}
       ) / sum(${propertySales.ApartmentFloorArea}) FILTER (
         WHERE ${propertySales.propertyTypeLabel} IN ('UN APPARTEMENT', 'DEUX APPARTEMENTS', 'APPARTEMENT INDETERMINE')
-      )
+        AND ${propertySales.ApartmentFloorArea} >= ${MIN_APARTMENT_AREA} AND ${propertySales.ApartmentFloorArea} <= ${MAX_APARTMENT_AREA}
+        AND ${propertySales.price} >= ${MIN_APARTMENT_PRICE} AND ${propertySales.price} <= ${MAX_APARTMENT_PRICE}
+      ))
       else null
     end
   `,
@@ -227,33 +261,33 @@ const houseSpecificFields = {
   `,
   houseTotalPrice: sql<number>`
     coalesce(
-      sum(${propertySales.price}) FILTER (
+      round(sum(${propertySales.price}) FILTER (
         WHERE ${propertySales.propertyTypeLabel} IN ('UNE MAISON', 'DES MAISONS', 'MAISON - INDETERMINEE')
-      ),
+      )),
       0
     )
   `,
   houseAvgPrice: sql<number>`
     coalesce(
-      avg(${propertySales.price}) FILTER (
+      round(avg(${propertySales.price}) FILTER (
         WHERE ${propertySales.propertyTypeLabel} IN ('UNE MAISON', 'DES MAISONS', 'MAISON - INDETERMINEE')
-      ),
+      )),
       0
     )
   `,
   houseTotalFloorArea: sql<number>`
     coalesce(
-      sum(${propertySales.HouseFloorArea}) FILTER (
+      round(sum(${propertySales.HouseFloorArea}) FILTER (
         WHERE ${propertySales.propertyTypeLabel} IN ('UNE MAISON', 'DES MAISONS', 'MAISON - INDETERMINEE')
-      ),
+      ), 1),
       0
     )
   `,
   houseAvgFloorArea: sql<number>`
     coalesce(
-      avg(${propertySales.HouseFloorArea}) FILTER (
+      round(avg(${propertySales.HouseFloorArea}) FILTER (
         WHERE ${propertySales.propertyTypeLabel} IN ('UNE MAISON', 'DES MAISONS', 'MAISON - INDETERMINEE')
-      ),
+      ), 1),
       0
     )
   `,
@@ -261,12 +295,18 @@ const houseSpecificFields = {
     case
       when sum(${propertySales.HouseFloorArea}) FILTER (
         WHERE ${propertySales.propertyTypeLabel} IN ('UNE MAISON', 'DES MAISONS', 'MAISON - INDETERMINEE')
+        AND ${propertySales.HouseFloorArea} >= ${MIN_HOUSE_AREA} AND ${propertySales.HouseFloorArea} <= ${MAX_HOUSE_AREA}
+        AND ${propertySales.price} >= ${MIN_HOUSE_PRICE} AND ${propertySales.price} <= ${MAX_HOUSE_PRICE}
       ) > 0
-      then sum(${propertySales.price}) FILTER (
+      then round(sum(${propertySales.price}) FILTER (
         WHERE ${propertySales.propertyTypeLabel} IN ('UNE MAISON', 'DES MAISONS', 'MAISON - INDETERMINEE')
+        AND ${propertySales.HouseFloorArea} >= ${MIN_HOUSE_AREA} AND ${propertySales.HouseFloorArea} <= ${MAX_HOUSE_AREA}
+        AND ${propertySales.price} >= ${MIN_HOUSE_PRICE} AND ${propertySales.price} <= ${MAX_HOUSE_PRICE}
       ) / sum(${propertySales.HouseFloorArea}) FILTER (
         WHERE ${propertySales.propertyTypeLabel} IN ('UNE MAISON', 'DES MAISONS', 'MAISON - INDETERMINEE')
-      )
+        AND ${propertySales.HouseFloorArea} >= ${MIN_HOUSE_AREA} AND ${propertySales.HouseFloorArea} <= ${MAX_HOUSE_AREA}
+        AND ${propertySales.price} >= ${MIN_HOUSE_PRICE} AND ${propertySales.price} <= ${MAX_HOUSE_PRICE}
+      ))
       else null
     end
   `,
@@ -596,34 +636,34 @@ export async function getPricePerM2Deciles(
     .select({
       decile1: sql<
         number | null
-      >`percentile_cont(0.1) within group (order by ${propertySales.price} / nullif(${propertySales.floorArea}, 0))`,
+      >`round(percentile_cont(0.1) within group (order by ${propertySales.price} / nullif(${propertySales.floorArea}, 0)))`,
       decile2: sql<
         number | null
-      >`percentile_cont(0.2) within group (order by ${propertySales.price} / nullif(${propertySales.floorArea}, 0))`,
+      >`round(percentile_cont(0.2) within group (order by ${propertySales.price} / nullif(${propertySales.floorArea}, 0)))`,
       decile3: sql<
         number | null
-      >`percentile_cont(0.3) within group (order by ${propertySales.price} / nullif(${propertySales.floorArea}, 0))`,
+      >`round(percentile_cont(0.3) within group (order by ${propertySales.price} / nullif(${propertySales.floorArea}, 0)))`,
       decile4: sql<
         number | null
-      >`percentile_cont(0.4) within group (order by ${propertySales.price} / nullif(${propertySales.floorArea}, 0))`,
+      >`round(percentile_cont(0.4) within group (order by ${propertySales.price} / nullif(${propertySales.floorArea}, 0)))`,
       decile5: sql<
         number | null
-      >`percentile_cont(0.5) within group (order by ${propertySales.price} / nullif(${propertySales.floorArea}, 0))`,
+      >`round(percentile_cont(0.5) within group (order by ${propertySales.price} / nullif(${propertySales.floorArea}, 0)))`,
       decile6: sql<
         number | null
-      >`percentile_cont(0.6) within group (order by ${propertySales.price} / nullif(${propertySales.floorArea}, 0))`,
+      >`round(percentile_cont(0.6) within group (order by ${propertySales.price} / nullif(${propertySales.floorArea}, 0)))`,
       decile7: sql<
         number | null
-      >`percentile_cont(0.7) within group (order by ${propertySales.price} / nullif(${propertySales.floorArea}, 0))`,
+      >`round(percentile_cont(0.7) within group (order by ${propertySales.price} / nullif(${propertySales.floorArea}, 0)))`,
       decile8: sql<
         number | null
-      >`percentile_cont(0.8) within group (order by ${propertySales.price} / nullif(${propertySales.floorArea}, 0))`,
+      >`round(percentile_cont(0.8) within group (order by ${propertySales.price} / nullif(${propertySales.floorArea}, 0)))`,
       decile9: sql<
         number | null
-      >`percentile_cont(0.9) within group (order by ${propertySales.price} / nullif(${propertySales.floorArea}, 0))`,
+      >`round(percentile_cont(0.9) within group (order by ${propertySales.price} / nullif(${propertySales.floorArea}, 0)))`,
       decile10: sql<
         number | null
-      >`percentile_cont(1.0) within group (order by ${propertySales.price} / nullif(${propertySales.floorArea}, 0))`,
+      >`round(percentile_cont(1.0) within group (order by ${propertySales.price} / nullif(${propertySales.floorArea}, 0)))`,
       totalTransactions: sql<number>`count(*)::int`,
     })
     .from(propertySales)

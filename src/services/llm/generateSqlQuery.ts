@@ -3,11 +3,14 @@ import { createSQLSystemPrompt } from "./systemPrompts";
 import { SQLSchema, type SqlQuery } from "./schemas";
 import { db } from "@/db";
 import { sql } from "drizzle-orm";
+import type { ModelMessage } from "ai";
 
 type QueryResult = Record<string, any>;
 
-export async function generateRawSqlQuery(prompt: string): Promise<SqlQuery> {
-  return generateObjectService(prompt, createSQLSystemPrompt(), SQLSchema);
+export async function generateRawSqlQuery(
+  messages: ModelMessage[]
+): Promise<SqlQuery> {
+  return generateObjectService(messages, createSQLSystemPrompt(), SQLSchema);
 }
 
 export function validateSqlQuery({ query }: SqlQuery) {
@@ -57,9 +60,11 @@ export async function executeSqlQuery(query: string) {
   }
 }
 
-export async function generateSqlQuery(prompt: string): Promise<QueryResult[]> {
+export async function generateSqlQuery(
+  messages: ModelMessage[]
+): Promise<QueryResult[]> {
   try {
-    const rawQuery = await generateRawSqlQuery(prompt);
+    const rawQuery = await generateRawSqlQuery(messages);
     const validatedQuery = validateSqlQuery(rawQuery);
     const result = await executeSqlQuery(validatedQuery);
     return result.rows;

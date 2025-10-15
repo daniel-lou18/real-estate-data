@@ -2,17 +2,19 @@ import type { AppRouteHandler } from "@/types";
 import type { ChatRoute } from "./chat.routes";
 import * as HttpStatusCodes from "@/config/http-status-codes";
 import { generateSqlQuery } from "@/services/llm/generateSqlQuery";
+import type { ModelMessage } from "ai";
 
 export const chat: AppRouteHandler<ChatRoute> = async (c) => {
   const { messages } = c.req.valid("json");
-  const prompt = messages.map((message) => message.content).join("\n");
 
-  console.log("prompt", prompt);
-
-  const result = await generateSqlQuery(prompt);
+  const data = await generateSqlQuery(messages);
+  const successMessage: ModelMessage = {
+    role: "assistant",
+    content: `Successfully retrieved ${data.length} rows`,
+  };
 
   return c.json(
-    { messages: [{ role: "assistant", content: result }] },
+    { messages: [successMessage, ...messages], data },
     HttpStatusCodes.OK
   );
 };
