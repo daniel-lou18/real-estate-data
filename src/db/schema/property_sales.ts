@@ -1,3 +1,9 @@
+import {
+  MAX_APARTMENT_AREA,
+  MAX_APARTMENT_PRICE,
+  MIN_APARTMENT_AREA,
+  MIN_APARTMENT_PRICE,
+} from "@/repositories/constants";
 import { SQL, sql } from "drizzle-orm";
 import {
   boolean,
@@ -7,6 +13,7 @@ import {
   jsonb,
   numeric,
   pgEnum,
+  pgMaterializedView,
   pgTable,
   smallint,
   timestamp,
