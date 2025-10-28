@@ -1,0 +1,1038 @@
+{
+  "id": "5e7c9eed-cb0f-4219-8233-e39b4f0d988a",
+  "prevId": "00000000-0000-0000-0000-000000000000",
+  "version": "7",
+  "dialect": "postgresql",
+  "tables": {
+    "public.communes_geom": {
+      "name": "communes_geom",
+      "schema": "",
+      "columns": {
+        "insee_code": {
+          "name": "insee_code",
+          "type": "varchar(5)",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "geom": {
+          "name": "geom",
+          "type": "geometry(point)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "idx_communes_geom_geom_gist": {
+          "name": "idx_communes_geom_geom_gist",
+          "columns": [
+            {
+              "expression": "geom",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "gist",
+          "with": {}
+        }
+      },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.property_sales": {
+      "name": "property_sales",
+      "schema": "",
+      "columns": {
+        "idmutation": {
+          "name": "idmutation",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "idmutinvar": {
+          "name": "idmutinvar",
+          "type": "varchar(50)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "idopendata": {
+          "name": "idopendata",
+          "type": "varchar(50)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "idnatmut": {
+          "name": "idnatmut",
+          "type": "smallint",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "codservch": {
+          "name": "codservch",
+          "type": "varchar(10)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "refdoc": {
+          "name": "refdoc",
+          "type": "varchar(50)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "datemut": {
+          "name": "datemut",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "anneemut": {
+          "name": "anneemut",
+          "type": "smallint",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "moismut": {
+          "name": "moismut",
+          "type": "smallint",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "coddep": {
+          "name": "coddep",
+          "type": "varchar(5)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "libnatmut": {
+          "name": "libnatmut",
+          "type": "varchar(100)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "vefa": {
+          "name": "vefa",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "valeurfonc": {
+          "name": "valeurfonc",
+          "type": "numeric(12, 2)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "nbdispo": {
+          "name": "nbdispo",
+          "type": "smallint",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "nblot": {
+          "name": "nblot",
+          "type": "smallint",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "nbcomm": {
+          "name": "nbcomm",
+          "type": "smallint",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "l_codinsee": {
+          "name": "l_codinsee",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "primary_insee_code": {
+          "name": "primary_insee_code",
+          "type": "varchar(10)",
+          "primaryKey": false,
+          "notNull": false,
+          "generated": {
+            "as": "l_codinsee->>0",
+            "type": "stored"
+          }
+        },
+        "nbsection": {
+          "name": "nbsection",
+          "type": "smallint",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "l_section": {
+          "name": "l_section",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "primary_section": {
+          "name": "primary_section",
+          "type": "varchar(5)",
+          "primaryKey": false,
+          "notNull": false,
+          "generated": {
+            "as": "l_section->>0",
+            "type": "stored"
+          }
+        },
+        "nbpar": {
+          "name": "nbpar",
+          "type": "smallint",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "l_idpar": {
+          "name": "l_idpar",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "primary_parcel_id": {
+          "name": "primary_parcel_id",
+          "type": "varchar(15)",
+          "primaryKey": false,
+          "notNull": false,
+          "generated": {
+            "as": "l_idpar->>0",
+            "type": "stored"
+          }
+        },
+        "nbparmut": {
+          "name": "nbparmut",
+          "type": "smallint",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "l_idparmut": {
+          "name": "l_idparmut",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "nbsuf": {
+          "name": "nbsuf",
+          "type": "smallint",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "sterr": {
+          "name": "sterr",
+          "type": "numeric(10, 2)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "nbvolmut": {
+          "name": "nbvolmut",
+          "type": "smallint",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "nblocmut": {
+          "name": "nblocmut",
+          "type": "smallint",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "l_idlocmut": {
+          "name": "l_idlocmut",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "nblocmai": {
+          "name": "nblocmai",
+          "type": "smallint",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "nblocapt": {
+          "name": "nblocapt",
+          "type": "smallint",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "nblocdep": {
+          "name": "nblocdep",
+          "type": "smallint",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "nblocact": {
+          "name": "nblocact",
+          "type": "smallint",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "nbapt1pp": {
+          "name": "nbapt1pp",
+          "type": "smallint",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "nbapt2pp": {
+          "name": "nbapt2pp",
+          "type": "smallint",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "nbapt3pp": {
+          "name": "nbapt3pp",
+          "type": "smallint",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "nbapt4pp": {
+          "name": "nbapt4pp",
+          "type": "smallint",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "nbapt5pp": {
+          "name": "nbapt5pp",
+          "type": "smallint",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "nbmai1pp": {
+          "name": "nbmai1pp",
+          "type": "smallint",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "nbmai2pp": {
+          "name": "nbmai2pp",
+          "type": "smallint",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "nbmai3pp": {
+          "name": "nbmai3pp",
+          "type": "smallint",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "nbmai4pp": {
+          "name": "nbmai4pp",
+          "type": "smallint",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "nbmai5pp": {
+          "name": "nbmai5pp",
+          "type": "smallint",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "sbati": {
+          "name": "sbati",
+          "type": "numeric(10, 2)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "sbatmai": {
+          "name": "sbatmai",
+          "type": "numeric(10, 2)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "sbatapt": {
+          "name": "sbatapt",
+          "type": "numeric(10, 2)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "sbatact": {
+          "name": "sbatact",
+          "type": "numeric(10, 2)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "sapt1pp": {
+          "name": "sapt1pp",
+          "type": "numeric(10, 2)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "sapt2pp": {
+          "name": "sapt2pp",
+          "type": "numeric(10, 2)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "sapt3pp": {
+          "name": "sapt3pp",
+          "type": "numeric(10, 2)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "sapt4pp": {
+          "name": "sapt4pp",
+          "type": "numeric(10, 2)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "sapt5pp": {
+          "name": "sapt5pp",
+          "type": "numeric(10, 2)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "smai1pp": {
+          "name": "smai1pp",
+          "type": "numeric(10, 2)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "smai2pp": {
+          "name": "smai2pp",
+          "type": "numeric(10, 2)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "smai3pp": {
+          "name": "smai3pp",
+          "type": "numeric(10, 2)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "smai4pp": {
+          "name": "smai4pp",
+          "type": "numeric(10, 2)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "smai5pp": {
+          "name": "smai5pp",
+          "type": "numeric(10, 2)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "codtypbien": {
+          "name": "codtypbien",
+          "type": "smallint",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "libtypbien": {
+          "name": "libtypbien",
+          "type": "property_type_label",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "idx_property_sales_datemut": {
+          "name": "idx_property_sales_datemut",
+          "columns": [
+            {
+              "expression": "datemut",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "idx_property_sales_coddep": {
+          "name": "idx_property_sales_coddep",
+          "columns": [
+            {
+              "expression": "coddep",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "idx_property_sales_anneemut": {
+          "name": "idx_property_sales_anneemut",
+          "columns": [
+            {
+              "expression": "anneemut",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "idx_property_sales_codtypbien": {
+          "name": "idx_property_sales_codtypbien",
+          "columns": [
+            {
+              "expression": "codtypbien",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "idx_property_sales_valeurfonc": {
+          "name": "idx_property_sales_valeurfonc",
+          "columns": [
+            {
+              "expression": "valeurfonc",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.sections_geom": {
+      "name": "sections_geom",
+      "schema": "",
+      "columns": {
+        "section": {
+          "name": "section",
+          "type": "varchar(11)",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "insee_code": {
+          "name": "insee_code",
+          "type": "varchar(5)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "prefix": {
+          "name": "prefix",
+          "type": "varchar(3)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "code": {
+          "name": "code",
+          "type": "varchar(2)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "geom": {
+          "name": "geom",
+          "type": "geometry(point)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "idx_sections_geom_insee_code": {
+          "name": "idx_sections_geom_insee_code",
+          "columns": [
+            {
+              "expression": "insee_code",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "idx_sections_geom_geom_gist": {
+          "name": "idx_sections_geom_geom_gist",
+          "columns": [
+            {
+              "expression": "geom",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "gist",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "sections_geom_insee_code_communes_geom_insee_code_fk": {
+          "name": "sections_geom_insee_code_communes_geom_insee_code_fk",
+          "tableFrom": "sections_geom",
+          "tableTo": "communes_geom",
+          "columnsFrom": [
+            "insee_code"
+          ],
+          "columnsTo": [
+            "insee_code"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    }
+  },
+  "enums": {
+    "public.property_type_label": {
+      "name": "property_type_label",
+      "schema": "public",
+      "values": [
+        "ACTIVITE",
+        "APPARTEMENT INDETERMINE",
+        "BATI - INDETERMINE : Vefa sans descriptif",
+        "BATI - INDETERMINE : Vente avec volume(s)",
+        "BATI MIXTE - LOGEMENT/ACTIVITE",
+        "BATI MIXTE - LOGEMENTS",
+        "DES DEPENDANCES",
+        "DES MAISONS",
+        "DEUX APPARTEMENTS",
+        "MAISON - INDETERMINEE",
+        "TERRAIN ARTIFICIALISE MIXTE",
+        "TERRAIN D'AGREMENT",
+        "TERRAIN DE TYPE RESEAU",
+        "TERRAIN DE TYPE TAB",
+        "UN APPARTEMENT",
+        "UNE DEPENDANCE",
+        "UNE MAISON"
+      ]
+    }
+  },
+  "schemas": {},
+  "sequences": {},
+  "roles": {},
+  "policies": {},
+  "views": {
+    "public.apartments_by_insee_code_month": {
+      "columns": {
+        "primary_insee_code": {
+          "name": "primary_insee_code",
+          "type": "varchar(10)",
+          "primaryKey": false,
+          "notNull": false,
+          "generated": {
+            "as": "l_codinsee->>0",
+            "type": "stored"
+          }
+        },
+        "anneemut": {
+          "name": "anneemut",
+          "type": "smallint",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "moismut": {
+          "name": "moismut",
+          "type": "smallint",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "definition": "select \"primary_insee_code\", \"anneemut\", \"moismut\", count(*)::int as \"total_sales\", round(coalesce(sum(\"valeurfonc\"), 0)) as \"total_price\", round(coalesce(avg(\"valeurfonc\"), 0)) as \"avg_price\", round(coalesce(sum(\"sbatapt\"), 0), 1) as \"total_area\", round(coalesce(avg(\"sbatapt\"), 0), 1) as \"avg_area\", round(sum(\"valeurfonc\") / nullif(sum(\"sbatapt\"), 0)) as \"avg_price_m2\", coalesce(sum(\"nblocapt\"), 0)::int as \"total_apartments\", coalesce(sum(\"nbapt1pp\"), 0)::int as \"apartment_1_room\", coalesce(sum(\"nbapt2pp\"), 0)::int as \"apartment_2_room\", coalesce(sum(\"nbapt3pp\"), 0)::int as \"apartment_3_room\", coalesce(sum(\"nbapt4pp\"), 0)::int as \"apartment_4_room\", coalesce(sum(\"nbapt5pp\"), 0)::int as \"apartment_5_room\", jsonb_build_array(\n        round(percentile_cont(0.1) within group (order by \"valeurfonc\" / nullif(\"sbatapt\", 0))),\n        round(percentile_cont(0.2) within group (order by \"valeurfonc\" / nullif(\"sbatapt\", 0))),\n        round(percentile_cont(0.3) within group (order by \"valeurfonc\" / nullif(\"sbatapt\", 0))),\n        round(percentile_cont(0.4) within group (order by \"valeurfonc\" / nullif(\"sbatapt\", 0))),\n        round(percentile_cont(0.5) within group (order by \"valeurfonc\" / nullif(\"sbatapt\", 0))),\n        round(percentile_cont(0.6) within group (order by \"valeurfonc\" / nullif(\"sbatapt\", 0))),\n        round(percentile_cont(0.7) within group (order by \"valeurfonc\" / nullif(\"sbatapt\", 0))),\n        round(percentile_cont(0.8) within group (order by \"valeurfonc\" / nullif(\"sbatapt\", 0))),\n        round(percentile_cont(0.9) within group (order by \"valeurfonc\" / nullif(\"sbatapt\", 0))),\n        round(percentile_cont(1.0) within group (order by \"valeurfonc\" / nullif(\"sbatapt\", 0)))\n      ) as \"price_m2_deciles\", round(min(\"valeurfonc\")) as \"min_price\", round(max(\"valeurfonc\")) as \"max_price\", round(percentile_cont(0.5) within group (order by \"valeurfonc\")) as \"median_price\", round(percentile_cont(0.5) within group (order by \"sbatapt\"), 1) as \"median_area\", round(min(\"valeurfonc\" / nullif(\"sbatapt\", 0))) as \"min_price_m2\", round(max(\"valeurfonc\" / nullif(\"sbatapt\", 0))) as \"max_price_m2\", round(percentile_cont(0.25) within group (order by \"valeurfonc\" / nullif(\"sbatapt\", 0))) as \"price_m2_p25\", round(percentile_cont(0.75) within group (order by \"valeurfonc\" / nullif(\"sbatapt\", 0))) as \"price_m2_p75\", round((percentile_cont(0.75) within group (order by \"valeurfonc\" / nullif(\"sbatapt\", 0))) - (percentile_cont(0.25) within group (order by \"valeurfonc\" / nullif(\"sbatapt\", 0)))) as \"price_m2_iqr\", round(stddev_samp(\"valeurfonc\" / nullif(\"sbatapt\", 0))) as \"price_m2_stddev\" from \"property_sales\" where (\"property_sales\".\"libtypbien\" in ('UN APPARTEMENT', 'DEUX APPARTEMENTS', 'APPARTEMENT INDETERMINE') and \"property_sales\".\"sbatapt\" between '10' and '200' and \"property_sales\".\"valeurfonc\" between '1500' and '5000000') group by \"property_sales\".\"primary_insee_code\", \"property_sales\".\"anneemut\", \"property_sales\".\"moismut\"",
+      "name": "apartments_by_insee_code_month",
+      "schema": "public",
+      "isExisting": false,
+      "materialized": true
+    },
+    "public.apartments_by_insee_code_week": {
+      "columns": {
+        "primary_insee_code": {
+          "name": "primary_insee_code",
+          "type": "varchar(10)",
+          "primaryKey": false,
+          "notNull": false,
+          "generated": {
+            "as": "l_codinsee->>0",
+            "type": "stored"
+          }
+        }
+      },
+      "definition": "select \"primary_insee_code\", extract(isoyear from \"datemut\")::int as \"iso_year\", extract(week from \"datemut\")::int as \"iso_week\", count(*)::int as \"total_sales\", round(coalesce(sum(\"valeurfonc\"), 0)) as \"total_price\", round(coalesce(avg(\"valeurfonc\"), 0)) as \"avg_price\", round(coalesce(sum(\"sbatapt\"), 0), 1) as \"total_area\", round(coalesce(avg(\"sbatapt\"), 0), 1) as \"avg_area\", round(sum(\"valeurfonc\") / nullif(sum(\"sbatapt\"), 0)) as \"avg_price_m2\", coalesce(sum(\"nblocapt\"), 0)::int as \"total_apartments\", coalesce(sum(\"nbapt1pp\"), 0)::int as \"apartment_1_room\", coalesce(sum(\"nbapt2pp\"), 0)::int as \"apartment_2_room\", coalesce(sum(\"nbapt3pp\"), 0)::int as \"apartment_3_room\", coalesce(sum(\"nbapt4pp\"), 0)::int as \"apartment_4_room\", coalesce(sum(\"nbapt5pp\"), 0)::int as \"apartment_5_room\", jsonb_build_array(\n        round(percentile_cont(0.1) within group (order by \"valeurfonc\" / nullif(\"sbatapt\", 0))),\n        round(percentile_cont(0.2) within group (order by \"valeurfonc\" / nullif(\"sbatapt\", 0))),\n        round(percentile_cont(0.3) within group (order by \"valeurfonc\" / nullif(\"sbatapt\", 0))),\n        round(percentile_cont(0.4) within group (order by \"valeurfonc\" / nullif(\"sbatapt\", 0))),\n        round(percentile_cont(0.5) within group (order by \"valeurfonc\" / nullif(\"sbatapt\", 0))),\n        round(percentile_cont(0.6) within group (order by \"valeurfonc\" / nullif(\"sbatapt\", 0))),\n        round(percentile_cont(0.7) within group (order by \"valeurfonc\" / nullif(\"sbatapt\", 0))),\n        round(percentile_cont(0.8) within group (order by \"valeurfonc\" / nullif(\"sbatapt\", 0))),\n        round(percentile_cont(0.9) within group (order by \"valeurfonc\" / nullif(\"sbatapt\", 0))),\n        round(percentile_cont(1.0) within group (order by \"valeurfonc\" / nullif(\"sbatapt\", 0)))\n      ) as \"price_m2_deciles\", round(min(\"valeurfonc\")) as \"min_price\", round(max(\"valeurfonc\")) as \"max_price\", round(percentile_cont(0.5) within group (order by \"valeurfonc\")) as \"median_price\", round(percentile_cont(0.5) within group (order by \"sbatapt\"), 1) as \"median_area\", round(min(\"valeurfonc\" / nullif(\"sbatapt\", 0))) as \"min_price_m2\", round(max(\"valeurfonc\" / nullif(\"sbatapt\", 0))) as \"max_price_m2\", round(percentile_cont(0.25) within group (order by \"valeurfonc\" / nullif(\"sbatapt\", 0))) as \"price_m2_p25\", round(percentile_cont(0.75) within group (order by \"valeurfonc\" / nullif(\"sbatapt\", 0))) as \"price_m2_p75\", round((percentile_cont(0.75) within group (order by \"valeurfonc\" / nullif(\"sbatapt\", 0))) - (percentile_cont(0.25) within group (order by \"valeurfonc\" / nullif(\"sbatapt\", 0)))) as \"price_m2_iqr\", round(stddev_samp(\"valeurfonc\" / nullif(\"sbatapt\", 0))) as \"price_m2_stddev\" from \"property_sales\" where (\"property_sales\".\"libtypbien\" in ('UN APPARTEMENT', 'DEUX APPARTEMENTS', 'APPARTEMENT INDETERMINE') and \"property_sales\".\"sbatapt\" between '10' and '200' and \"property_sales\".\"valeurfonc\" between '1500' and '5000000') group by \"property_sales\".\"primary_insee_code\", extract(isoyear from \"property_sales\".\"datemut\")::int, extract(week from \"property_sales\".\"datemut\")::int",
+      "name": "apartments_by_insee_code_week",
+      "schema": "public",
+      "isExisting": false,
+      "materialized": true
+    },
+    "public.apartments_by_insee_code_year": {
+      "columns": {
+        "primary_insee_code": {
+          "name": "primary_insee_code",
+          "type": "varchar(10)",
+          "primaryKey": false,
+          "notNull": false,
+          "generated": {
+            "as": "l_codinsee->>0",
+            "type": "stored"
+          }
+        },
+        "anneemut": {
+          "name": "anneemut",
+          "type": "smallint",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "definition": "select \"primary_insee_code\", \"anneemut\", count(*)::int as \"total_sales\", round(coalesce(sum(\"valeurfonc\"), 0)) as \"total_price\", round(coalesce(avg(\"valeurfonc\"), 0)) as \"avg_price\", round(coalesce(sum(\"sbatapt\"), 0), 1) as \"total_area\", round(coalesce(avg(\"sbatapt\"), 0), 1) as \"avg_area\", round(sum(\"valeurfonc\") / nullif(sum(\"sbatapt\"), 0)) as \"avg_price_m2\", coalesce(sum(\"nblocapt\"), 0)::int as \"total_apartments\", coalesce(sum(\"nbapt1pp\"), 0)::int as \"apartment_1_room\", coalesce(sum(\"nbapt2pp\"), 0)::int as \"apartment_2_room\", coalesce(sum(\"nbapt3pp\"), 0)::int as \"apartment_3_room\", coalesce(sum(\"nbapt4pp\"), 0)::int as \"apartment_4_room\", coalesce(sum(\"nbapt5pp\"), 0)::int as \"apartment_5_room\", jsonb_build_array(\n        round(percentile_cont(0.1) within group (order by \"valeurfonc\" / nullif(\"sbatapt\", 0))),\n        round(percentile_cont(0.2) within group (order by \"valeurfonc\" / nullif(\"sbatapt\", 0))),\n        round(percentile_cont(0.3) within group (order by \"valeurfonc\" / nullif(\"sbatapt\", 0))),\n        round(percentile_cont(0.4) within group (order by \"valeurfonc\" / nullif(\"sbatapt\", 0))),\n        round(percentile_cont(0.5) within group (order by \"valeurfonc\" / nullif(\"sbatapt\", 0))),\n        round(percentile_cont(0.6) within group (order by \"valeurfonc\" / nullif(\"sbatapt\", 0))),\n        round(percentile_cont(0.7) within group (order by \"valeurfonc\" / nullif(\"sbatapt\", 0))),\n        round(percentile_cont(0.8) within group (order by \"valeurfonc\" / nullif(\"sbatapt\", 0))),\n        round(percentile_cont(0.9) within group (order by \"valeurfonc\" / nullif(\"sbatapt\", 0))),\n        round(percentile_cont(1.0) within group (order by \"valeurfonc\" / nullif(\"sbatapt\", 0)))\n      ) as \"price_m2_deciles\", round(min(\"valeurfonc\")) as \"min_price\", round(max(\"valeurfonc\")) as \"max_price\", round(percentile_cont(0.5) within group (order by \"valeurfonc\")) as \"median_price\", round(percentile_cont(0.5) within group (order by \"sbatapt\"), 1) as \"median_area\", round(min(\"valeurfonc\" / nullif(\"sbatapt\", 0))) as \"min_price_m2\", round(max(\"valeurfonc\" / nullif(\"sbatapt\", 0))) as \"max_price_m2\", round(percentile_cont(0.25) within group (order by \"valeurfonc\" / nullif(\"sbatapt\", 0))) as \"price_m2_p25\", round(percentile_cont(0.75) within group (order by \"valeurfonc\" / nullif(\"sbatapt\", 0))) as \"price_m2_p75\", round((percentile_cont(0.75) within group (order by \"valeurfonc\" / nullif(\"sbatapt\", 0))) - (percentile_cont(0.25) within group (order by \"valeurfonc\" / nullif(\"sbatapt\", 0)))) as \"price_m2_iqr\", round(stddev_samp(\"valeurfonc\" / nullif(\"sbatapt\", 0))) as \"price_m2_stddev\" from \"property_sales\" where (\"property_sales\".\"libtypbien\" in ('UN APPARTEMENT', 'DEUX APPARTEMENTS', 'APPARTEMENT INDETERMINE') and \"property_sales\".\"sbatapt\" between '10' and '200' and \"property_sales\".\"valeurfonc\" between '1500' and '5000000') group by \"property_sales\".\"primary_insee_code\", \"property_sales\".\"anneemut\"",
+      "name": "apartments_by_insee_code_year",
+      "schema": "public",
+      "isExisting": false,
+      "materialized": true
+    },
+    "public.houses_by_insee_code_month": {
+      "columns": {
+        "primary_insee_code": {
+          "name": "primary_insee_code",
+          "type": "varchar(10)",
+          "primaryKey": false,
+          "notNull": false,
+          "generated": {
+            "as": "l_codinsee->>0",
+            "type": "stored"
+          }
+        },
+        "anneemut": {
+          "name": "anneemut",
+          "type": "smallint",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "moismut": {
+          "name": "moismut",
+          "type": "smallint",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "definition": "select \"primary_insee_code\", \"anneemut\", \"moismut\", count(*)::int as \"total_sales\", round(coalesce(sum(\"valeurfonc\"), 0)) as \"total_price\", round(coalesce(avg(\"valeurfonc\"), 0)) as \"avg_price\", round(coalesce(sum(\"sbatmai\"), 0), 1) as \"total_area\", round(coalesce(avg(\"sbatmai\"), 0), 1) as \"avg_area\", round(sum(\"valeurfonc\") / nullif(sum(\"sbatmai\"), 0)) as \"avg_price_m2\", coalesce(sum(\"nblocmai\"), 0)::int as \"total_houses\", coalesce(sum(\"nbmai1pp\"), 0)::int as \"house_1_room\", coalesce(sum(\"nbmai2pp\"), 0)::int as \"house_2_room\", coalesce(sum(\"nbmai3pp\"), 0)::int as \"house_3_room\", coalesce(sum(\"nbmai4pp\"), 0)::int as \"house_4_room\", coalesce(sum(\"nbmai5pp\"), 0)::int as \"house_5_room\", jsonb_build_array(\n        round(percentile_cont(0.1) within group (order by \"valeurfonc\" / nullif(\"sbatmai\", 0))),\n        round(percentile_cont(0.2) within group (order by \"valeurfonc\" / nullif(\"sbatmai\", 0))),\n        round(percentile_cont(0.3) within group (order by \"valeurfonc\" / nullif(\"sbatmai\", 0))),\n        round(percentile_cont(0.4) within group (order by \"valeurfonc\" / nullif(\"sbatmai\", 0))),\n        round(percentile_cont(0.5) within group (order by \"valeurfonc\" / nullif(\"sbatmai\", 0))),\n        round(percentile_cont(0.6) within group (order by \"valeurfonc\" / nullif(\"sbatmai\", 0))),\n        round(percentile_cont(0.7) within group (order by \"valeurfonc\" / nullif(\"sbatmai\", 0))),\n        round(percentile_cont(0.8) within group (order by \"valeurfonc\" / nullif(\"sbatmai\", 0))),\n        round(percentile_cont(0.9) within group (order by \"valeurfonc\" / nullif(\"sbatmai\", 0))),\n        round(percentile_cont(1.0) within group (order by \"valeurfonc\" / nullif(\"sbatmai\", 0)))\n      ) as \"price_m2_deciles\", round(min(\"valeurfonc\")) as \"min_price\", round(max(\"valeurfonc\")) as \"max_price\", round(percentile_cont(0.5) within group (order by \"valeurfonc\")) as \"median_price\", round(percentile_cont(0.5) within group (order by \"sbatmai\"), 1) as \"median_area\", round(min(\"valeurfonc\" / nullif(\"sbatmai\", 0))) as \"min_price_m2\", round(max(\"valeurfonc\" / nullif(\"sbatmai\", 0))) as \"max_price_m2\", round(percentile_cont(0.25) within group (order by \"valeurfonc\" / nullif(\"sbatmai\", 0))) as \"price_m2_p25\", round(percentile_cont(0.75) within group (order by \"valeurfonc\" / nullif(\"sbatmai\", 0))) as \"price_m2_p75\", round((percentile_cont(0.75) within group (order by \"valeurfonc\" / nullif(\"sbatmai\", 0))) - (percentile_cont(0.25) within group (order by \"valeurfonc\" / nullif(\"sbatmai\", 0)))) as \"price_m2_iqr\", round(stddev_samp(\"valeurfonc\" / nullif(\"sbatmai\", 0))) as \"price_m2_stddev\" from \"property_sales\" where (\"property_sales\".\"libtypbien\" in ('UNE MAISON', 'DES MAISONS', 'MAISON - INDETERMINEE') and \"property_sales\".\"sbatmai\" between '20' and '300' and \"property_sales\".\"valeurfonc\" between '1500' and '15000000') group by \"property_sales\".\"primary_insee_code\", \"property_sales\".\"anneemut\", \"property_sales\".\"moismut\"",
+      "name": "houses_by_insee_code_month",
+      "schema": "public",
+      "isExisting": false,
+      "materialized": true
+    },
+    "public.houses_by_insee_code_week": {
+      "columns": {
+        "primary_insee_code": {
+          "name": "primary_insee_code",
+          "type": "varchar(10)",
+          "primaryKey": false,
+          "notNull": false,
+          "generated": {
+            "as": "l_codinsee->>0",
+            "type": "stored"
+          }
+        }
+      },
+      "definition": "select \"primary_insee_code\", extract(isoyear from \"datemut\")::int as \"iso_year\", extract(week from \"datemut\")::int as \"iso_week\", count(*)::int as \"total_sales\", round(coalesce(sum(\"valeurfonc\"), 0)) as \"total_price\", round(coalesce(avg(\"valeurfonc\"), 0)) as \"avg_price\", round(coalesce(sum(\"sbatmai\"), 0), 1) as \"total_area\", round(coalesce(avg(\"sbatmai\"), 0), 1) as \"avg_area\", round(sum(\"valeurfonc\") / nullif(sum(\"sbatmai\"), 0)) as \"avg_price_m2\", coalesce(sum(\"nblocmai\"), 0)::int as \"total_houses\", coalesce(sum(\"nbmai1pp\"), 0)::int as \"house_1_room\", coalesce(sum(\"nbmai2pp\"), 0)::int as \"house_2_room\", coalesce(sum(\"nbmai3pp\"), 0)::int as \"house_3_room\", coalesce(sum(\"nbmai4pp\"), 0)::int as \"house_4_room\", coalesce(sum(\"nbmai5pp\"), 0)::int as \"house_5_room\", jsonb_build_array(\n        round(percentile_cont(0.1) within group (order by \"valeurfonc\" / nullif(\"sbatmai\", 0))),\n        round(percentile_cont(0.2) within group (order by \"valeurfonc\" / nullif(\"sbatmai\", 0))),\n        round(percentile_cont(0.3) within group (order by \"valeurfonc\" / nullif(\"sbatmai\", 0))),\n        round(percentile_cont(0.4) within group (order by \"valeurfonc\" / nullif(\"sbatmai\", 0))),\n        round(percentile_cont(0.5) within group (order by \"valeurfonc\" / nullif(\"sbatmai\", 0))),\n        round(percentile_cont(0.6) within group (order by \"valeurfonc\" / nullif(\"sbatmai\", 0))),\n        round(percentile_cont(0.7) within group (order by \"valeurfonc\" / nullif(\"sbatmai\", 0))),\n        round(percentile_cont(0.8) within group (order by \"valeurfonc\" / nullif(\"sbatmai\", 0))),\n        round(percentile_cont(0.9) within group (order by \"valeurfonc\" / nullif(\"sbatmai\", 0))),\n        round(percentile_cont(1.0) within group (order by \"valeurfonc\" / nullif(\"sbatmai\", 0)))\n      ) as \"price_m2_deciles\", round(min(\"valeurfonc\")) as \"min_price\", round(max(\"valeurfonc\")) as \"max_price\", round(percentile_cont(0.5) within group (order by \"valeurfonc\")) as \"median_price\", round(percentile_cont(0.5) within group (order by \"sbatmai\"), 1) as \"median_area\", round(min(\"valeurfonc\" / nullif(\"sbatmai\", 0))) as \"min_price_m2\", round(max(\"valeurfonc\" / nullif(\"sbatmai\", 0))) as \"max_price_m2\", round(percentile_cont(0.25) within group (order by \"valeurfonc\" / nullif(\"sbatmai\", 0))) as \"price_m2_p25\", round(percentile_cont(0.75) within group (order by \"valeurfonc\" / nullif(\"sbatmai\", 0))) as \"price_m2_p75\", round((percentile_cont(0.75) within group (order by \"valeurfonc\" / nullif(\"sbatmai\", 0))) - (percentile_cont(0.25) within group (order by \"valeurfonc\" / nullif(\"sbatmai\", 0)))) as \"price_m2_iqr\", round(stddev_samp(\"valeurfonc\" / nullif(\"sbatmai\", 0))) as \"price_m2_stddev\" from \"property_sales\" where (\"property_sales\".\"libtypbien\" in ('UNE MAISON', 'DES MAISONS', 'MAISON - INDETERMINEE') and \"property_sales\".\"sbatmai\" between '20' and '300' and \"property_sales\".\"valeurfonc\" between '1500' and '15000000') group by \"property_sales\".\"primary_insee_code\", extract(isoyear from \"property_sales\".\"datemut\")::int, extract(week from \"property_sales\".\"datemut\")::int",
+      "name": "houses_by_insee_code_week",
+      "schema": "public",
+      "isExisting": false,
+      "materialized": true
+    },
+    "public.houses_by_insee_code_year": {
+      "columns": {
+        "primary_insee_code": {
+          "name": "primary_insee_code",
+          "type": "varchar(10)",
+          "primaryKey": false,
+          "notNull": false,
+          "generated": {
+            "as": "l_codinsee->>0",
+            "type": "stored"
+          }
+        },
+        "anneemut": {
+          "name": "anneemut",
+          "type": "smallint",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "definition": "select \"primary_insee_code\", \"anneemut\", count(*)::int as \"total_sales\", round(coalesce(sum(\"valeurfonc\"), 0)) as \"total_price\", round(coalesce(avg(\"valeurfonc\"), 0)) as \"avg_price\", round(coalesce(sum(\"sbatmai\"), 0), 1) as \"total_area\", round(coalesce(avg(\"sbatmai\"), 0), 1) as \"avg_area\", round(sum(\"valeurfonc\") / nullif(sum(\"sbatmai\"), 0)) as \"avg_price_m2\", coalesce(sum(\"nblocmai\"), 0)::int as \"total_houses\", coalesce(sum(\"nbmai1pp\"), 0)::int as \"house_1_room\", coalesce(sum(\"nbmai2pp\"), 0)::int as \"house_2_room\", coalesce(sum(\"nbmai3pp\"), 0)::int as \"house_3_room\", coalesce(sum(\"nbmai4pp\"), 0)::int as \"house_4_room\", coalesce(sum(\"nbmai5pp\"), 0)::int as \"house_5_room\", jsonb_build_array(\n        round(percentile_cont(0.1) within group (order by \"valeurfonc\" / nullif(\"sbatmai\", 0))),\n        round(percentile_cont(0.2) within group (order by \"valeurfonc\" / nullif(\"sbatmai\", 0))),\n        round(percentile_cont(0.3) within group (order by \"valeurfonc\" / nullif(\"sbatmai\", 0))),\n        round(percentile_cont(0.4) within group (order by \"valeurfonc\" / nullif(\"sbatmai\", 0))),\n        round(percentile_cont(0.5) within group (order by \"valeurfonc\" / nullif(\"sbatmai\", 0))),\n        round(percentile_cont(0.6) within group (order by \"valeurfonc\" / nullif(\"sbatmai\", 0))),\n        round(percentile_cont(0.7) within group (order by \"valeurfonc\" / nullif(\"sbatmai\", 0))),\n        round(percentile_cont(0.8) within group (order by \"valeurfonc\" / nullif(\"sbatmai\", 0))),\n        round(percentile_cont(0.9) within group (order by \"valeurfonc\" / nullif(\"sbatmai\", 0))),\n        round(percentile_cont(1.0) within group (order by \"valeurfonc\" / nullif(\"sbatmai\", 0)))\n      ) as \"price_m2_deciles\", round(min(\"valeurfonc\")) as \"min_price\", round(max(\"valeurfonc\")) as \"max_price\", round(percentile_cont(0.5) within group (order by \"valeurfonc\")) as \"median_price\", round(percentile_cont(0.5) within group (order by \"sbatmai\"), 1) as \"median_area\", round(min(\"valeurfonc\" / nullif(\"sbatmai\", 0))) as \"min_price_m2\", round(max(\"valeurfonc\" / nullif(\"sbatmai\", 0))) as \"max_price_m2\", round(percentile_cont(0.25) within group (order by \"valeurfonc\" / nullif(\"sbatmai\", 0))) as \"price_m2_p25\", round(percentile_cont(0.75) within group (order by \"valeurfonc\" / nullif(\"sbatmai\", 0))) as \"price_m2_p75\", round((percentile_cont(0.75) within group (order by \"valeurfonc\" / nullif(\"sbatmai\", 0))) - (percentile_cont(0.25) within group (order by \"valeurfonc\" / nullif(\"sbatmai\", 0)))) as \"price_m2_iqr\", round(stddev_samp(\"valeurfonc\" / nullif(\"sbatmai\", 0))) as \"price_m2_stddev\" from \"property_sales\" where (\"property_sales\".\"libtypbien\" in ('UNE MAISON', 'DES MAISONS', 'MAISON - INDETERMINEE') and \"property_sales\".\"sbatmai\" between '20' and '300' and \"property_sales\".\"valeurfonc\" between '1500' and '15000000') group by \"property_sales\".\"primary_insee_code\", \"property_sales\".\"anneemut\"",
+      "name": "houses_by_insee_code_year",
+      "schema": "public",
+      "isExisting": false,
+      "materialized": true
+    },
+    "public.residential_sales_fact": {
+      "columns": {
+        "idmutation": {
+          "name": "idmutation",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "idopendata": {
+          "name": "idopendata",
+          "type": "varchar(50)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "datemut": {
+          "name": "datemut",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "anneemut": {
+          "name": "anneemut",
+          "type": "smallint",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "moismut": {
+          "name": "moismut",
+          "type": "smallint",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "coddep": {
+          "name": "coddep",
+          "type": "varchar(5)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "primary_insee_code": {
+          "name": "primary_insee_code",
+          "type": "varchar(10)",
+          "primaryKey": false,
+          "notNull": false,
+          "generated": {
+            "as": "l_codinsee->>0",
+            "type": "stored"
+          }
+        },
+        "primary_section": {
+          "name": "primary_section",
+          "type": "varchar(5)",
+          "primaryKey": false,
+          "notNull": false,
+          "generated": {
+            "as": "l_section->>0",
+            "type": "stored"
+          }
+        },
+        "libtypbien": {
+          "name": "libtypbien",
+          "type": "property_type_label",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "vefa": {
+          "name": "vefa",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "valeurfonc": {
+          "name": "valeurfonc",
+          "type": "numeric(12, 2)",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "definition": "select \"idmutation\", \"idopendata\", \"datemut\", \"anneemut\", \"moismut\", extract(isoyear from \"datemut\")::int as \"iso_year\", extract(week from \"datemut\")::int as \"iso_week\", \"coddep\", \"primary_insee_code\", \"primary_section\", \"libtypbien\", case\n        when \"libtypbien\" in ('UN APPARTEMENT','DEUX APPARTEMENTS','APPARTEMENT INDETERMINE') then 'apartment'\n        when \"libtypbien\" in ('UNE MAISON','DES MAISONS','MAISON - INDETERMINEE') then 'house'\n        else 'other'\n      end as \"res_type\", \"vefa\", \"valeurfonc\", case\n        when \"libtypbien\" in ('UN APPARTEMENT','DEUX APPARTEMENTS','APPARTEMENT INDETERMINE') then \"sbatapt\"\n        when \"libtypbien\" in ('UNE MAISON','DES MAISONS','MAISON - INDETERMINEE') then \"sbatmai\"\n        else \"sbati\"\n      end as \"area\", round(\"valeurfonc\" / nullif(case\n        when \"libtypbien\" in ('UN APPARTEMENT','DEUX APPARTEMENTS','APPARTEMENT INDETERMINE') then \"sbatapt\"\n        when \"libtypbien\" in ('UNE MAISON','DES MAISONS','MAISON - INDETERMINEE') then \"sbatmai\"\n        else \"sbati\"\n      end, 0)) as \"price_per_m2\", case\n        when \"libtypbien\" in ('UN APPARTEMENT','DEUX APPARTEMENTS','APPARTEMENT INDETERMINE') then (\n          case\n            when coalesce(\"nbapt5pp\",0) > 0 then '5+'\n            when coalesce(\"nbapt4pp\",0) > 0 then '4'\n            when coalesce(\"nbapt3pp\",0) > 0 then '3'\n            when coalesce(\"nbapt2pp\",0) > 0 then '2'\n            when coalesce(\"nbapt1pp\",0) > 0 then '1'\n            else null\n          end\n        )\n        when \"libtypbien\" in ('UNE MAISON','DES MAISONS','MAISON - INDETERMINEE') then (\n          case\n            when coalesce(\"nbmai5pp\",0) > 0 then '5+'\n            when coalesce(\"nbmai4pp\",0) > 0 then '4'\n            when coalesce(\"nbmai3pp\",0) > 0 then '3'\n            when coalesce(\"nbmai2pp\",0) > 0 then '2'\n            when coalesce(\"nbmai1pp\",0) > 0 then '1'\n            else null\n          end\n        )\n        else null\n      end as \"rooms_bucket\" from \"property_sales\" where ((\"property_sales\".\"libtypbien\" in ('UN APPARTEMENT', 'DEUX APPARTEMENTS', 'APPARTEMENT INDETERMINE') and \"property_sales\".\"sbatapt\" between '10' and '200' and \"property_sales\".\"valeurfonc\" between '1500' and '5000000') or (\"property_sales\".\"libtypbien\" in ('UNE MAISON', 'DES MAISONS', 'MAISON - INDETERMINEE') and \"property_sales\".\"sbatmai\" between '20' and '300' and \"property_sales\".\"valeurfonc\" between '1500' and '15000000'))",
+      "name": "residential_sales_fact",
+      "schema": "public",
+      "isExisting": false,
+      "materialized": true
+    },
+    "public.residential_topk_by_insee_month": {
+      "columns": {
+        "idmutation": {
+          "name": "idmutation",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "datemut": {
+          "name": "datemut",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "anneemut": {
+          "name": "anneemut",
+          "type": "smallint",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "moismut": {
+          "name": "moismut",
+          "type": "smallint",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "coddep": {
+          "name": "coddep",
+          "type": "varchar(5)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "primary_insee_code": {
+          "name": "primary_insee_code",
+          "type": "varchar(10)",
+          "primaryKey": false,
+          "notNull": false,
+          "generated": {
+            "as": "l_codinsee->>0",
+            "type": "stored"
+          }
+        },
+        "primary_section": {
+          "name": "primary_section",
+          "type": "varchar(5)",
+          "primaryKey": false,
+          "notNull": false,
+          "generated": {
+            "as": "l_section->>0",
+            "type": "stored"
+          }
+        },
+        "vefa": {
+          "name": "vefa",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "valeurfonc": {
+          "name": "valeurfonc",
+          "type": "numeric(12, 2)",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "definition": "select \"idmutation\", \"datemut\", \"anneemut\", \"moismut\", \"coddep\", \"primary_insee_code\", \"primary_section\", case\n        when \"libtypbien\" in ('UN APPARTEMENT','DEUX APPARTEMENTS','APPARTEMENT INDETERMINE') then 'apartment'\n        when \"libtypbien\" in ('UNE MAISON','DES MAISONS','MAISON - INDETERMINEE') then 'house'\n        else 'other'\n      end as \"res_type\", \"vefa\", \"valeurfonc\", coalesce(\"sbatapt\", \"sbatmai\") as \"area\", round(\"valeurfonc\" / nullif(coalesce(\"sbatapt\", \"sbatmai\"), 0)) as \"price_per_m2\", dense_rank() over (partition by \"primary_insee_code\", \"anneemut\", \"moismut\",\n        case\n          when \"libtypbien\" in ('UN APPARTEMENT','DEUX APPARTEMENTS','APPARTEMENT INDETERMINE') then 'apartment'\n          when \"libtypbien\" in ('UNE MAISON','DES MAISONS','MAISON - INDETERMINEE') then 'house'\n          else 'other'\n        end\n      order by (\"valeurfonc\" / nullif(coalesce(\"sbatapt\", \"sbatmai\"), 0)) asc) as \"rank_asc\", dense_rank() over (partition by \"primary_insee_code\", \"anneemut\", \"moismut\",\n        case\n          when \"libtypbien\" in ('UN APPARTEMENT','DEUX APPARTEMENTS','APPARTEMENT INDETERMINE') then 'apartment'\n          when \"libtypbien\" in ('UNE MAISON','DES MAISONS','MAISON - INDETERMINEE') then 'house'\n          else 'other'\n        end\n      order by (\"valeurfonc\" / nullif(coalesce(\"sbatapt\", \"sbatmai\"), 0)) desc) as \"rank_desc\" from \"property_sales\" where ((\"property_sales\".\"libtypbien\" in ('UN APPARTEMENT', 'DEUX APPARTEMENTS', 'APPARTEMENT INDETERMINE') and \"property_sales\".\"sbatapt\" between '10' and '200' and \"property_sales\".\"valeurfonc\" between '1500' and '5000000') or (\"property_sales\".\"libtypbien\" in ('UNE MAISON', 'DES MAISONS', 'MAISON - INDETERMINEE') and \"property_sales\".\"sbatmai\" between '20' and '300' and \"property_sales\".\"valeurfonc\" between '1500' and '15000000'))",
+      "name": "residential_topk_by_insee_month",
+      "schema": "public",
+      "isExisting": false,
+      "materialized": true
+    },
+    "public.residential_topk_by_insee_year": {
+      "columns": {
+        "idmutation": {
+          "name": "idmutation",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "datemut": {
+          "name": "datemut",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "anneemut": {
+          "name": "anneemut",
+          "type": "smallint",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "coddep": {
+          "name": "coddep",
+          "type": "varchar(5)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "primary_insee_code": {
+          "name": "primary_insee_code",
+          "type": "varchar(10)",
+          "primaryKey": false,
+          "notNull": false,
+          "generated": {
+            "as": "l_codinsee->>0",
+            "type": "stored"
+          }
+        },
+        "primary_section": {
+          "name": "primary_section",
+          "type": "varchar(5)",
+          "primaryKey": false,
+          "notNull": false,
+          "generated": {
+            "as": "l_section->>0",
+            "type": "stored"
+          }
+        },
+        "vefa": {
+          "name": "vefa",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "valeurfonc": {
+          "name": "valeurfonc",
+          "type": "numeric(12, 2)",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "definition": "select \"idmutation\", \"datemut\", \"anneemut\", \"coddep\", \"primary_insee_code\", \"primary_section\", case\n        when \"libtypbien\" in ('UN APPARTEMENT','DEUX APPARTEMENTS','APPARTEMENT INDETERMINE') then 'apartment'\n        when \"libtypbien\" in ('UNE MAISON','DES MAISONS','MAISON - INDETERMINEE') then 'house'\n        else 'other'\n      end as \"res_type\", \"vefa\", \"valeurfonc\", coalesce(\"sbatapt\", \"sbatmai\") as \"area\", round(\"valeurfonc\" / nullif(coalesce(\"sbatapt\", \"sbatmai\"), 0)) as \"price_per_m2\", dense_rank() over (partition by \"primary_insee_code\", \"anneemut\",\n        case\n          when \"libtypbien\" in ('UN APPARTEMENT','DEUX APPARTEMENTS','APPARTEMENT INDETERMINE') then 'apartment'\n          when \"libtypbien\" in ('UNE MAISON','DES MAISONS','MAISON - INDETERMINEE') then 'house'\n          else 'other'\n        end\n      order by (\"valeurfonc\" / nullif(coalesce(\"sbatapt\", \"sbatmai\"), 0)) asc) as \"rank_asc\", dense_rank() over (partition by \"primary_insee_code\", \"anneemut\",\n        case\n          when \"libtypbien\" in ('UN APPARTEMENT','DEUX APPARTEMENTS','APPARTEMENT INDETERMINE') then 'apartment'\n          when \"libtypbien\" in ('UNE MAISON','DES MAISONS','MAISON - INDETERMINEE') then 'house'\n          else 'other'\n        end\n      order by (\"valeurfonc\" / nullif(coalesce(\"sbatapt\", \"sbatmai\"), 0)) desc) as \"rank_desc\" from \"property_sales\" where ((\"property_sales\".\"libtypbien\" in ('UN APPARTEMENT', 'DEUX APPARTEMENTS', 'APPARTEMENT INDETERMINE') and \"property_sales\".\"sbatapt\" between '10' and '200' and \"property_sales\".\"valeurfonc\" between '1500' and '5000000') or (\"property_sales\".\"libtypbien\" in ('UNE MAISON', 'DES MAISONS', 'MAISON - INDETERMINEE') and \"property_sales\".\"sbatmai\" between '20' and '300' and \"property_sales\".\"valeurfonc\" between '1500' and '15000000'))",
+      "name": "residential_topk_by_insee_year",
+      "schema": "public",
+      "isExisting": false,
+      "materialized": true
+    }
+  },
+  "_meta": {
+    "columns": {},
+    "schemas": {},
+    "tables": {}
+  }
+}

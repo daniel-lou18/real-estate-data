@@ -9,12 +9,12 @@ const openai = createOpenAI({
 const google = createGoogleGenerativeAI({
     apiKey: env.GOOGLE_GENERATIVE_AI_API_KEY,
 });
-export async function generateObjectService(prompt, system, schema) {
+export async function generateObjectService(messages, system, schema) {
     try {
         const result = await generateObject({
             model: google("gemini-2.5-flash-preview-09-2025"),
             system,
-            prompt,
+            messages,
             schema,
         });
         console.log("result", result.object);

@@ -1,7 +1,7 @@
 import { createRoute, z } from "@hono/zod-openapi";
 import * as HttpStatusCodes from "@/config/http-status-codes";
 import jsonContent from "@/openapi/helpers/json-content";
-import { AnalyticsQueryParamsSchema, SalesByInseeCodeSchema, SalesByMonthSchema, SalesByPropertyTypeSchema, SalesByInseeCodeAndSectionSchema, SalesByYearSchema, SalesSummarySchema, PricePerM2DecilesSchema, PricePerM2DecilesByInseeCodeSchema, PricePerM2DecilesByInseeCodeAndSectionSchema, } from "./analytics.schemas";
+import { AnalyticsQueryParamsSchema, SalesByInseeCodeSchema, SalesByMonthSchema, SalesByPropertyTypeSchema, SalesByInseeCodeAndSectionSchema, SalesByYearSchema, SalesSummarySchema, PricePerM2DecilesSchema, } from "./analytics.schemas";
 const tags = ["Analytics"];
 export const groupedByInseeCode = createRoute({
     tags,
@@ -78,27 +78,5 @@ export const pricePerM2Deciles = createRoute({
     },
     responses: {
         [HttpStatusCodes.OK]: jsonContent(PricePerM2DecilesSchema, "Price per m2 deciles"),
-    },
-});
-export const pricePerM2DecilesByInseeCode = createRoute({
-    tags,
-    method: "get",
-    path: "/price-per-m2-deciles/by-insee-code",
-    request: {
-        query: AnalyticsQueryParamsSchema,
-    },
-    responses: {
-        [HttpStatusCodes.OK]: jsonContent(PricePerM2DecilesByInseeCodeSchema, "Price per m2 deciles by insee code"),
-    },
-});
-export const pricePerM2DecilesByInseeCodeAndSection = createRoute({
-    tags,
-    method: "get",
-    path: "/price-per-m2-deciles/by-insee-code-and-section",
-    request: {
-        query: AnalyticsQueryParamsSchema,
-    },
-    responses: {
-        [HttpStatusCodes.OK]: jsonContent(PricePerM2DecilesByInseeCodeAndSectionSchema, "Price per m2 deciles by insee code and section"),
     },
 });

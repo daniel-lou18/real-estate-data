@@ -22,6 +22,20 @@
       "when": 1759344915581,
       "tag": "0002_crazy_parcel",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1761648275455,
+      "tag": "0003_boring_karma",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1761650890116,
+      "tag": "0006_dapper_glorian",
+      "breakpoints": true
     }
   ]
 }

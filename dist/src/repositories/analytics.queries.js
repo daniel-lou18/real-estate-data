@@ -13,6 +13,7 @@
 import { and, between, eq, gte, isNotNull, lte, sql } from "drizzle-orm";
 import { db } from "@/db";
 import { propertySales } from "@/db/schema";
+import { MIN_RESIDENTIAL_AREA, MAX_RESIDENTIAL_AREA, MIN_RESIDENTIAL_PRICE, MAX_RESIDENTIAL_PRICE, MIN_APARTMENT_AREA, MAX_APARTMENT_AREA, MIN_APARTMENT_PRICE, MAX_APARTMENT_PRICE, MIN_HOUSE_AREA, MAX_HOUSE_AREA, MIN_HOUSE_PRICE, MAX_HOUSE_PRICE, } from "./constants";
 // ============================================================================
 // Shared Utilities
 // ============================================================================
@@ -94,21 +95,35 @@ function buildOrderByClause(params) {
 const baseAggregationFields = {
     // Transaction count
     count: sql `count(*)::int`,
-    // Price aggregates (in euros)
-    totalPrice: sql `coalesce(sum(${propertySales.price}), 0)`,
-    avgPrice: sql `coalesce(avg(${propertySales.price}), 0)`,
-    minPrice: sql `coalesce(min(${propertySales.price}), 0)`,
-    maxPrice: sql `coalesce(max(${propertySales.price}), 0)`,
-    // Floor area aggregates (in m²)
-    totalFloorArea: sql `coalesce(sum(${propertySales.floorArea}), 0)`,
-    avgFloorArea: sql `coalesce(avg(${propertySales.floorArea}), 0)`,
+    // Price aggregates (in euros) - rounded to nearest euro
+    totalPrice: sql `coalesce(round(sum(${propertySales.price})), 0)`,
+    avgPrice: sql `coalesce(round(avg(${propertySales.price})), 0)`,
+    minPrice: sql `coalesce(round(min(${propertySales.price})), 0)`,
+    maxPrice: sql `coalesce(round(max(${propertySales.price})), 0)`,
+    // Floor area aggregates (in m²) - rounded to 1 decimal place
+    totalFloorArea: sql `coalesce(round(sum(${propertySales.floorArea}), 1), 0)`,
+    avgFloorArea: sql `coalesce(round(avg(${propertySales.floorArea}), 1), 0)`,
     // Computed metric: Average price per m² (AFTER aggregation - weighted average)
     // This is the CORRECT way: SUM(price) / SUM(floorArea)
     // NOT: AVG(price / floorArea) which would be wrong
+    // Rounded to nearest euro per m²
+    // Filter to main property types only (apartments and houses) and exclude outliers
     avgPricePerM2: sql `
     case
-      when sum(${propertySales.floorArea}) > 0
-      then sum(${propertySales.price}) / sum(${propertySales.floorArea})
+      when sum(${propertySales.floorArea}) FILTER (
+        WHERE ${propertySales.propertyTypeLabel} IN ('UN APPARTEMENT', 'DEUX APPARTEMENTS', 'APPARTEMENT INDETERMINE', 'UNE MAISON', 'DES MAISONS', 'MAISON - INDETERMINEE')
+        AND ${propertySales.floorArea} >= ${MIN_RESIDENTIAL_AREA} AND ${propertySales.floorArea} <= ${MAX_RESIDENTIAL_AREA}
+        AND ${propertySales.price} >= ${MIN_RESIDENTIAL_PRICE} AND ${propertySales.price} <= ${MAX_RESIDENTIAL_PRICE}
+      ) > 0
+      then round(sum(${propertySales.price}) FILTER (
+        WHERE ${propertySales.propertyTypeLabel} IN ('UN APPARTEMENT', 'DEUX APPARTEMENTS', 'APPARTEMENT INDETERMINE', 'UNE MAISON', 'DES MAISONS', 'MAISON - INDETERMINEE')
+        AND ${propertySales.floorArea} >= ${MIN_RESIDENTIAL_AREA} AND ${propertySales.floorArea} <= ${MAX_RESIDENTIAL_AREA}
+        AND ${propertySales.price} >= ${MIN_RESIDENTIAL_PRICE} AND ${propertySales.price} <= ${MAX_RESIDENTIAL_PRICE}
+      ) / sum(${propertySales.floorArea}) FILTER (
+        WHERE ${propertySales.propertyTypeLabel} IN ('UN APPARTEMENT', 'DEUX APPARTEMENTS', 'APPARTEMENT INDETERMINE', 'UNE MAISON', 'DES MAISONS', 'MAISON - INDETERMINEE')
+        AND ${propertySales.floorArea} >= ${MIN_RESIDENTIAL_AREA} AND ${propertySales.floorArea} <= ${MAX_RESIDENTIAL_AREA}
+        AND ${propertySales.price} >= ${MIN_RESIDENTIAL_PRICE} AND ${propertySales.price} <= ${MAX_RESIDENTIAL_PRICE}
+      ))
       else null
     end
   `,
@@ -136,33 +151,33 @@ const apartmentSpecificFields = {
   `,
     apartmentTotalPrice: sql `
     coalesce(
-      sum(${propertySales.price}) FILTER (
+      round(sum(${propertySales.price}) FILTER (
         WHERE ${propertySales.propertyTypeLabel} IN ('UN APPARTEMENT', 'DEUX APPARTEMENTS', 'APPARTEMENT INDETERMINE')
-      ),
+      )),
       0
     )
   `,
     apartmentAvgPrice: sql `
     coalesce(
-      avg(${propertySales.price}) FILTER (
+      round(avg(${propertySales.price}) FILTER (
         WHERE ${propertySales.propertyTypeLabel} IN ('UN APPARTEMENT', 'DEUX APPARTEMENTS', 'APPARTEMENT INDETERMINE')
-      ),
+      )),
       0
     )
   `,
     apartmentTotalFloorArea: sql `
     coalesce(
-      sum(${propertySales.ApartmentFloorArea}) FILTER (
+      round(sum(${propertySales.ApartmentFloorArea}) FILTER (
         WHERE ${propertySales.propertyTypeLabel} IN ('UN APPARTEMENT', 'DEUX APPARTEMENTS', 'APPARTEMENT INDETERMINE')
-      ),
+      ), 1),
       0
     )
   `,
     apartmentAvgFloorArea: sql `
     coalesce(
-      avg(${propertySales.ApartmentFloorArea}) FILTER (
+      round(avg(${propertySales.ApartmentFloorArea}) FILTER (
         WHERE ${propertySales.propertyTypeLabel} IN ('UN APPARTEMENT', 'DEUX APPARTEMENTS', 'APPARTEMENT INDETERMINE')
-      ),
+      ), 1),
       0
     )
   `,
@@ -170,12 +185,18 @@ const apartmentSpecificFields = {
     case
       when sum(${propertySales.ApartmentFloorArea}) FILTER (
         WHERE ${propertySales.propertyTypeLabel} IN ('UN APPARTEMENT', 'DEUX APPARTEMENTS', 'APPARTEMENT INDETERMINE')
+        AND ${propertySales.ApartmentFloorArea} >= ${MIN_APARTMENT_AREA} AND ${propertySales.ApartmentFloorArea} <= ${MAX_APARTMENT_AREA}
+        AND ${propertySales.price} >= ${MIN_APARTMENT_PRICE} AND ${propertySales.price} <= ${MAX_APARTMENT_PRICE}
       ) > 0
-      then sum(${propertySales.price}) FILTER (
+      then round(sum(${propertySales.price}) FILTER (
         WHERE ${propertySales.propertyTypeLabel} IN ('UN APPARTEMENT', 'DEUX APPARTEMENTS', 'APPARTEMENT INDETERMINE')
+        AND ${propertySales.ApartmentFloorArea} >= ${MIN_APARTMENT_AREA} AND ${propertySales.ApartmentFloorArea} <= ${MAX_APARTMENT_AREA}
+        AND ${propertySales.price} >= ${MIN_APARTMENT_PRICE} AND ${propertySales.price} <= ${MAX_APARTMENT_PRICE}
       ) / sum(${propertySales.ApartmentFloorArea}) FILTER (
         WHERE ${propertySales.propertyTypeLabel} IN ('UN APPARTEMENT', 'DEUX APPARTEMENTS', 'APPARTEMENT INDETERMINE')
-      )
+        AND ${propertySales.ApartmentFloorArea} >= ${MIN_APARTMENT_AREA} AND ${propertySales.ApartmentFloorArea} <= ${MAX_APARTMENT_AREA}
+        AND ${propertySales.price} >= ${MIN_APARTMENT_PRICE} AND ${propertySales.price} <= ${MAX_APARTMENT_PRICE}
+      ))
       else null
     end
   `,
@@ -192,33 +213,33 @@ const houseSpecificFields = {
   `,
     houseTotalPrice: sql `
     coalesce(
-      sum(${propertySales.price}) FILTER (
+      round(sum(${propertySales.price}) FILTER (
         WHERE ${propertySales.propertyTypeLabel} IN ('UNE MAISON', 'DES MAISONS', 'MAISON - INDETERMINEE')
-      ),
+      )),
       0
     )
   `,
     houseAvgPrice: sql `
     coalesce(
-      avg(${propertySales.price}) FILTER (
+      round(avg(${propertySales.price}) FILTER (
         WHERE ${propertySales.propertyTypeLabel} IN ('UNE MAISON', 'DES MAISONS', 'MAISON - INDETERMINEE')
-      ),
+      )),
       0
     )
   `,
     houseTotalFloorArea: sql `
     coalesce(
-      sum(${propertySales.HouseFloorArea}) FILTER (
+      round(sum(${propertySales.HouseFloorArea}) FILTER (
         WHERE ${propertySales.propertyTypeLabel} IN ('UNE MAISON', 'DES MAISONS', 'MAISON - INDETERMINEE')
-      ),
+      ), 1),
       0
     )
   `,
     houseAvgFloorArea: sql `
     coalesce(
-      avg(${propertySales.HouseFloorArea}) FILTER (
+      round(avg(${propertySales.HouseFloorArea}) FILTER (
         WHERE ${propertySales.propertyTypeLabel} IN ('UNE MAISON', 'DES MAISONS', 'MAISON - INDETERMINEE')
-      ),
+      ), 1),
       0
     )
   `,
@@ -226,12 +247,18 @@ const houseSpecificFields = {
     case
       when sum(${propertySales.HouseFloorArea}) FILTER (
         WHERE ${propertySales.propertyTypeLabel} IN ('UNE MAISON', 'DES MAISONS', 'MAISON - INDETERMINEE')
+        AND ${propertySales.HouseFloorArea} >= ${MIN_HOUSE_AREA} AND ${propertySales.HouseFloorArea} <= ${MAX_HOUSE_AREA}
+        AND ${propertySales.price} >= ${MIN_HOUSE_PRICE} AND ${propertySales.price} <= ${MAX_HOUSE_PRICE}
       ) > 0
-      then sum(${propertySales.price}) FILTER (
+      then round(sum(${propertySales.price}) FILTER (
         WHERE ${propertySales.propertyTypeLabel} IN ('UNE MAISON', 'DES MAISONS', 'MAISON - INDETERMINEE')
+        AND ${propertySales.HouseFloorArea} >= ${MIN_HOUSE_AREA} AND ${propertySales.HouseFloorArea} <= ${MAX_HOUSE_AREA}
+        AND ${propertySales.price} >= ${MIN_HOUSE_PRICE} AND ${propertySales.price} <= ${MAX_HOUSE_PRICE}
       ) / sum(${propertySales.HouseFloorArea}) FILTER (
         WHERE ${propertySales.propertyTypeLabel} IN ('UNE MAISON', 'DES MAISONS', 'MAISON - INDETERMINEE')
-      )
+        AND ${propertySales.HouseFloorArea} >= ${MIN_HOUSE_AREA} AND ${propertySales.HouseFloorArea} <= ${MAX_HOUSE_AREA}
+        AND ${propertySales.price} >= ${MIN_HOUSE_PRICE} AND ${propertySales.price} <= ${MAX_HOUSE_PRICE}
+      ))
       else null
     end
   `,
@@ -361,7 +388,6 @@ export async function getSalesByYear(params) {
  */
 export async function getSalesByMonth(params) {
     const whereClause = buildWhereClause(params);
-    const _orderByClause = buildOrderByClause(params);
     const results = await db
         .select({
         year: sql `${propertySales.year}`,
@@ -490,29 +516,27 @@ export async function getHouseStats(whereClause) {
 // Decile Calculation Functions
 // ============================================================================
 /**
- * Calculate 10 deciles for average price per square meter across the whole dataset
- * Returns the price per m² values that divide the dataset into 10 equal groups
+ * Generic function to calculate price per m² deciles
  */
 export async function getPricePerM2Deciles(params = {}) {
     const whereClause = buildWhereClause(params);
     const results = await db
         .select({
-        decile1: sql `percentile_cont(0.1) within group (order by ${propertySales.price} / nullif(${propertySales.floorArea}, 0))`,
-        decile2: sql `percentile_cont(0.2) within group (order by ${propertySales.price} / nullif(${propertySales.floorArea}, 0))`,
-        decile3: sql `percentile_cont(0.3) within group (order by ${propertySales.price} / nullif(${propertySales.floorArea}, 0))`,
-        decile4: sql `percentile_cont(0.4) within group (order by ${propertySales.price} / nullif(${propertySales.floorArea}, 0))`,
-        decile5: sql `percentile_cont(0.5) within group (order by ${propertySales.price} / nullif(${propertySales.floorArea}, 0))`,
-        decile6: sql `percentile_cont(0.6) within group (order by ${propertySales.price} / nullif(${propertySales.floorArea}, 0))`,
-        decile7: sql `percentile_cont(0.7) within group (order by ${propertySales.price} / nullif(${propertySales.floorArea}, 0))`,
-        decile8: sql `percentile_cont(0.8) within group (order by ${propertySales.price} / nullif(${propertySales.floorArea}, 0))`,
-        decile9: sql `percentile_cont(0.9) within group (order by ${propertySales.price} / nullif(${propertySales.floorArea}, 0))`,
-        decile10: sql `percentile_cont(1.0) within group (order by ${propertySales.price} / nullif(${propertySales.floorArea}, 0))`,
+        decile1: sql `round(percentile_cont(0.1) within group (order by ${propertySales.price} / nullif(${propertySales.floorArea}, 0)))`,
+        decile2: sql `round(percentile_cont(0.2) within group (order by ${propertySales.price} / nullif(${propertySales.floorArea}, 0)))`,
+        decile3: sql `round(percentile_cont(0.3) within group (order by ${propertySales.price} / nullif(${propertySales.floorArea}, 0)))`,
+        decile4: sql `round(percentile_cont(0.4) within group (order by ${propertySales.price} / nullif(${propertySales.floorArea}, 0)))`,
+        decile5: sql `round(percentile_cont(0.5) within group (order by ${propertySales.price} / nullif(${propertySales.floorArea}, 0)))`,
+        decile6: sql `round(percentile_cont(0.6) within group (order by ${propertySales.price} / nullif(${propertySales.floorArea}, 0)))`,
+        decile7: sql `round(percentile_cont(0.7) within group (order by ${propertySales.price} / nullif(${propertySales.floorArea}, 0)))`,
+        decile8: sql `round(percentile_cont(0.8) within group (order by ${propertySales.price} / nullif(${propertySales.floorArea}, 0)))`,
+        decile9: sql `round(percentile_cont(0.9) within group (order by ${propertySales.price} / nullif(${propertySales.floorArea}, 0)))`,
+        decile10: sql `round(percentile_cont(1.0) within group (order by ${propertySales.price} / nullif(${propertySales.floorArea}, 0)))`,
         totalTransactions: sql `count(*)::int`,
     })
         .from(propertySales)
         .where(and(whereClause, sql `${propertySales.floorArea} > 0`, sql `${propertySales.price} > 0`));
     const result = results[0];
-    // Transform to new array-based format
     return {
         deciles: [
             { percentile: 10, value: result.decile1 },
@@ -529,113 +553,3 @@ export async function getPricePerM2Deciles(params = {}) {
         totalTransactions: result.totalTransactions,
     };
 }
-/**
- * Calculate 10 deciles for average price per square meter grouped by INSEE code
- * Returns deciles calculated from the avgPricePerM2 of each INSEE code group
- */
-export async function getPricePerM2DecilesByInseeCode(params = {}) {
-    const whereClause = buildWhereClause(params);
-    // Calculate deciles from aggregated data by INSEE code
-    const results = await db
-        .select({
-        decile1: sql `percentile_cont(0.1) within group (order by avg_price_per_m2)`,
-        decile2: sql `percentile_cont(0.2) within group (order by avg_price_per_m2)`,
-        decile3: sql `percentile_cont(0.3) within group (order by avg_price_per_m2)`,
-        decile4: sql `percentile_cont(0.4) within group (order by avg_price_per_m2)`,
-        decile5: sql `percentile_cont(0.5) within group (order by avg_price_per_m2)`,
-        decile6: sql `percentile_cont(0.6) within group (order by avg_price_per_m2)`,
-        decile7: sql `percentile_cont(0.7) within group (order by avg_price_per_m2)`,
-        decile8: sql `percentile_cont(0.8) within group (order by avg_price_per_m2)`,
-        decile9: sql `percentile_cont(0.9) within group (order by avg_price_per_m2)`,
-        decile10: sql `percentile_cont(1.0) within group (order by avg_price_per_m2)`,
-        totalInseeCodes: sql `count(*)::int`,
-    })
-        .from(db
-        .select({
-        avgPricePerM2: sql `
-            case
-              when sum(${propertySales.floorArea}) > 0
-              then sum(${propertySales.price}) / sum(${propertySales.floorArea})
-              else null
-            end as avg_price_per_m2
-          `,
-    })
-        .from(propertySales)
-        .where(and(whereClause, isNotNull(propertySales.primaryInseeCode), sql `${propertySales.floorArea} > 0`, sql `${propertySales.price} > 0`))
-        .groupBy(propertySales.primaryInseeCode)
-        .as("aggregated_data"))
-        .where(sql `avg_price_per_m2 is not null`);
-    const result = results[0];
-    // Transform to new array-based format
-    return {
-        deciles: [
-            { percentile: 10, value: result.decile1 },
-            { percentile: 20, value: result.decile2 },
-            { percentile: 30, value: result.decile3 },
-            { percentile: 40, value: result.decile4 },
-            { percentile: 50, value: result.decile5 },
-            { percentile: 60, value: result.decile6 },
-            { percentile: 70, value: result.decile7 },
-            { percentile: 80, value: result.decile8 },
-            { percentile: 90, value: result.decile9 },
-            { percentile: 100, value: result.decile10 },
-        ],
-        totalInseeCodes: result.totalInseeCodes,
-    };
-}
-/**
- * Calculate 10 deciles for average price per square meter grouped by INSEE code and section
- * Returns deciles calculated from the avgPricePerM2 of each INSEE code + section group
- */
-export async function getPricePerM2DecilesByInseeCodeAndSection(params = {}) {
-    const whereClause = buildWhereClause(params);
-    // Calculate deciles from aggregated data by INSEE code and section
-    const results = await db
-        .select({
-        decile1: sql `percentile_cont(0.1) within group (order by avg_price_per_m2)`,
-        decile2: sql `percentile_cont(0.2) within group (order by avg_price_per_m2)`,
-        decile3: sql `percentile_cont(0.3) within group (order by avg_price_per_m2)`,
-        decile4: sql `percentile_cont(0.4) within group (order by avg_price_per_m2)`,
-        decile5: sql `percentile_cont(0.5) within group (order by avg_price_per_m2)`,
-        decile6: sql `percentile_cont(0.6) within group (order by avg_price_per_m2)`,
-        decile7: sql `percentile_cont(0.7) within group (order by avg_price_per_m2)`,
-        decile8: sql `percentile_cont(0.8) within group (order by avg_price_per_m2)`,
-        decile9: sql `percentile_cont(0.9) within group (order by avg_price_per_m2)`,
-        decile10: sql `percentile_cont(1.0) within group (order by avg_price_per_m2)`,
-        totalSections: sql `count(*)::int`,
-    })
-        .from(db
-        .select({
-        avgPricePerM2: sql `
-            case
-              when sum(${propertySales.floorArea}) > 0
-              then sum(${propertySales.price}) / sum(${propertySales.floorArea})
-              else null
-            end
-          `,
-    })
-        .from(propertySales)
-        .where(and(whereClause, isNotNull(propertySales.primaryInseeCode), isNotNull(propertySales.primarySection), sql `${propertySales.floorArea} > 0`, sql `${propertySales.price} > 0`))
-        .groupBy(propertySales.primaryInseeCode, propertySales.primarySection)
-        .as("aggregated_data"))
-        .where(sql `avg_price_per_m2 is not null`);
-    const result = results[0];
-    // Transform to new array-based format
-    return {
-        deciles: [
-            { percentile: 10, value: result.decile1 },
-            { percentile: 20, value: result.decile2 },
-            { percentile: 30, value: result.decile3 },
-            { percentile: 40, value: result.decile4 },
-            { percentile: 50, value: result.decile5 },
-            { percentile: 60, value: result.decile6 },
-            { percentile: 70, value: result.decile7 },
-            { percentile: 80, value: result.decile8 },
-            { percentile: 90, value: result.decile9 },
-            { percentile: 100, value: result.decile10 },
-        ],
-        totalSections: result.totalSections,
-    };
-}
-// Export utility functions for use in handlers if needed
-export { buildOrderByClause, buildWhereClause };

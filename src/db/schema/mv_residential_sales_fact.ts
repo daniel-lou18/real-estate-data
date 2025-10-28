@@ -24,8 +24,13 @@ export const residential_sales_fact = pgMaterializedView(
       date: propertySales.date,
       year: propertySales.year,
       month: propertySales.month,
-      iso_year: sql<number>`extract(isoyear from ${propertySales.date})::int`,
-      iso_week: sql<number>`extract(week from ${propertySales.date})::int`,
+      iso_year:
+        sql<number>`extract(isoyear from ${propertySales.date})::int`.as(
+          "iso_year"
+        ),
+      iso_week: sql<number>`extract(week from ${propertySales.date})::int`.as(
+        "iso_week"
+      ),
 
       depCode: propertySales.depCode,
       inseeCode: propertySales.primaryInseeCode,
@@ -36,7 +41,7 @@ export const residential_sales_fact = pgMaterializedView(
         when ${propertySales.propertyTypeLabel} in ('UN APPARTEMENT','DEUX APPARTEMENTS','APPARTEMENT INDETERMINE') then 'apartment'
         when ${propertySales.propertyTypeLabel} in ('UNE MAISON','DES MAISONS','MAISON - INDETERMINEE') then 'house'
         else 'other'
-      end`,
+      end`.as("res_type"),
       vefa: propertySales.vefa,
 
       price: propertySales.price,
@@ -44,12 +49,12 @@ export const residential_sales_fact = pgMaterializedView(
         when ${propertySales.propertyTypeLabel} in ('UN APPARTEMENT','DEUX APPARTEMENTS','APPARTEMENT INDETERMINE') then ${propertySales.ApartmentFloorArea}
         when ${propertySales.propertyTypeLabel} in ('UNE MAISON','DES MAISONS','MAISON - INDETERMINEE') then ${propertySales.HouseFloorArea}
         else ${propertySales.floorArea}
-      end`,
+      end`.as("area"),
       price_per_m2: sql<number>`round(${propertySales.price} / nullif(case
         when ${propertySales.propertyTypeLabel} in ('UN APPARTEMENT','DEUX APPARTEMENTS','APPARTEMENT INDETERMINE') then ${propertySales.ApartmentFloorArea}
         when ${propertySales.propertyTypeLabel} in ('UNE MAISON','DES MAISONS','MAISON - INDETERMINEE') then ${propertySales.HouseFloorArea}
         else ${propertySales.floorArea}
-      end, 0))`,
+      end, 0))`.as("price_per_m2"),
 
       // Heuristic rooms bucket per transaction: prefer largest bucket present, apartment-first then house
       rooms_bucket: sql<string | null>`case
@@ -74,7 +79,7 @@ export const residential_sales_fact = pgMaterializedView(
           end
         )
         else null
-      end`,
+      end`.as("rooms_bucket"),
     })
     .from(propertySales)
     .where(
@@ -134,25 +139,36 @@ export const residential_topk_by_insee_month = pgMaterializedView(
         when ${propertySales.propertyTypeLabel} in ('UN APPARTEMENT','DEUX APPARTEMENTS','APPARTEMENT INDETERMINE') then 'apartment'
         when ${propertySales.propertyTypeLabel} in ('UNE MAISON','DES MAISONS','MAISON - INDETERMINEE') then 'house'
         else 'other'
-      end`,
+      end`.as("res_type"),
       vefa: propertySales.vefa,
       price: propertySales.price,
-      area: sql<number>`coalesce(${propertySales.ApartmentFloorArea}, ${propertySales.HouseFloorArea})`,
-      price_per_m2: sql<number>`round(${propertySales.price} / nullif(coalesce(${propertySales.ApartmentFloorArea}, ${propertySales.HouseFloorArea}), 0))`,
-      rank_asc: sql<number>`dense_rank() over (partition by ${propertySales.primaryInseeCode}, ${propertySales.year}, ${propertySales.month},
+      area: sql<number>`coalesce(${propertySales.ApartmentFloorArea}, ${propertySales.HouseFloorArea})`.as(
+        "area"
+      ),
+      price_per_m2:
+        sql<number>`round(${propertySales.price} / nullif(coalesce(${propertySales.ApartmentFloorArea}, ${propertySales.HouseFloorArea}), 0))`.as(
+          "price_per_m2"
+        ),
+      rank_asc:
+        sql<number>`dense_rank() over (partition by ${propertySales.primaryInseeCode}, ${propertySales.year}, ${propertySales.month},
         case
           when ${propertySales.propertyTypeLabel} in ('UN APPARTEMENT','DEUX APPARTEMENTS','APPARTEMENT INDETERMINE') then 'apartment'
           when ${propertySales.propertyTypeLabel} in ('UNE MAISON','DES MAISONS','MAISON - INDETERMINEE') then 'house'
           else 'other'
         end
-      order by (${propertySales.price} / nullif(coalesce(${propertySales.ApartmentFloorArea}, ${propertySales.HouseFloorArea}), 0)) asc)`,
-      rank_desc: sql<number>`dense_rank() over (partition by ${propertySales.primaryInseeCode}, ${propertySales.year}, ${propertySales.month},
+      order by (${propertySales.price} / nullif(coalesce(${propertySales.ApartmentFloorArea}, ${propertySales.HouseFloorArea}), 0)) asc)`.as(
+          "rank_asc"
+        ),
+      rank_desc:
+        sql<number>`dense_rank() over (partition by ${propertySales.primaryInseeCode}, ${propertySales.year}, ${propertySales.month},
         case
           when ${propertySales.propertyTypeLabel} in ('UN APPARTEMENT','DEUX APPARTEMENTS','APPARTEMENT INDETERMINE') then 'apartment'
           when ${propertySales.propertyTypeLabel} in ('UNE MAISON','DES MAISONS','MAISON - INDETERMINEE') then 'house'
           else 'other'
         end
-      order by (${propertySales.price} / nullif(coalesce(${propertySales.ApartmentFloorArea}, ${propertySales.HouseFloorArea}), 0)) desc)`,
+      order by (${propertySales.price} / nullif(coalesce(${propertySales.ApartmentFloorArea}, ${propertySales.HouseFloorArea}), 0)) desc)`.as(
+          "rank_desc"
+        ),
     })
     .from(propertySales)
     .where(
@@ -198,25 +214,36 @@ export const residential_topk_by_insee_year = pgMaterializedView(
         when ${propertySales.propertyTypeLabel} in ('UN APPARTEMENT','DEUX APPARTEMENTS','APPARTEMENT INDETERMINE') then 'apartment'
         when ${propertySales.propertyTypeLabel} in ('UNE MAISON','DES MAISONS','MAISON - INDETERMINEE') then 'house'
         else 'other'
-      end`,
+      end`.as("res_type"),
       vefa: propertySales.vefa,
       price: propertySales.price,
-      area: sql<number>`coalesce(${propertySales.ApartmentFloorArea}, ${propertySales.HouseFloorArea})`,
-      price_per_m2: sql<number>`round(${propertySales.price} / nullif(coalesce(${propertySales.ApartmentFloorArea}, ${propertySales.HouseFloorArea}), 0))`,
-      rank_asc: sql<number>`dense_rank() over (partition by ${propertySales.primaryInseeCode}, ${propertySales.year},
+      area: sql<number>`coalesce(${propertySales.ApartmentFloorArea}, ${propertySales.HouseFloorArea})`.as(
+        "area"
+      ),
+      price_per_m2:
+        sql<number>`round(${propertySales.price} / nullif(coalesce(${propertySales.ApartmentFloorArea}, ${propertySales.HouseFloorArea}), 0))`.as(
+          "price_per_m2"
+        ),
+      rank_asc:
+        sql<number>`dense_rank() over (partition by ${propertySales.primaryInseeCode}, ${propertySales.year},
         case
           when ${propertySales.propertyTypeLabel} in ('UN APPARTEMENT','DEUX APPARTEMENTS','APPARTEMENT INDETERMINE') then 'apartment'
           when ${propertySales.propertyTypeLabel} in ('UNE MAISON','DES MAISONS','MAISON - INDETERMINEE') then 'house'
           else 'other'
         end
-      order by (${propertySales.price} / nullif(coalesce(${propertySales.ApartmentFloorArea}, ${propertySales.HouseFloorArea}), 0)) asc)`,
-      rank_desc: sql<number>`dense_rank() over (partition by ${propertySales.primaryInseeCode}, ${propertySales.year},
+      order by (${propertySales.price} / nullif(coalesce(${propertySales.ApartmentFloorArea}, ${propertySales.HouseFloorArea}), 0)) asc)`.as(
+          "rank_asc"
+        ),
+      rank_desc:
+        sql<number>`dense_rank() over (partition by ${propertySales.primaryInseeCode}, ${propertySales.year},
         case
           when ${propertySales.propertyTypeLabel} in ('UN APPARTEMENT','DEUX APPARTEMENTS','APPARTEMENT INDETERMINE') then 'apartment'
           when ${propertySales.propertyTypeLabel} in ('UNE MAISON','DES MAISONS','MAISON - INDETERMINEE') then 'house'
           else 'other'
         end
-      order by (${propertySales.price} / nullif(coalesce(${propertySales.ApartmentFloorArea}, ${propertySales.HouseFloorArea}), 0)) desc)`,
+      order by (${propertySales.price} / nullif(coalesce(${propertySales.ApartmentFloorArea}, ${propertySales.HouseFloorArea}), 0)) desc)`.as(
+          "rank_desc"
+        ),
     })
     .from(propertySales)
     .where(

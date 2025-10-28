@@ -2,8 +2,10 @@ import * as HttpStatusCodes from "@/config/http-status-codes";
 import { generateSqlQuery } from "@/services/llm/generateSqlQuery";
 export const chat = async (c) => {
     const { messages } = c.req.valid("json");
-    const prompt = messages.map((message) => message.content).join("\n");
-    console.log("prompt", prompt);
-    const result = await generateSqlQuery(prompt);
-    return c.json({ messages: [{ role: "assistant", content: result }] }, HttpStatusCodes.OK);
+    const data = await generateSqlQuery(messages);
+    const successMessage = {
+        role: "assistant",
+        content: `Successfully retrieved ${data.length} rows`,
+    };
+    return c.json({ messages: [successMessage, ...messages], data }, HttpStatusCodes.OK);
 };

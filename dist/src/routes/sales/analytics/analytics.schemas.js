@@ -217,10 +217,38 @@ export const SalesSummarySchema = BaseAggregationMetrics.extend({
 // ============================================================================
 // Query Parameter Schemas
 // ============================================================================
+export const BaseQueryParamsSchema = z.object({
+    // Pagination
+    limit: z.coerce
+        .number()
+        .int()
+        .min(1)
+        .max(500)
+        .default(50)
+        .describe("Maximum number of results"),
+    offset: z.coerce
+        .number()
+        .int()
+        .min(0)
+        .default(0)
+        .describe("Number of results to skip"),
+    // Sorting
+    sortBy: z
+        .enum([
+        "count",
+        "totalPrice",
+        "avgPrice",
+        "avgPricePerM2",
+        "totalFloorArea",
+    ])
+        .optional()
+        .describe("Field to sort by"),
+    sortOrder: z.enum(["asc", "desc"]).default("desc").describe("Sort order"),
+});
 /**
  * Common query parameters for filtering analytics
  */
-export const AnalyticsQueryParamsSchema = z.object({
+export const AnalyticsQueryParamsSchema = BaseQueryParamsSchema.extend({
     // Time filters
     year: z.coerce.number().int().optional().describe("Filter by specific year"),
     startYear: z.coerce
@@ -248,32 +276,6 @@ export const AnalyticsQueryParamsSchema = z.object({
         .int()
         .optional()
         .describe("Filter by property type code"),
-    // Pagination
-    limit: z.coerce
-        .number()
-        .int()
-        .min(1)
-        .max(100)
-        .default(50)
-        .describe("Maximum number of results"),
-    offset: z.coerce
-        .number()
-        .int()
-        .min(0)
-        .default(0)
-        .describe("Number of results to skip"),
-    // Sorting
-    sortBy: z
-        .enum([
-        "count",
-        "totalPrice",
-        "avgPrice",
-        "avgPricePerM2",
-        "totalFloorArea",
-    ])
-        .optional()
-        .describe("Field to sort by"),
-    sortOrder: z.enum(["asc", "desc"]).default("desc").describe("Sort order"),
 });
 // ============================================================================
 // Type exports
@@ -303,29 +305,4 @@ export const PricePerM2DecilesSchema = z.object({
         .number()
         .int()
         .describe("Total number of transactions analyzed"),
-});
-/**
- * Schema for price per m² deciles grouped by INSEE code
- * Each decile represents the price per m² value that divides INSEE codes into 10 equal groups
- */
-export const PricePerM2DecilesByInseeCodeSchema = z.object({
-    deciles: z
-        .array(DecileValueSchema)
-        .length(10)
-        .describe("Array of 10 decile values from 10th to 100th percentile"),
-    totalInseeCodes: z
-        .number()
-        .int()
-        .describe("Total number of INSEE codes analyzed"),
-});
-/**
- * Schema for price per m² deciles grouped by INSEE code and section
- * Each decile represents the price per m² value that divides sections into 10 equal groups
- */
-export const PricePerM2DecilesByInseeCodeAndSectionSchema = z.object({
-    deciles: z
-        .array(DecileValueSchema)
-        .length(10)
-        .describe("Array of 10 decile values from 10th to 100th percentile"),
-    totalSections: z.number().int().describe("Total number of sections analyzed"),
 });

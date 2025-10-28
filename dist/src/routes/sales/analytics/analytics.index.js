@@ -8,7 +8,5 @@ const router = createRouter()
     .openapi(routes.groupedByYear, handlers.groupedByYear)
     .openapi(routes.groupedByMonth, handlers.groupedByMonth)
     .openapi(routes.summary, handlers.summary)
-    .openapi(routes.pricePerM2Deciles, handlers.pricePerM2Deciles)
-    .openapi(routes.pricePerM2DecilesByInseeCode, handlers.pricePerM2DecilesByInseeCode)
-    .openapi(routes.pricePerM2DecilesByInseeCodeAndSection, handlers.pricePerM2DecilesByInseeCodeAndSection);
+    .openapi(routes.pricePerM2Deciles, handlers.pricePerM2Deciles);
 export default router;
