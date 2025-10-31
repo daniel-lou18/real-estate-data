@@ -7,6 +7,10 @@ import {
   houses_by_insee_code_year,
   apartments_by_insee_code_week,
   houses_by_insee_code_week,
+  apartments_by_section_month,
+  houses_by_section_month,
+  apartments_by_section_year,
+  houses_by_section_year,
 } from "@/db/schema/mv_property_sales";
 import type {
   ApartmentsByInseeMonth,
@@ -20,14 +24,32 @@ import type {
   InseeWeekParams,
   SortBy,
   SortOrder,
+  ApartmentsBySectionMonth,
+  HousesBySectionMonth,
+  ApartmentsBySectionYear,
+  HousesBySectionYear,
+  SectionMonthParams,
+  SectionYearParams,
 } from "@/routes/sales/mv/mv.schemas";
 
 /**
  * Generic orderBy helper that works for all views.
- * All views have the same sortable fields: total_sales, avg_price_m2, total_price, avg_price
+ * Returns an array of sort expressions for multi-field sorting.
+ * All views share common metric fields and dimensional fields (inseeCode, year)
+ * Some views have additional temporal fields (month, iso_year, iso_week)
+ *
+ * For temporal sorts, automatically adds secondary sorts for natural ordering:
+ * - year → year, month (if month exists)
+ * - iso_year → iso_year, iso_week (if iso_week exists)
  */
 function getOrderBy<
   T extends {
+    inseeCode?: any;
+    section?: any;
+    year?: any;
+    month?: any;
+    iso_year?: any;
+    iso_week?: any;
     total_sales: any;
     avg_price_m2: any;
     total_price: any;
@@ -35,16 +57,61 @@ function getOrderBy<
   }
 >(view: T, sortBy: SortBy | undefined, sortOrder: SortOrder) {
   const dir = sortOrder === "asc" ? asc : desc;
+
   switch (sortBy) {
+    // Dimensional fields
+    case "inseeCode":
+      return view.inseeCode ? [dir(view.inseeCode)] : [dir(view.total_sales)];
+    case "section":
+      return view.section ? [dir(view.section)] : [dir(view.total_sales)];
+
+    // Temporal fields with automatic secondary sorts
+    case "year":
+      if (view.year && view.month) {
+        // For monthly data: sort by year, then month
+        return [dir(view.year), dir(view.month)];
+      } else if (view.year) {
+        return [dir(view.year)];
+      }
+      return [dir(view.total_sales)];
+
+    case "month":
+      if (view.month && view.year) {
+        // Sort by month, but also by year for proper ordering across years
+        return [dir(view.year), dir(view.month)];
+      } else if (view.month) {
+        return [dir(view.month)];
+      }
+      return [dir(view.total_sales)];
+
+    case "iso_year":
+      if (view.iso_year && view.iso_week) {
+        // For weekly data: sort by iso_year, then iso_week
+        return [dir(view.iso_year), dir(view.iso_week)];
+      } else if (view.iso_year) {
+        return [dir(view.iso_year)];
+      }
+      return [dir(view.total_sales)];
+
+    case "iso_week":
+      if (view.iso_week && view.iso_year) {
+        // Sort by iso_week, but also by iso_year for proper ordering across years
+        return [dir(view.iso_year), dir(view.iso_week)];
+      } else if (view.iso_week) {
+        return [dir(view.iso_week)];
+      }
+      return [dir(view.total_sales)];
+
+    // Metric fields
     case "avg_price_m2":
-      return dir(view.avg_price_m2);
+      return [dir(view.avg_price_m2)];
     case "total_price":
-      return dir(view.total_price);
+      return [dir(view.total_price)];
     case "avg_price":
-      return dir(view.avg_price);
+      return [dir(view.avg_price)];
     case "total_sales":
     default:
-      return dir(view.total_sales);
+      return [dir(view.total_sales)];
   }
 }
 
@@ -82,6 +149,27 @@ function buildWeekWhereConditions(
   return conditions;
 }
 
+function buildSectionMonthWhereConditions(
+  view: typeof apartments_by_section_month | typeof houses_by_section_month,
+  params: SectionMonthParams
+) {
+  const conditions = [];
+  if (params.section) conditions.push(eq(view.section, params.section));
+  if (params.year) conditions.push(eq(view.year, params.year));
+  if (params.month) conditions.push(eq(view.month, params.month));
+  return conditions;
+}
+
+function buildSectionYearWhereConditions(
+  view: typeof apartments_by_section_year | typeof houses_by_section_year,
+  params: SectionYearParams
+) {
+  const conditions = [];
+  if (params.section) conditions.push(eq(view.section, params.section));
+  if (params.year) conditions.push(eq(view.year, params.year));
+  return conditions;
+}
+
 // ----------------------------------------------------------------------------
 // Repositories: Monthly (INSEE × year × month)
 // ----------------------------------------------------------------------------
@@ -96,15 +184,15 @@ export async function getAptsByInseeMonth(
 
   const orderBy = getOrderBy(
     apartments_by_insee_code_month,
-    params.sortBy ?? "total_sales",
-    params.sortOrder ?? "desc"
+    params.sortBy,
+    params.sortOrder
   );
 
   const results = await db
     .select()
     .from(apartments_by_insee_code_month)
     .where(whereConditions.length ? and(...whereConditions) : undefined)
-    .orderBy(orderBy)
+    .orderBy(...orderBy)
     .limit(params.limit ?? 200)
     .offset(params.offset ?? 0);
 
@@ -121,15 +209,15 @@ export async function getHousesByInseeMonth(
 
   const orderBy = getOrderBy(
     houses_by_insee_code_month,
-    params.sortBy ?? "total_sales",
-    params.sortOrder ?? "desc"
+    params.sortBy,
+    params.sortOrder
   );
 
   const results = await db
     .select()
     .from(houses_by_insee_code_month)
     .where(whereConditions.length ? and(...whereConditions) : undefined)
-    .orderBy(orderBy)
+    .orderBy(...orderBy)
     .limit(params.limit ?? 200)
     .offset(params.offset ?? 0);
 
@@ -150,15 +238,15 @@ export async function getAptsByInseeYear(
 
   const orderBy = getOrderBy(
     apartments_by_insee_code_year,
-    params.sortBy ?? "total_sales",
-    params.sortOrder ?? "desc"
+    params.sortBy,
+    params.sortOrder
   );
 
   const results = await db
     .select()
     .from(apartments_by_insee_code_year)
     .where(whereConditions.length ? and(...whereConditions) : undefined)
-    .orderBy(orderBy)
+    .orderBy(...orderBy)
     .limit(params.limit ?? 200)
     .offset(params.offset ?? 0);
 
@@ -175,15 +263,15 @@ export async function getHousesByInseeYear(
 
   const orderBy = getOrderBy(
     houses_by_insee_code_year,
-    params.sortBy ?? "total_sales",
-    params.sortOrder ?? "desc"
+    params.sortBy,
+    params.sortOrder
   );
 
   const results = await db
     .select()
     .from(houses_by_insee_code_year)
     .where(whereConditions.length ? and(...whereConditions) : undefined)
-    .orderBy(orderBy)
+    .orderBy(...orderBy)
     .limit(params.limit ?? 200)
     .offset(params.offset ?? 0);
 
@@ -204,15 +292,15 @@ export async function getAptsByInseeWeek(
 
   const orderBy = getOrderBy(
     apartments_by_insee_code_week,
-    params.sortBy ?? "total_sales",
-    params.sortOrder ?? "desc"
+    params.sortBy,
+    params.sortOrder
   );
 
   const results = await db
     .select()
     .from(apartments_by_insee_code_week)
     .where(whereConditions.length ? and(...whereConditions) : undefined)
-    .orderBy(orderBy)
+    .orderBy(...orderBy)
     .limit(params.limit ?? 200)
     .offset(params.offset ?? 0);
 
@@ -229,17 +317,125 @@ export async function getHousesByInseeWeek(
 
   const orderBy = getOrderBy(
     houses_by_insee_code_week,
-    params.sortBy ?? "total_sales",
-    params.sortOrder ?? "desc"
+    params.sortBy,
+    params.sortOrder
   );
 
   const results = await db
     .select()
     .from(houses_by_insee_code_week)
     .where(whereConditions.length ? and(...whereConditions) : undefined)
-    .orderBy(orderBy)
+    .orderBy(...orderBy)
     .limit(params.limit ?? 200)
     .offset(params.offset ?? 0);
 
   return results as unknown as HousesByInseeWeek[];
+}
+
+// ----------------------------------------------------------------------------
+// Repositories: Monthly (SECTION × year × month)
+// ----------------------------------------------------------------------------
+
+export async function getAptsBySectionMonth(
+  params: SectionMonthParams
+): Promise<ApartmentsBySectionMonth[]> {
+  const whereConditions = buildSectionMonthWhereConditions(
+    apartments_by_section_month,
+    params
+  );
+
+  const orderBy = getOrderBy(
+    apartments_by_section_month,
+    params.sortBy,
+    params.sortOrder
+  );
+
+  const results = await db
+    .select()
+    .from(apartments_by_section_month)
+    .where(whereConditions.length ? and(...whereConditions) : undefined)
+    .orderBy(...orderBy)
+    .limit(params.limit)
+    .offset(params.offset);
+
+  return results as unknown as ApartmentsBySectionMonth[];
+}
+
+export async function getHousesBySectionMonth(
+  params: SectionMonthParams
+): Promise<HousesBySectionMonth[]> {
+  const whereConditions = buildSectionMonthWhereConditions(
+    houses_by_section_month,
+    params
+  );
+
+  const orderBy = getOrderBy(
+    houses_by_section_month,
+    params.sortBy,
+    params.sortOrder
+  );
+
+  const results = await db
+    .select()
+    .from(houses_by_section_month)
+    .where(whereConditions.length ? and(...whereConditions) : undefined)
+    .orderBy(...orderBy)
+    .limit(params.limit)
+    .offset(params.offset);
+
+  return results as unknown as HousesBySectionMonth[];
+}
+
+// ----------------------------------------------------------------------------
+// Repositories: Yearly (SECTION × year)
+// ----------------------------------------------------------------------------
+
+export async function getAptsBySectionYear(
+  params: SectionYearParams
+): Promise<ApartmentsBySectionYear[]> {
+  const whereConditions = buildSectionYearWhereConditions(
+    apartments_by_section_year,
+    params
+  );
+
+  const orderBy = getOrderBy(
+    apartments_by_section_year,
+    params.sortBy,
+    params.sortOrder
+  );
+
+  const results = await db
+    .select()
+    .from(apartments_by_section_year)
+    .where(whereConditions.length ? and(...whereConditions) : undefined)
+    .orderBy(...orderBy)
+    .limit(params.limit)
+    .offset(params.offset);
+
+  return results as unknown as ApartmentsBySectionYear[];
+}
+
+export async function getHousesBySectionYear(
+  params: SectionYearParams
+): Promise<HousesBySectionYear[]> {
+  const whereConditions = buildSectionYearWhereConditions(
+    houses_by_section_year,
+    params
+  );
+
+  const orderBy = getOrderBy(
+    houses_by_section_year,
+    params.sortBy,
+    params.sortOrder
+  );
+
+  const results = await db
+    .select()
+    .from(houses_by_section_year)
+    .where(whereConditions.length ? and(...whereConditions) : undefined)
+    .orderBy(...orderBy)
+    .limit(params.limit)
+    .offset(params.offset);
+
+  return results as unknown as HousesBySectionYear[];
 }

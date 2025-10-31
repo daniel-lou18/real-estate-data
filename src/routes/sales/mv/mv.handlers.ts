@@ -6,6 +6,10 @@ import type {
   GetHousesByInseeCodeYearRoute,
   GetAptsByInseeCodeWeekRoute,
   GetHousesByInseeCodeWeekRoute,
+  GetAptsBySectionYearRoute,
+  GetHousesBySectionYearRoute,
+  GetHousesBySectionMonthRoute,
+  GetAptsBySectionMonthRoute,
 } from "./mv.routes";
 import * as HttpStatusCodes from "@/config/http-status-codes";
 import {
@@ -15,6 +19,10 @@ import {
   getHousesByInseeMonth,
   getHousesByInseeWeek,
   getHousesByInseeYear,
+  getAptsBySectionYear as getAptsBySectionYearRepository,
+  getHousesBySectionYear as getHousesBySectionYearRepository,
+  getAptsBySectionMonth as getAptsBySectionMonthRepository,
+  getHousesBySectionMonth as getHousesBySectionMonthRepository,
 } from "@/repositories/mv/mv.analytics";
 
 export const getAptsByInseeCodeYear: AppRouteHandler<
@@ -62,5 +70,39 @@ export const getHousesByInseeCodeWeek: AppRouteHandler<
 > = async (c) => {
   const query = c.req.valid("query");
   const results = await getHousesByInseeWeek(query);
+  return c.json(results, HttpStatusCodes.OK);
+};
+
+// Section aggregates
+
+export const getAptsBySectionYear: AppRouteHandler<
+  GetAptsBySectionYearRoute
+> = async (c) => {
+  const query = c.req.valid("query");
+  const results = await getAptsBySectionYearRepository(query);
+  return c.json(results, HttpStatusCodes.OK);
+};
+
+export const getHousesBySectionYear: AppRouteHandler<
+  GetHousesBySectionYearRoute
+> = async (c) => {
+  const query = c.req.valid("query");
+  const results = await getHousesBySectionYearRepository(query);
+  return c.json(results, HttpStatusCodes.OK);
+};
+
+export const getAptsBySectionMonth: AppRouteHandler<
+  GetAptsBySectionMonthRoute
+> = async (c) => {
+  const query = c.req.valid("query");
+  const results = await getAptsBySectionMonthRepository(query);
+  return c.json(results, HttpStatusCodes.OK);
+};
+
+export const getHousesBySectionMonth: AppRouteHandler<
+  GetHousesBySectionMonthRoute
+> = async (c) => {
+  const query = c.req.valid("query");
+  const results = await getHousesBySectionMonthRepository(query);
   return c.json(results, HttpStatusCodes.OK);
 };

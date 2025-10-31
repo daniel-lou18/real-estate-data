@@ -10,6 +10,12 @@ import {
   InseeWeekParamsSchema,
   HousesByInseeWeekSchema,
   ApartmentsByInseeWeekSchema,
+  SectionYearParamsSchema,
+  ApartmentsBySectionYearSchema,
+  HousesBySectionYearSchema,
+  SectionMonthParamsSchema,
+  ApartmentsBySectionMonthSchema,
+  HousesBySectionMonthSchema,
 } from "./mv.schemas";
 import jsonContent from "@/openapi/helpers/json-content";
 
@@ -105,9 +111,73 @@ export const getHousesByInseeCodeWeek = createRoute({
   },
 });
 
+export const getAptsBySectionYear = createRoute({
+  tags,
+  method: "get",
+  path: "/apartments/by-section/year",
+  request: {
+    query: SectionYearParamsSchema,
+  },
+  responses: {
+    [HttpStatusCodes.OK]: jsonContent(
+      z.array(ApartmentsBySectionYearSchema),
+      "List of apartments by section, year"
+    ),
+  },
+});
+
+export const getHousesBySectionYear = createRoute({
+  tags,
+  method: "get",
+  path: "/houses/by-section/year",
+  request: {
+    query: SectionYearParamsSchema,
+  },
+  responses: {
+    [HttpStatusCodes.OK]: jsonContent(
+      z.array(HousesBySectionYearSchema),
+      "List of houses by section, year"
+    ),
+  },
+});
+
+export const getAptsBySectionMonth = createRoute({
+  tags,
+  method: "get",
+  path: "/apartments/by-section/month",
+  request: {
+    query: SectionMonthParamsSchema,
+  },
+  responses: {
+    [HttpStatusCodes.OK]: jsonContent(
+      z.array(ApartmentsBySectionMonthSchema),
+      "List of apartments by section, year, month"
+    ),
+  },
+});
+
+export const getHousesBySectionMonth = createRoute({
+  tags,
+  method: "get",
+  path: "/houses/by-section/month",
+  request: {
+    query: SectionMonthParamsSchema,
+  },
+  responses: {
+    [HttpStatusCodes.OK]: jsonContent(
+      z.array(HousesBySectionMonthSchema),
+      "List of houses by section, year, month"
+    ),
+  },
+});
+
 export type GetAptsByInseeCodeYearRoute = typeof getAptsByInseeCodeYear;
 export type GetHousesByInseeCodeYearRoute = typeof getHousesByInseeCodeYear;
 export type GetAptsByInseeCodeMonthRoute = typeof getAptsByInseeCodeMonth;
 export type GetHousesByInseeCodeMonthRoute = typeof getHousesByInseeCodeMonth;
 export type GetAptsByInseeCodeWeekRoute = typeof getAptsByInseeCodeWeek;
 export type GetHousesByInseeCodeWeekRoute = typeof getHousesByInseeCodeWeek;
+export type GetAptsBySectionYearRoute = typeof getAptsBySectionYear;
+export type GetHousesBySectionYearRoute = typeof getHousesBySectionYear;
+export type GetAptsBySectionMonthRoute = typeof getAptsBySectionMonth;
+export type GetHousesBySectionMonthRoute = typeof getHousesBySectionMonth;

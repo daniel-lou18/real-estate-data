@@ -23,12 +23,21 @@ const PaginationParams = z.object({
   offset: z.coerce.number().int().min(0).default(0),
 });
 
-const MapFeatureParamsSchema = z.object({
-  level: z.enum(["commune", "section"]),
-  propertyType: z.enum(["house", "apartment"]),
+export const MapFeatureParamsSchema = z.object({
+  level: z.enum(["commune", "section"]).default("commune"),
+  propertyType: z.enum(["house", "apartment"]).default("apartment"),
   field: z.enum(allowedMetrics),
-  year: z.number().int(),
-  month: z.number().int().min(1).max(12).optional(),
+  year: z.coerce.number().int().default(2024),
+  month: z.coerce.number().int().min(1).max(12).optional(),
+  bbox: z
+    .tuple([
+      z.coerce.number(),
+      z.coerce.number(),
+      z.coerce.number(),
+      z.coerce.number(),
+    ])
+    .describe("Bounding box [minLng, minLat, maxLng, maxLat] in EPSG:4326")
+    .default([2.2242, 48.8156, 2.4699, 48.9021]),
   ...PaginationParams.shape,
 });
 
@@ -78,6 +87,11 @@ export const MapSectionFeatureCollectionSchema = z.object({
   features: z.array(MapSectionFeatureSchema),
   bbox: z.tuple([z.number(), z.number(), z.number(), z.number()]).optional(),
 });
+
+export const MapFeatureCollectionSchema = z.discriminatedUnion("type", [
+  MapCommuneFeatureCollectionSchema,
+  MapSectionFeatureCollectionSchema,
+]);
 
 // Legend
 

@@ -111,6 +111,40 @@ export const HousesByInseeWeekSchema = AggregateMetricsMV.extend({
 });
 
 // ----------------------------------------------------------------------------
+// Monthly aggregates by section
+// ----------------------------------------------------------------------------
+
+export const ApartmentsBySectionMonthSchema = AggregateMetricsMV.extend({
+  section: z.string(),
+  year: z.number().int(),
+  month: z.number().int().min(1).max(12),
+  ...ApartmentComposition.shape,
+});
+
+export const HousesBySectionMonthSchema = AggregateMetricsMV.extend({
+  section: z.string(),
+  year: z.number().int(),
+  month: z.number().int().min(1).max(12),
+  ...HouseComposition.shape,
+});
+
+// ----------------------------------------------------------------------------
+// Yearly aggregates by section
+// ----------------------------------------------------------------------------
+
+export const ApartmentsBySectionYearSchema = AggregateMetricsMV.extend({
+  section: z.string(),
+  year: z.number().int(),
+  ...ApartmentComposition.shape,
+});
+
+export const HousesBySectionYearSchema = AggregateMetricsMV.extend({
+  section: z.string(),
+  year: z.number().int(),
+  ...HouseComposition.shape,
+});
+
+// ----------------------------------------------------------------------------
 // Query param schemas (MV-focused)
 // ----------------------------------------------------------------------------
 
@@ -120,6 +154,14 @@ const PaginationParams = z.object({
 });
 
 export const SortBySchema = z.enum([
+  // Dimensional fields
+  "inseeCode",
+  "section",
+  "year",
+  "month",
+  "iso_year",
+  "iso_week",
+  // Metric fields
   "total_sales",
   "avg_price_m2",
   "total_price",
@@ -131,14 +173,14 @@ export const InseeMonthParamsSchema = PaginationParams.extend({
   inseeCode: z.string().optional(),
   year: z.coerce.number().int().optional(),
   month: z.coerce.number().int().min(1).max(12).optional(),
-  sortBy: SortBySchema.optional(),
+  sortBy: SortBySchema.default("month"),
   sortOrder: SortOrderSchema,
 });
 
 export const InseeYearParamsSchema = PaginationParams.extend({
   inseeCode: z.string().optional(),
   year: z.coerce.number().int().optional(),
-  sortBy: SortBySchema.optional(),
+  sortBy: SortBySchema.default("year"),
   sortOrder: SortOrderSchema,
 });
 
@@ -146,10 +188,24 @@ export const InseeWeekParamsSchema = PaginationParams.extend({
   inseeCode: z.string().optional(),
   iso_year: z.coerce.number().int().optional(),
   iso_week: z.coerce.number().int().min(1).max(53).optional(),
-  sortBy: SortBySchema.optional(),
+  sortBy: SortBySchema.default("iso_week"),
   sortOrder: SortOrderSchema,
 });
 
+export const SectionMonthParamsSchema = PaginationParams.extend({
+  section: z.string().optional(),
+  year: z.coerce.number().int().optional(),
+  month: z.coerce.number().int().min(1).max(12).optional(),
+  sortBy: SortBySchema.default("month"),
+  sortOrder: SortOrderSchema,
+});
+
+export const SectionYearParamsSchema = PaginationParams.extend({
+  section: z.string().optional(),
+  year: z.coerce.number().int().optional(),
+  sortBy: SortBySchema.default("year"),
+  sortOrder: SortOrderSchema,
+});
 // ----------------------------------------------------------------------------
 // Type exports
 // ----------------------------------------------------------------------------
@@ -163,9 +219,19 @@ export type ApartmentsByInseeYear = z.infer<typeof ApartmentsByInseeYearSchema>;
 export type HousesByInseeYear = z.infer<typeof HousesByInseeYearSchema>;
 export type ApartmentsByInseeWeek = z.infer<typeof ApartmentsByInseeWeekSchema>;
 export type HousesByInseeWeek = z.infer<typeof HousesByInseeWeekSchema>;
+export type ApartmentsBySectionYear = z.infer<
+  typeof ApartmentsBySectionYearSchema
+>;
+export type HousesBySectionYear = z.infer<typeof HousesBySectionYearSchema>;
+export type ApartmentsBySectionMonth = z.infer<
+  typeof ApartmentsBySectionMonthSchema
+>;
+export type HousesBySectionMonth = z.infer<typeof HousesBySectionMonthSchema>;
 
 export type InseeMonthParams = z.infer<typeof InseeMonthParamsSchema>;
 export type InseeYearParams = z.infer<typeof InseeYearParamsSchema>;
 export type InseeWeekParams = z.infer<typeof InseeWeekParamsSchema>;
+export type SectionMonthParams = z.infer<typeof SectionMonthParamsSchema>;
+export type SectionYearParams = z.infer<typeof SectionYearParamsSchema>;
 export type SortBy = z.infer<typeof SortBySchema>;
 export type SortOrder = z.infer<typeof SortOrderSchema>;
