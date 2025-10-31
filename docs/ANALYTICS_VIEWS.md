@@ -6,12 +6,15 @@ It complements the base `property_sales` table described in `PROPERTY_SALES.md` 
 
 - Code: `src/db/schema/mv_property_sales.ts`
 - Code: `src/db/schema/mv_residential_sales_fact.ts`
+- Code: `src/db/schema/communes_geom.ts`
+- Code: `src/db/schema/sections_geom.ts`
 
 ### Goals
 
 - Cover ~80% of common intents with pre-aggregated or filtered data.
 - Provide stable, cacheable metrics for maps (including deciles for legend bins).
-- Keep a non-aggregated but filtered “facts” MV for fast listings and drill-through.
+- Keep a non-aggregated but filtered "facts" MV for fast listings and drill-through.
+- Enable fast map visualizations with PostGIS geometry data.
 
 ---
 
@@ -44,6 +47,20 @@ Designed for fast listing queries (day/week/month/INSEE/department/type), includ
 - `residential_topk_by_insee_year` (INSEE × year × type)
 
 Contain `rank_asc`/`rank_desc` by `price_per_m2` so clients can fetch top/bottom listings instantly.
+
+### Geometry tables (PostGIS)
+
+- `communes_geom` (Paris arrondissements)
+
+  - `insee_code` (primary key), `name`, `geom` (MultiPolygon, 4326)
+  - Contains 20 Paris arrondissements with boundaries
+
+- `sections_geom` (Cadastral sections)
+  - `section` (primary key), `insee_code`, `prefix`, `code`, `geom` (MultiPolygon, 4326)
+  - Contains ~1389 cadastral sections with boundaries
+  - Foreign key to `communes_geom.insee_code`
+
+Both tables include GiST spatial indexes for fast geometric operations.
 
 ---
 
@@ -183,12 +200,30 @@ order by month;
 
 ### 2) Map: choropleth by INSEE using deciles for legend
 
-Join your geometry table (not part of this repo) on `inseeCode`:
+Join with geometry table on `inseeCode`:
 
 ```sql
-select g.geom, mv.inseeCode, mv.avg_price_m2, mv.price_m2_deciles
+select
+  mv.inseeCode,
+  mv.avg_price_m2,
+  mv.price_m2_deciles,
+  c.name as commune_name,
+  ST_AsGeoJSON(c.geom) as geometry
 from apartments_by_insee_code_month mv
-join communes_geom g on g.insee_code = mv.inseeCode
+join communes_geom c on c.insee_code = mv.inseeCode
+where mv.year = 2023 and mv.month = 5;
+```
+
+### 2b) Map: sections with geometry
+
+```sql
+select
+  mv.inseeCode,
+  mv.section,
+  mv.avg_price_m2,
+  s.geom
+from apartments_by_insee_code_month mv
+join sections_geom s on s.section = mv.section
 where mv.year = 2023 and mv.month = 5;
 ```
 
@@ -223,11 +258,18 @@ order by iso_week;
 
 ## Map integration guidance
 
-- Keep MVs geometry-free; join to geometry tables at read-time:
-  - `communes_geom(insee_code text primary key, geom geometry(MultiPolygon, 4326))`
-  - Optionally `sections_geom(section_code text primary key, geom geometry(...))`
-- Prefer MVT tiles or an H3-based layer for web maps at scale (future option: `*_by_h3_month`).
-- Use `price_m2_deciles` for quantile-based legends; optionally provide fixed-band histograms if needed.
+- **Geometry tables**: Use `communes_geom` and `sections_geom` for map boundaries
+- **Join pattern**: Combine analytics MVs with geometry tables at query time:
+  ```sql
+  SELECT mv.*, ST_AsGeoJSON(g.geom) as geometry
+  FROM apartments_by_insee_code_month mv
+  JOIN communes_geom g ON g.insee_code = mv.inseeCode
+  ```
+- **Output formats**:
+  - GeoJSON: Use `ST_AsGeoJSON(geom)` for frontend consumption
+  - Vector tiles: Use `ST_AsMVT()` for high-performance web maps
+- **Legends**: Use `price_m2_deciles` for quantile-based color schemes
+- **Performance**: GiST indexes on geometry columns enable fast spatial operations
 
 ---
 
@@ -240,7 +282,31 @@ order by iso_week;
 
 ---
 
+## Data import and setup
+
+### Geometry data import
+
+- Import GeoJSON files using `ogr2ogr`:
+  ```bash
+  ogr2ogr -f PostgreSQL "PG:host=localhost dbname=your_db user=your_user password=your_password" \
+    src/db/cadastre-75-communes.json -nln communes_geom_staging -nlt MULTIPOLYGON \
+    -lco GEOMETRY_NAME=geom -oo FLATTEN_NESTED_ATTRIBUTES=YES
+  ```
+- Map staging data to final schema:
+  ```sql
+  INSERT INTO communes_geom (insee_code, name, geom)
+  SELECT id, nom, geom FROM communes_geom_staging
+  ON CONFLICT (insee_code) DO UPDATE SET name = EXCLUDED.name, geom = EXCLUDED.geom;
+  ```
+
+### PostGIS requirements
+
+- Ensure PostGIS extension is enabled: `CREATE EXTENSION postgis;`
+- Geometry columns use SRID 4326 (WGS84)
+- GiST indexes are automatically created for spatial operations
+
 ## Refresh strategy (optional)
 
 - These are materialized views; you can schedule `REFRESH MATERIALIZED VIEW CONCURRENTLY` per MV when data updates.
 - Immutable time slices (year/month/week) pair well with HTTP caching (ETag, long TTL) in API layers.
+- Geometry tables are static and don't require regular refresh.

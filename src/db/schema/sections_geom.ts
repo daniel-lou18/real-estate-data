@@ -6,6 +6,7 @@ import {
   timestamp,
 } from "drizzle-orm/pg-core";
 import { communesGeom } from "./communes_geom";
+import { createSelectSchema } from "drizzle-zod";
 
 export const sectionsGeom = pgTable(
   "sections_geom",
@@ -25,3 +26,5 @@ export const sectionsGeom = pgTable(
     index("idx_sections_geom_geom_gist").using("gist", table.geom),
   ]
 );
+
+export const SelectSectionsGeomSchema = createSelectSchema(sectionsGeom);

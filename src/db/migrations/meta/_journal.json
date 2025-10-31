@@ -36,6 +36,41 @@
       "when": 1761650890116,
       "tag": "0006_dapper_glorian",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1761655930375,
+      "tag": "0007_conscious_radioactive_man",
+      "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1761656010379,
+      "tag": "0008_sections_materialized_views",
+      "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1761656010380,
+      "tag": "0008_sections_materialized_views",
+      "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1761656010381,
+      "tag": "0009_fix_commune_mvs_aliases",
+      "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1761656010382,
+      "tag": "0010_fix_week_mvs_aliases",
+      "breakpoints": true
     }
   ]
 }

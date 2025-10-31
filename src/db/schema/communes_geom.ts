@@ -6,6 +6,7 @@ import {
   varchar,
   timestamp,
 } from "drizzle-orm/pg-core";
+import { createSelectSchema } from "drizzle-zod";
 
 export const communesGeom = pgTable(
   "communes_geom",
@@ -17,3 +18,5 @@ export const communesGeom = pgTable(
   },
   (table) => [index("idx_communes_geom_geom_gist").using("gist", table.geom)]
 );
+
+export const SelectCommunesGeomSchema = createSelectSchema(communesGeom);
