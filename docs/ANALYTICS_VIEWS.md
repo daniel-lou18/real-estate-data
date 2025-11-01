@@ -27,11 +27,15 @@ It complements the base `property_sales` table described in `PROPERTY_SALES.md` 
   - `apartments_by_insee_code_month` (INSEE × year × month)
   - `apartments_by_insee_code_year` (INSEE × year)
   - `apartments_by_insee_code_week` (INSEE × ISO year × ISO week)
+  - `apartments_by_section_month`
+  - `apartments_by_section_year`
 
 - Houses
   - `houses_by_insee_code_month`
   - `houses_by_insee_code_year`
   - `houses_by_insee_code_week`
+  - `houses_by_section_month`
+  - `houses_by_section_year`
 
 All aggregates compute the same metrics set (see Metrics section) and include a deciles array of price-per-m² for map legends.
 

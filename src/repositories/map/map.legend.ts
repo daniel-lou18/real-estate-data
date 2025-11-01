@@ -101,12 +101,13 @@ async function computeCommuneLegend(params: {
 async function computeSectionLegend(params: {
   mv: SectionMV;
   field: AggregateMetricsMVKey;
+  inseeCode?: string;
   year: number;
   month?: number;
   bbox?: [number, number, number, number];
   bucketsCount: number;
 }) {
-  const { mv, field, year, month, bbox, bucketsCount } = params;
+  const { mv, field, inseeCode, year, month, bbox, bucketsCount } = params;
 
   const metricColumn = mv[field as keyof typeof mv];
   if (!metricColumn) {
@@ -115,6 +116,10 @@ async function computeSectionLegend(params: {
 
   const conditions = buildTimeConditions(mv, year, month);
   conditions.push(sql`${metricColumn} IS NOT NULL`);
+
+  if (inseeCode) {
+    conditions.push(sql`${sectionsGeom.inseeCode} = ${inseeCode}`);
+  }
 
   if (bbox) {
     const envelope = buildSpatialEnvelope(bbox);
@@ -152,6 +157,7 @@ async function computeSectionLegend(params: {
 async function countInBucket(params: {
   mv: CommuneMV | SectionMV;
   field: AggregateMetricsMVKey;
+  inseeCode?: string;
   year: number;
   month?: number;
   bbox?: [number, number, number, number];
@@ -165,6 +171,7 @@ async function countInBucket(params: {
     field,
     year,
     month,
+    inseeCode,
     bbox,
     min,
     max,
@@ -177,6 +184,10 @@ async function countInBucket(params: {
 
   const conditions = buildTimeConditions(mv, year, month);
   conditions.push(sql`${metricColumn} IS NOT NULL`);
+
+  if (level === "section" && inseeCode) {
+    conditions.push(sql`${sectionsGeom.inseeCode} = ${inseeCode}`);
+  }
 
   if (min !== null) {
     // Cast to numeric to handle comparison with integer columns
@@ -216,6 +227,7 @@ export async function getLegend(params: GetLegendParams): Promise<Legend> {
     level,
     propertyType,
     field,
+    inseeCode,
     year,
     month,
     bbox,
@@ -241,6 +253,7 @@ export async function getLegend(params: GetLegendParams): Promise<Legend> {
       : await computeSectionLegend({
           mv: mv as SectionMV,
           field,
+          inseeCode,
           year,
           month,
           bbox,
@@ -263,6 +276,7 @@ export async function getLegend(params: GetLegendParams): Promise<Legend> {
         field,
         year,
         month,
+        inseeCode,
         bbox,
         min: bucketMin,
         max: bucketMax,

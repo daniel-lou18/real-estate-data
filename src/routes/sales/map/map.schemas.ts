@@ -27,6 +27,10 @@ export const MapFeatureParamsSchema = z.object({
   level: z.enum(["commune", "section"]).default("commune"),
   propertyType: z.enum(["house", "apartment"]).default("apartment"),
   field: z.enum(allowedMetrics),
+  inseeCode: z
+    .string()
+    .optional()
+    .describe("Will be used to filter section level features by INSEE code"),
   year: z.coerce.number().int().default(2024),
   month: z.coerce.number().int().min(1).max(12).optional(),
   bbox: z
@@ -51,21 +55,37 @@ const MapFeatureSchema = z.object({
   bbox: z.tuple([z.number(), z.number(), z.number(), z.number()]).optional(),
 });
 
+const MetricSchema = z.object({
+  metricName: z
+    .enum(allowedMetrics)
+    .describe("The name of the metric to display"),
+  metricValue: z
+    .number()
+    .nullable()
+    .describe("The value of the metric to display"),
+});
+
 export const MapCommunePropertiesSchema = z.object({
-  id: z.string().describe("The id is the INSEE code"),
-  name: z.string(),
-  metricName: z.enum(allowedMetrics),
-  metricValue: z.number().nullable(),
+  id: z
+    .string()
+    .describe("The id is the INSEE code of the commune, 5 characters long"),
+  name: z.string().describe("The name of the commune"),
+  ...MetricSchema.shape,
 });
 
 export const MapSectionPropertiesSchema = z.object({
-  id: z.string().describe("The id is the full section code"),
-  inseeCode: z.string(),
-  section: z.string(),
-  prefix: z.string(),
-  code: z.string(),
-  metricName: z.enum(allowedMetrics),
-  metricValue: z.number().nullable(),
+  id: z
+    .string()
+    .describe("The id is the full section code: inseeCode + prefix + code"),
+  inseeCode: z
+    .string()
+    .describe("The INSEE code of the section, 5 characters long"),
+  section: z
+    .string()
+    .describe("The full section code: inseeCode + prefix + code"),
+  prefix: z.string().describe("The prefix of the section, 3 characters long"),
+  code: z.string().describe("The code of the section, 2 characters long"),
+  ...MetricSchema.shape,
 });
 
 export const MapCommuneFeatureSchema = MapFeatureSchema.extend({

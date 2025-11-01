@@ -4,9 +4,16 @@ import { db } from "@/db";
 import {
   apartments_by_insee_code_month,
   apartments_by_section_year,
+  sectionsGeom,
 } from "@/db/schema";
+import { eq } from "drizzle-orm";
 
 const WORLD_BBOX: [number, number, number, number] = [-180, -90, 180, 90];
+const BASE_PARAMS = {
+  limit: 5000,
+  offset: 0,
+  bbox: WORLD_BBOX,
+} as const;
 
 type CommuneSample = {
   year: number;
@@ -15,6 +22,7 @@ type CommuneSample = {
 
 type SectionSample = {
   year: number;
+  inseeCode: string;
 };
 
 let communeSample: CommuneSample | null = null;
@@ -40,19 +48,30 @@ describe("getLegend", () => {
     const [sectionRow] = await db
       .select({
         year: apartments_by_section_year.year,
+        section: apartments_by_section_year.section,
       })
       .from(apartments_by_section_year)
       .limit(1);
 
-    if (sectionRow && sectionRow.year !== null) {
-      sectionSample = {
-        year: sectionRow.year,
-      };
+    if (sectionRow && sectionRow.year !== null && sectionRow.section !== null) {
+      const [sectionInfo] = await db
+        .select({ inseeCode: sectionsGeom.inseeCode })
+        .from(sectionsGeom)
+        .where(eq(sectionsGeom.section, sectionRow.section))
+        .limit(1);
+
+      if (sectionInfo && sectionInfo.inseeCode !== null) {
+        sectionSample = {
+          year: sectionRow.year,
+          inseeCode: sectionInfo.inseeCode,
+        };
+      }
     }
   });
 
   it("returns a quantile legend for communes", async () => {
     const params = {
+      ...BASE_PARAMS,
       level: "commune" as const,
       propertyType: "apartment" as const,
       field: "avg_price_m2" as const,
@@ -121,11 +140,13 @@ describe("getLegend", () => {
       sectionSample?.year ?? communeSample?.year ?? new Date().getFullYear();
 
     const params = {
+      ...BASE_PARAMS,
       level: "section" as const,
       propertyType: "apartment" as const,
       field: "avg_price_m2" as const,
       year: fallbackYear,
       bucketsCount: 10,
+      ...(sectionSample ? { inseeCode: sectionSample.inseeCode } : {}),
     };
 
     const result = await getLegend(params);
@@ -150,10 +171,19 @@ describe("getLegend", () => {
       expect(typeof bucket.label).toBe("string");
       expect(typeof bucket.count).toBe("number");
     });
+
+    if (sectionSample) {
+      const totalBucketCount = result.buckets.reduce(
+        (sum, bucket) => sum + bucket.count,
+        0
+      );
+      expect(totalBucketCount).toBe(result.stats.count);
+    }
   });
 
   it("respects bbox parameter for communes", async () => {
     const params = {
+      ...BASE_PARAMS,
       level: "commune" as const,
       propertyType: "apartment" as const,
       field: "avg_price_m2" as const,
@@ -173,6 +203,7 @@ describe("getLegend", () => {
 
   it("handles different metrics", async () => {
     const params = {
+      ...BASE_PARAMS,
       level: "commune" as const,
       propertyType: "apartment" as const,
       field: "total_sales" as const,
@@ -205,6 +236,7 @@ describe("getLegend", () => {
     }
 
     const monthlyParams = {
+      ...BASE_PARAMS,
       level: "commune" as const,
       propertyType: "apartment" as const,
       field: "avg_price_m2" as const,
@@ -214,6 +246,7 @@ describe("getLegend", () => {
     };
 
     const yearlyParams = {
+      ...BASE_PARAMS,
       level: "commune" as const,
       propertyType: "apartment" as const,
       field: "avg_price_m2" as const,
@@ -235,6 +268,7 @@ describe("getLegend", () => {
 
   it("uses default bucketsCount of 10 when not specified", async () => {
     const params = {
+      ...BASE_PARAMS,
       level: "commune" as const,
       propertyType: "apartment" as const,
       field: "avg_price_m2" as const,
@@ -250,6 +284,7 @@ describe("getLegend", () => {
 
   it("validates that median falls within min-max range", async () => {
     const params = {
+      ...BASE_PARAMS,
       level: "commune" as const,
       propertyType: "apartment" as const,
       field: "avg_price_m2" as const,
