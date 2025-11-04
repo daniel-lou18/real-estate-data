@@ -71,6 +71,13 @@
       "when": 1761656010382,
       "tag": "0010_fix_week_mvs_aliases",
       "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "7",
+      "when": 1761656010383,
+      "tag": "0011_add_insee_code_to_section_mvs",
+      "breakpoints": true
     }
   ]
 }

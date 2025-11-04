@@ -154,6 +154,7 @@ function buildSectionMonthWhereConditions(
   params: SectionMonthParams
 ) {
   const conditions = [];
+  if (params.inseeCode) conditions.push(eq(view.inseeCode, params.inseeCode));
   if (params.section) conditions.push(eq(view.section, params.section));
   if (params.year) conditions.push(eq(view.year, params.year));
   if (params.month) conditions.push(eq(view.month, params.month));
@@ -165,6 +166,7 @@ function buildSectionYearWhereConditions(
   params: SectionYearParams
 ) {
   const conditions = [];
+  if (params.inseeCode) conditions.push(eq(view.inseeCode, params.inseeCode));
   if (params.section) conditions.push(eq(view.section, params.section));
   if (params.year) conditions.push(eq(view.year, params.year));
   return conditions;

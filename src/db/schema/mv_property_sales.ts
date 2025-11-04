@@ -312,6 +312,9 @@ export const apartments_by_section_month = pgMaterializedView(
 ).as((qb) =>
   qb
     .select({
+      inseeCode: sql<string>`${propertySales.primaryInseeCode}`.as(
+        "insee_code"
+      ),
       section:
         sql<string>`concat(${propertySales.primaryInseeCode}, "000", ${propertySales.primarySection})`.as(
           "section"
@@ -337,6 +340,9 @@ export const houses_by_section_month = pgMaterializedView(
 ).as((qb) =>
   qb
     .select({
+      inseeCode: sql<string>`${propertySales.primaryInseeCode}`.as(
+        "insee_code"
+      ),
       section:
         sql<string>`concat(${propertySales.primaryInseeCode}, "000", ${propertySales.primarySection})`.as(
           "section"
@@ -363,6 +369,9 @@ export const apartments_by_section_year = pgMaterializedView(
 ).as((qb) =>
   qb
     .select({
+      inseeCode: sql<string>`${propertySales.primaryInseeCode}`.as(
+        "insee_code"
+      ),
       section:
         sql<string>`concat(${propertySales.primaryInseeCode}, "000", ${propertySales.primarySection})`.as(
           "section"
@@ -386,6 +395,9 @@ export const houses_by_section_year = pgMaterializedView(
 ).as((qb) =>
   qb
     .select({
+      inseeCode: sql<string>`${propertySales.primaryInseeCode}`.as(
+        "insee_code"
+      ),
       section:
         sql<string>`concat(${propertySales.primaryInseeCode}, "000", ${propertySales.primarySection})`.as(
           "section"

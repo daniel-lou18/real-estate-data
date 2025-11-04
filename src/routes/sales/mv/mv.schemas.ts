@@ -115,6 +115,7 @@ export const HousesByInseeWeekSchema = AggregateMetricsMV.extend({
 // ----------------------------------------------------------------------------
 
 export const ApartmentsBySectionMonthSchema = AggregateMetricsMV.extend({
+  inseeCode: z.string(),
   section: z.string(),
   year: z.number().int(),
   month: z.number().int().min(1).max(12),
@@ -122,6 +123,7 @@ export const ApartmentsBySectionMonthSchema = AggregateMetricsMV.extend({
 });
 
 export const HousesBySectionMonthSchema = AggregateMetricsMV.extend({
+  inseeCode: z.string(),
   section: z.string(),
   year: z.number().int(),
   month: z.number().int().min(1).max(12),
@@ -133,12 +135,14 @@ export const HousesBySectionMonthSchema = AggregateMetricsMV.extend({
 // ----------------------------------------------------------------------------
 
 export const ApartmentsBySectionYearSchema = AggregateMetricsMV.extend({
+  inseeCode: z.string(),
   section: z.string(),
   year: z.number().int(),
   ...ApartmentComposition.shape,
 });
 
 export const HousesBySectionYearSchema = AggregateMetricsMV.extend({
+  inseeCode: z.string(),
   section: z.string(),
   year: z.number().int(),
   ...HouseComposition.shape,
@@ -193,6 +197,7 @@ export const InseeWeekParamsSchema = PaginationParams.extend({
 });
 
 export const SectionMonthParamsSchema = PaginationParams.extend({
+  inseeCode: z.string().optional(),
   section: z.string().optional(),
   year: z.coerce.number().int().optional(),
   month: z.coerce.number().int().min(1).max(12).optional(),
@@ -201,6 +206,7 @@ export const SectionMonthParamsSchema = PaginationParams.extend({
 });
 
 export const SectionYearParamsSchema = PaginationParams.extend({
+  inseeCode: z.string().optional(),
   section: z.string().optional(),
   year: z.coerce.number().int().optional(),
   sortBy: SortBySchema.default("year"),
