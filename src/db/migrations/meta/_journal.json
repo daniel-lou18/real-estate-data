@@ -31,13 +31,6 @@
       "breakpoints": true
     },
     {
-      "idx": 6,
-      "version": "7",
-      "when": 1761650890116,
-      "tag": "0006_dapper_glorian",
-      "breakpoints": true
-    },
-    {
       "idx": 7,
       "version": "7",
       "when": 1761655930375,
@@ -45,38 +38,45 @@
       "breakpoints": true
     },
     {
-      "idx": 8,
+      "idx": 13,
       "version": "7",
-      "when": 1761656010379,
-      "tag": "0008_sections_materialized_views",
+      "when": 1761656010384,
+      "tag": "0012_remove_deciles_from_mv",
       "breakpoints": true
     },
     {
-      "idx": 9,
+      "idx": 14,
       "version": "7",
-      "when": 1761656010380,
-      "tag": "0008_sections_materialized_views",
+      "when": 1761656010385,
+      "tag": "0013_remove_deciles_from_insee_mvs",
       "breakpoints": true
     },
     {
-      "idx": 10,
+      "idx": 15,
       "version": "7",
-      "when": 1761656010381,
-      "tag": "0009_fix_commune_mvs_aliases",
+      "when": 1761656010386,
+      "tag": "0014_create_yearly_deltas_mv",
       "breakpoints": true
     },
     {
-      "idx": 11,
+      "idx": 16,
       "version": "7",
-      "when": 1761656010382,
-      "tag": "0010_fix_week_mvs_aliases",
+      "when": 1761656010387,
+      "tag": "0015_fix_insee_mvs_types",
       "breakpoints": true
     },
     {
-      "idx": 12,
+      "idx": 17,
       "version": "7",
-      "when": 1761656010383,
-      "tag": "0011_add_insee_code_to_section_mvs",
+      "when": 1761656010388,
+      "tag": "0016_fix_section_mvs_types",
+      "breakpoints": true
+    },
+    {
+      "idx": 18,
+      "version": "7",
+      "when": 1761656010389,
+      "tag": "0017_fix_yearly_deltas_mv_types",
       "breakpoints": true
     }
   ]

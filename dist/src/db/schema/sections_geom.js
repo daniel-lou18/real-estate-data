@@ -1,5 +1,6 @@
 import { geometry, index, pgTable, varchar, timestamp, } from "drizzle-orm/pg-core";
 import { communesGeom } from "./communes_geom";
+import { createSelectSchema } from "drizzle-zod";
 export const sectionsGeom = pgTable("sections_geom", {
     section: varchar("section", { length: 11 }).primaryKey(),
     inseeCode: varchar("insee_code", { length: 5 }).references(() => communesGeom.inseeCode, { onDelete: "cascade" }),
@@ -11,3 +12,4 @@ export const sectionsGeom = pgTable("sections_geom", {
     index("idx_sections_geom_insee_code").on(table.inseeCode),
     index("idx_sections_geom_geom_gist").using("gist", table.geom),
 ]);
+export const SelectSectionsGeomSchema = createSelectSchema(sectionsGeom);

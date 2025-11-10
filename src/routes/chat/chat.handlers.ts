@@ -8,6 +8,7 @@ export const chat: AppRouteHandler<ChatRoute> = async (c) => {
   const { messages } = c.req.valid("json");
 
   const data = await generateSqlQuery(messages);
+
   const successMessage: AssistantModelMessage = {
     role: "assistant",
     content: `Successfully retrieved ${data.length} rows`,

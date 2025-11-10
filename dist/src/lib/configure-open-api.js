@@ -9,7 +9,7 @@ export default function configureOpenAPI(app) {
         },
     });
     app.get("/reference", Scalar({
-        url: "/doc",
+        url: "/api/doc",
         theme: "deepSpace",
         defaultHttpClient: {
             targetKey: "js",

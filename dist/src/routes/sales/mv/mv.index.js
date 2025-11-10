@@ -7,5 +7,9 @@ const router = createRouter()
     .openapi(routes.getAptsByInseeCodeMonth, handlers.getAptsByInseeCodeMonth)
     .openapi(routes.getHousesByInseeCodeMonth, handlers.getHousesByInseeCodeMonth)
     .openapi(routes.getAptsByInseeCodeWeek, handlers.getAptsByInseeCodeWeek)
-    .openapi(routes.getHousesByInseeCodeWeek, handlers.getHousesByInseeCodeWeek);
+    .openapi(routes.getHousesByInseeCodeWeek, handlers.getHousesByInseeCodeWeek)
+    .openapi(routes.getAptsBySectionYear, handlers.getAptsBySectionYear)
+    .openapi(routes.getHousesBySectionYear, handlers.getHousesBySectionYear)
+    .openapi(routes.getAptsBySectionMonth, handlers.getAptsBySectionMonth)
+    .openapi(routes.getHousesBySectionMonth, handlers.getHousesBySectionMonth);
 export default router;

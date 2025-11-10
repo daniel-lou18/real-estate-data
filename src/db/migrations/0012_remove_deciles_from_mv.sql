@@ -1,14 +1,19 @@
-DROP MATERIALIZED VIEW IF EXISTS "public"."apartments_by_insee_code_month" CASCADE;
+DROP MATERIALIZED VIEW IF EXISTS "public"."apartments_by_section_month" CASCADE;
 --> statement-breakpoint
-DROP MATERIALIZED VIEW IF EXISTS "public"."apartments_by_insee_code_year" CASCADE;
+DROP MATERIALIZED VIEW IF EXISTS "public"."houses_by_section_month" CASCADE;
 --> statement-breakpoint
-DROP MATERIALIZED VIEW IF EXISTS "public"."houses_by_insee_code_month" CASCADE;
+DROP MATERIALIZED VIEW IF EXISTS "public"."apartments_by_section_year" CASCADE;
 --> statement-breakpoint
-DROP MATERIALIZED VIEW IF EXISTS "public"."houses_by_insee_code_year" CASCADE;
+DROP MATERIALIZED VIEW IF EXISTS "public"."houses_by_section_year" CASCADE;
 --> statement-breakpoint
-CREATE MATERIALIZED VIEW "public"."apartments_by_insee_code_month" AS (
+CREATE MATERIALIZED VIEW "public"."apartments_by_section_month" AS (
   SELECT
     "property_sales"."primary_insee_code" AS "insee_code",
+    concat(
+      "property_sales"."primary_insee_code",
+      '000',
+      "property_sales"."primary_section"
+    ) AS "section",
     "property_sales"."anneemut" AS "year",
     "property_sales"."moismut" AS "month",
     count(*)::int AS "total_sales",
@@ -17,18 +22,6 @@ CREATE MATERIALIZED VIEW "public"."apartments_by_insee_code_month" AS (
     round((coalesce(sum("property_sales"."sbatapt"), 0))::numeric, 1) AS "total_area",
     round((coalesce(avg("property_sales"."sbatapt"), 0))::numeric, 1) AS "avg_area",
     round(sum("property_sales"."valeurfonc") / nullif(sum("property_sales"."sbatapt"), 0)) AS "avg_price_m2",
-    jsonb_build_array(
-      round((percentile_cont(0.1) WITHIN GROUP (ORDER BY "property_sales"."valeurfonc" / nullif("property_sales"."sbatapt", 0)))::numeric),
-      round((percentile_cont(0.2) WITHIN GROUP (ORDER BY "property_sales"."valeurfonc" / nullif("property_sales"."sbatapt", 0)))::numeric),
-      round((percentile_cont(0.3) WITHIN GROUP (ORDER BY "property_sales"."valeurfonc" / nullif("property_sales"."sbatapt", 0)))::numeric),
-      round((percentile_cont(0.4) WITHIN GROUP (ORDER BY "property_sales"."valeurfonc" / nullif("property_sales"."sbatapt", 0)))::numeric),
-      round((percentile_cont(0.5) WITHIN GROUP (ORDER BY "property_sales"."valeurfonc" / nullif("property_sales"."sbatapt", 0)))::numeric),
-      round((percentile_cont(0.6) WITHIN GROUP (ORDER BY "property_sales"."valeurfonc" / nullif("property_sales"."sbatapt", 0)))::numeric),
-      round((percentile_cont(0.7) WITHIN GROUP (ORDER BY "property_sales"."valeurfonc" / nullif("property_sales"."sbatapt", 0)))::numeric),
-      round((percentile_cont(0.8) WITHIN GROUP (ORDER BY "property_sales"."valeurfonc" / nullif("property_sales"."sbatapt", 0)))::numeric),
-      round((percentile_cont(0.9) WITHIN GROUP (ORDER BY "property_sales"."valeurfonc" / nullif("property_sales"."sbatapt", 0)))::numeric),
-      round((percentile_cont(1.0) WITHIN GROUP (ORDER BY "property_sales"."valeurfonc" / nullif("property_sales"."sbatapt", 0)))::numeric)
-    ) AS "price_m2_deciles",
     round(min("property_sales"."valeurfonc")) AS "min_price",
     round(max("property_sales"."valeurfonc")) AS "max_price",
     round(percentile_cont(0.5) WITHIN GROUP (ORDER BY "property_sales"."valeurfonc")) AS "median_price",
@@ -53,13 +46,23 @@ CREATE MATERIALIZED VIEW "public"."apartments_by_insee_code_month" AS (
   )
   GROUP BY
     "property_sales"."primary_insee_code",
+    concat(
+      "property_sales"."primary_insee_code",
+      '000',
+      "property_sales"."primary_section"
+    ),
     "property_sales"."anneemut",
     "property_sales"."moismut"
 );
 --> statement-breakpoint
-CREATE MATERIALIZED VIEW "public"."houses_by_insee_code_month" AS (
+CREATE MATERIALIZED VIEW "public"."houses_by_section_month" AS (
   SELECT
     "property_sales"."primary_insee_code" AS "insee_code",
+    concat(
+      "property_sales"."primary_insee_code",
+      '000',
+      "property_sales"."primary_section"
+    ) AS "section",
     "property_sales"."anneemut" AS "year",
     "property_sales"."moismut" AS "month",
     count(*)::int AS "total_sales",
@@ -68,18 +71,6 @@ CREATE MATERIALIZED VIEW "public"."houses_by_insee_code_month" AS (
     round((coalesce(sum("property_sales"."sbatmai"), 0))::numeric, 1) AS "total_area",
     round((coalesce(avg("property_sales"."sbatmai"), 0))::numeric, 1) AS "avg_area",
     round(sum("property_sales"."valeurfonc") / nullif(sum("property_sales"."sbatmai"), 0)) AS "avg_price_m2",
-    jsonb_build_array(
-      round((percentile_cont(0.1) WITHIN GROUP (ORDER BY "property_sales"."valeurfonc" / nullif("property_sales"."sbatmai", 0)))::numeric),
-      round((percentile_cont(0.2) WITHIN GROUP (ORDER BY "property_sales"."valeurfonc" / nullif("property_sales"."sbatmai", 0)))::numeric),
-      round((percentile_cont(0.3) WITHIN GROUP (ORDER BY "property_sales"."valeurfonc" / nullif("property_sales"."sbatmai", 0)))::numeric),
-      round((percentile_cont(0.4) WITHIN GROUP (ORDER BY "property_sales"."valeurfonc" / nullif("property_sales"."sbatmai", 0)))::numeric),
-      round((percentile_cont(0.5) WITHIN GROUP (ORDER BY "property_sales"."valeurfonc" / nullif("property_sales"."sbatmai", 0)))::numeric),
-      round((percentile_cont(0.6) WITHIN GROUP (ORDER BY "property_sales"."valeurfonc" / nullif("property_sales"."sbatmai", 0)))::numeric),
-      round((percentile_cont(0.7) WITHIN GROUP (ORDER BY "property_sales"."valeurfonc" / nullif("property_sales"."sbatmai", 0)))::numeric),
-      round((percentile_cont(0.8) WITHIN GROUP (ORDER BY "property_sales"."valeurfonc" / nullif("property_sales"."sbatmai", 0)))::numeric),
-      round((percentile_cont(0.9) WITHIN GROUP (ORDER BY "property_sales"."valeurfonc" / nullif("property_sales"."sbatmai", 0)))::numeric),
-      round((percentile_cont(1.0) WITHIN GROUP (ORDER BY "property_sales"."valeurfonc" / nullif("property_sales"."sbatmai", 0)))::numeric)
-    ) AS "price_m2_deciles",
     round(min("property_sales"."valeurfonc")) AS "min_price",
     round(max("property_sales"."valeurfonc")) AS "max_price",
     round(percentile_cont(0.5) WITHIN GROUP (ORDER BY "property_sales"."valeurfonc")) AS "median_price",
@@ -104,13 +95,23 @@ CREATE MATERIALIZED VIEW "public"."houses_by_insee_code_month" AS (
   )
   GROUP BY
     "property_sales"."primary_insee_code",
+    concat(
+      "property_sales"."primary_insee_code",
+      '000',
+      "property_sales"."primary_section"
+    ),
     "property_sales"."anneemut",
     "property_sales"."moismut"
 );
 --> statement-breakpoint
-CREATE MATERIALIZED VIEW "public"."apartments_by_insee_code_year" AS (
+CREATE MATERIALIZED VIEW "public"."apartments_by_section_year" AS (
   SELECT
     "property_sales"."primary_insee_code" AS "insee_code",
+    concat(
+      "property_sales"."primary_insee_code",
+      '000',
+      "property_sales"."primary_section"
+    ) AS "section",
     "property_sales"."anneemut" AS "year",
     count(*)::int AS "total_sales",
     round(coalesce(sum("property_sales"."valeurfonc"), 0)) AS "total_price",
@@ -118,18 +119,6 @@ CREATE MATERIALIZED VIEW "public"."apartments_by_insee_code_year" AS (
     round((coalesce(sum("property_sales"."sbatapt"), 0))::numeric, 1) AS "total_area",
     round((coalesce(avg("property_sales"."sbatapt"), 0))::numeric, 1) AS "avg_area",
     round(sum("property_sales"."valeurfonc") / nullif(sum("property_sales"."sbatapt"), 0)) AS "avg_price_m2",
-    jsonb_build_array(
-      round((percentile_cont(0.1) WITHIN GROUP (ORDER BY "property_sales"."valeurfonc" / nullif("property_sales"."sbatapt", 0)))::numeric),
-      round((percentile_cont(0.2) WITHIN GROUP (ORDER BY "property_sales"."valeurfonc" / nullif("property_sales"."sbatapt", 0)))::numeric),
-      round((percentile_cont(0.3) WITHIN GROUP (ORDER BY "property_sales"."valeurfonc" / nullif("property_sales"."sbatapt", 0)))::numeric),
-      round((percentile_cont(0.4) WITHIN GROUP (ORDER BY "property_sales"."valeurfonc" / nullif("property_sales"."sbatapt", 0)))::numeric),
-      round((percentile_cont(0.5) WITHIN GROUP (ORDER BY "property_sales"."valeurfonc" / nullif("property_sales"."sbatapt", 0)))::numeric),
-      round((percentile_cont(0.6) WITHIN GROUP (ORDER BY "property_sales"."valeurfonc" / nullif("property_sales"."sbatapt", 0)))::numeric),
-      round((percentile_cont(0.7) WITHIN GROUP (ORDER BY "property_sales"."valeurfonc" / nullif("property_sales"."sbatapt", 0)))::numeric),
-      round((percentile_cont(0.8) WITHIN GROUP (ORDER BY "property_sales"."valeurfonc" / nullif("property_sales"."sbatapt", 0)))::numeric),
-      round((percentile_cont(0.9) WITHIN GROUP (ORDER BY "property_sales"."valeurfonc" / nullif("property_sales"."sbatapt", 0)))::numeric),
-      round((percentile_cont(1.0) WITHIN GROUP (ORDER BY "property_sales"."valeurfonc" / nullif("property_sales"."sbatapt", 0)))::numeric)
-    ) AS "price_m2_deciles",
     round(min("property_sales"."valeurfonc")) AS "min_price",
     round(max("property_sales"."valeurfonc")) AS "max_price",
     round(percentile_cont(0.5) WITHIN GROUP (ORDER BY "property_sales"."valeurfonc")) AS "median_price",
@@ -154,12 +143,22 @@ CREATE MATERIALIZED VIEW "public"."apartments_by_insee_code_year" AS (
   )
   GROUP BY
     "property_sales"."primary_insee_code",
+    concat(
+      "property_sales"."primary_insee_code",
+      '000',
+      "property_sales"."primary_section"
+    ),
     "property_sales"."anneemut"
 );
 --> statement-breakpoint
-CREATE MATERIALIZED VIEW "public"."houses_by_insee_code_year" AS (
+CREATE MATERIALIZED VIEW "public"."houses_by_section_year" AS (
   SELECT
     "property_sales"."primary_insee_code" AS "insee_code",
+    concat(
+      "property_sales"."primary_insee_code",
+      '000',
+      "property_sales"."primary_section"
+    ) AS "section",
     "property_sales"."anneemut" AS "year",
     count(*)::int AS "total_sales",
     round(coalesce(sum("property_sales"."valeurfonc"), 0)) AS "total_price",
@@ -167,18 +166,6 @@ CREATE MATERIALIZED VIEW "public"."houses_by_insee_code_year" AS (
     round((coalesce(sum("property_sales"."sbatmai"), 0))::numeric, 1) AS "total_area",
     round((coalesce(avg("property_sales"."sbatmai"), 0))::numeric, 1) AS "avg_area",
     round(sum("property_sales"."valeurfonc") / nullif(sum("property_sales"."sbatmai"), 0)) AS "avg_price_m2",
-    jsonb_build_array(
-      round((percentile_cont(0.1) WITHIN GROUP (ORDER BY "property_sales"."valeurfonc" / nullif("property_sales"."sbatmai", 0)))::numeric),
-      round((percentile_cont(0.2) WITHIN GROUP (ORDER BY "property_sales"."valeurfonc" / nullif("property_sales"."sbatmai", 0)))::numeric),
-      round((percentile_cont(0.3) WITHIN GROUP (ORDER BY "property_sales"."valeurfonc" / nullif("property_sales"."sbatmai", 0)))::numeric),
-      round((percentile_cont(0.4) WITHIN GROUP (ORDER BY "property_sales"."valeurfonc" / nullif("property_sales"."sbatmai", 0)))::numeric),
-      round((percentile_cont(0.5) WITHIN GROUP (ORDER BY "property_sales"."valeurfonc" / nullif("property_sales"."sbatmai", 0)))::numeric),
-      round((percentile_cont(0.6) WITHIN GROUP (ORDER BY "property_sales"."valeurfonc" / nullif("property_sales"."sbatmai", 0)))::numeric),
-      round((percentile_cont(0.7) WITHIN GROUP (ORDER BY "property_sales"."valeurfonc" / nullif("property_sales"."sbatmai", 0)))::numeric),
-      round((percentile_cont(0.8) WITHIN GROUP (ORDER BY "property_sales"."valeurfonc" / nullif("property_sales"."sbatmai", 0)))::numeric),
-      round((percentile_cont(0.9) WITHIN GROUP (ORDER BY "property_sales"."valeurfonc" / nullif("property_sales"."sbatmai", 0)))::numeric),
-      round((percentile_cont(1.0) WITHIN GROUP (ORDER BY "property_sales"."valeurfonc" / nullif("property_sales"."sbatmai", 0)))::numeric)
-    ) AS "price_m2_deciles",
     round(min("property_sales"."valeurfonc")) AS "min_price",
     round(max("property_sales"."valeurfonc")) AS "max_price",
     round(percentile_cont(0.5) WITHIN GROUP (ORDER BY "property_sales"."valeurfonc")) AS "median_price",
@@ -203,13 +190,18 @@ CREATE MATERIALIZED VIEW "public"."houses_by_insee_code_year" AS (
   )
   GROUP BY
     "property_sales"."primary_insee_code",
+    concat(
+      "property_sales"."primary_insee_code",
+      '000',
+      "property_sales"."primary_section"
+    ),
     "property_sales"."anneemut"
 );
 --> statement-breakpoint
-CREATE INDEX IF NOT EXISTS "idx_apts_insee_month" ON "public"."apartments_by_insee_code_month" ("insee_code", "year", "month");
+CREATE INDEX IF NOT EXISTS "idx_apts_section_month" ON "public"."apartments_by_section_month" ("section", "year", "month");
 --> statement-breakpoint
-CREATE INDEX IF NOT EXISTS "idx_houses_insee_month" ON "public"."houses_by_insee_code_month" ("insee_code", "year", "month");
+CREATE INDEX IF NOT EXISTS "idx_houses_section_month" ON "public"."houses_by_section_month" ("section", "year", "month");
 --> statement-breakpoint
-CREATE INDEX IF NOT EXISTS "idx_apts_insee_year" ON "public"."apartments_by_insee_code_year" ("insee_code", "year");
+CREATE INDEX IF NOT EXISTS "idx_apts_section_year" ON "public"."apartments_by_section_year" ("section", "year");
 --> statement-breakpoint
-CREATE INDEX IF NOT EXISTS "idx_houses_insee_year" ON "public"."houses_by_insee_code_year" ("insee_code", "year");
+CREATE INDEX IF NOT EXISTS "idx_houses_section_year" ON "public"."houses_by_section_year" ("section", "year");

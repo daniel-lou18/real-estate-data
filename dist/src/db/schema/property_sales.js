@@ -1,6 +1,5 @@
-import { MAX_APARTMENT_AREA, MAX_APARTMENT_PRICE, MIN_APARTMENT_AREA, MIN_APARTMENT_PRICE, } from "@/repositories/constants";
 import { SQL, sql } from "drizzle-orm";
-import { boolean, date, index, integer, jsonb, numeric, pgEnum, pgMaterializedView, pgTable, smallint, timestamp, varchar, } from "drizzle-orm/pg-core";
+import { boolean, date, index, integer, jsonb, numeric, pgEnum, pgTable, smallint, timestamp, varchar, } from "drizzle-orm/pg-core";
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 export const propertyTypeLabelEnum = pgEnum("property_type_label", [
     "ACTIVITE",

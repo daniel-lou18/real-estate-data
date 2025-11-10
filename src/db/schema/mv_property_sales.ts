@@ -24,48 +24,47 @@ function buildAggregateMetrics(areaColumn: AnyPgColumn) {
   return {
     total_sales: sql<number>`count(*)::int`.as("total_sales"),
     total_price:
-      sql<number>`round(coalesce(sum(${propertySales.price}), 0))`.as(
+      sql<number>`round(coalesce(sum(${propertySales.price}), 0))::double precision`.as(
         "total_price"
       ),
-    avg_price: sql<number>`round(coalesce(avg(${propertySales.price}), 0))`.as(
-      "avg_price"
-    ),
+    avg_price:
+      sql<number>`round(coalesce(avg(${propertySales.price}), 0))::double precision`.as(
+        "avg_price"
+      ),
     total_area:
-      sql<number>`round((coalesce(sum(${areaColumn}), 0))::numeric, 1)`.as(
+      sql<number>`round((coalesce(sum(${areaColumn}), 0))::double precision, 1)`.as(
         "total_area"
       ),
     avg_area:
-      sql<number>`round((coalesce(avg(${areaColumn}), 0))::numeric, 1)`.as(
+      sql<number>`round((coalesce(avg(${areaColumn}), 0))::double precision, 1)`.as(
         "avg_area"
       ),
     avg_price_m2:
-      sql<number>`round(sum(${propertySales.price}) / nullif(sum(${areaColumn}), 0))`.as(
+      sql<number>`round(sum(${propertySales.price}) / nullif(sum(${areaColumn}), 0))::double precision`.as(
         "avg_price_m2"
       ),
-    price_m2_deciles: sql<any>`jsonb_build_array(
-      round((percentile_cont(0.1) within group (order by ${pricePerM2}))::numeric),
-      round((percentile_cont(0.2) within group (order by ${pricePerM2}))::numeric),
-      round((percentile_cont(0.3) within group (order by ${pricePerM2}))::numeric),
-      round((percentile_cont(0.4) within group (order by ${pricePerM2}))::numeric),
-      round((percentile_cont(0.5) within group (order by ${pricePerM2}))::numeric),
-      round((percentile_cont(0.6) within group (order by ${pricePerM2}))::numeric),
-      round((percentile_cont(0.7) within group (order by ${pricePerM2}))::numeric),
-      round((percentile_cont(0.8) within group (order by ${pricePerM2}))::numeric),
-      round((percentile_cont(0.9) within group (order by ${pricePerM2}))::numeric),
-      round((percentile_cont(1.0) within group (order by ${pricePerM2}))::numeric)
-    )`.as("price_m2_deciles"),
-    min_price: sql<number>`round(min(${propertySales.price}))`.as("min_price"),
-    max_price: sql<number>`round(max(${propertySales.price}))`.as("max_price"),
+    min_price:
+      sql<number>`round(min(${propertySales.price}))::double precision`.as(
+        "min_price"
+      ),
+    max_price:
+      sql<number>`round(max(${propertySales.price}))::double precision`.as(
+        "max_price"
+      ),
     median_price:
       sql<number>`round(percentile_cont(0.5) within group (order by ${propertySales.price}))`.as(
         "median_price"
       ),
     median_area:
-      sql<number>`round((percentile_cont(0.5) within group (order by ${areaColumn}))::numeric, 1)`.as(
+      sql<number>`round((percentile_cont(0.5) within group (order by ${areaColumn}))::numeric, 1)::double precision`.as(
         "median_area"
       ),
-    min_price_m2: sql<number>`round(min(${pricePerM2}))`.as("min_price_m2"),
-    max_price_m2: sql<number>`round(max(${pricePerM2}))`.as("max_price_m2"),
+    min_price_m2: sql<number>`round(min(${pricePerM2}))::double precision`.as(
+      "min_price_m2"
+    ),
+    max_price_m2: sql<number>`round(max(${pricePerM2}))::double precision`.as(
+      "max_price_m2"
+    ),
     price_m2_p25:
       sql<number>`round(percentile_cont(0.25) within group (order by ${pricePerM2}))`.as(
         "price_m2_p25"
@@ -78,9 +77,10 @@ function buildAggregateMetrics(areaColumn: AnyPgColumn) {
       sql<number>`round((percentile_cont(0.75) within group (order by ${pricePerM2})) - (percentile_cont(0.25) within group (order by ${pricePerM2})))`.as(
         "price_m2_iqr"
       ),
-    price_m2_stddev: sql<number>`round(stddev_samp(${pricePerM2}))`.as(
-      "price_m2_stddev"
-    ),
+    price_m2_stddev:
+      sql<number>`round(stddev_samp(${pricePerM2}))::double precision`.as(
+        "price_m2_stddev"
+      ),
   };
 }
 

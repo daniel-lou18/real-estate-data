@@ -2,11 +2,7 @@ import { z } from "zod";
 // ----------------------------------------------------------------------------
 // Shared metric schemas for MV responses
 // ----------------------------------------------------------------------------
-const PriceM2Deciles = z
-    .array(z.number().nullable())
-    .length(10)
-    .describe("Deciles p10..p100 of price per m²");
-const AggregateMetricsMV = z.object({
+export const AggregateMetricsMV = z.object({
     // Counts and totals
     total_sales: z.number().int().describe("Total number of transactions"),
     total_price: z.number().describe("Sum of transaction prices"),
@@ -29,7 +25,6 @@ const AggregateMetricsMV = z.object({
     price_m2_p75: z.number(),
     price_m2_iqr: z.number(),
     price_m2_stddev: z.number(),
-    price_m2_deciles: PriceM2Deciles,
 });
 // Apartment composition
 const ApartmentComposition = z.object({
@@ -93,36 +88,91 @@ export const HousesByInseeWeekSchema = AggregateMetricsMV.extend({
     ...HouseComposition.shape,
 });
 // ----------------------------------------------------------------------------
+// Monthly aggregates by section
+// ----------------------------------------------------------------------------
+export const ApartmentsBySectionMonthSchema = AggregateMetricsMV.extend({
+    inseeCode: z.string(),
+    section: z.string(),
+    year: z.number().int(),
+    month: z.number().int().min(1).max(12),
+    ...ApartmentComposition.shape,
+});
+export const HousesBySectionMonthSchema = AggregateMetricsMV.extend({
+    inseeCode: z.string(),
+    section: z.string(),
+    year: z.number().int(),
+    month: z.number().int().min(1).max(12),
+    ...HouseComposition.shape,
+});
+// ----------------------------------------------------------------------------
+// Yearly aggregates by section
+// ----------------------------------------------------------------------------
+export const ApartmentsBySectionYearSchema = AggregateMetricsMV.extend({
+    inseeCode: z.string(),
+    section: z.string(),
+    year: z.number().int(),
+    ...ApartmentComposition.shape,
+});
+export const HousesBySectionYearSchema = AggregateMetricsMV.extend({
+    inseeCode: z.string(),
+    section: z.string(),
+    year: z.number().int(),
+    ...HouseComposition.shape,
+});
+// ----------------------------------------------------------------------------
 // Query param schemas (MV-focused)
 // ----------------------------------------------------------------------------
 const PaginationParams = z.object({
     limit: z.coerce.number().int().min(1).max(500).default(200),
     offset: z.coerce.number().int().min(0).default(0),
 });
-const SortOrder = z.enum(["asc", "desc"]).default("desc");
+export const SortBySchema = z.enum([
+    // Dimensional fields
+    "inseeCode",
+    "section",
+    "year",
+    "month",
+    "iso_year",
+    "iso_week",
+    // Metric fields
+    "total_sales",
+    "avg_price_m2",
+    "total_price",
+    "avg_price",
+]);
+export const SortOrderSchema = z.enum(["asc", "desc"]).default("desc");
 export const InseeMonthParamsSchema = PaginationParams.extend({
     inseeCode: z.string().optional(),
     year: z.coerce.number().int().optional(),
     month: z.coerce.number().int().min(1).max(12).optional(),
-    sortBy: z
-        .enum(["total_sales", "avg_price_m2", "total_price", "avg_price"])
-        .optional(),
-    sortOrder: SortOrder,
+    sortBy: SortBySchema.default("month"),
+    sortOrder: SortOrderSchema,
 });
 export const InseeYearParamsSchema = PaginationParams.extend({
     inseeCode: z.string().optional(),
     year: z.coerce.number().int().optional(),
-    sortBy: z
-        .enum(["total_sales", "avg_price_m2", "total_price", "avg_price"])
-        .optional(),
-    sortOrder: SortOrder,
+    sortBy: SortBySchema.default("year"),
+    sortOrder: SortOrderSchema,
 });
 export const InseeWeekParamsSchema = PaginationParams.extend({
     inseeCode: z.string().optional(),
     iso_year: z.coerce.number().int().optional(),
     iso_week: z.coerce.number().int().min(1).max(53).optional(),
-    sortBy: z
-        .enum(["total_sales", "avg_price_m2", "total_price", "avg_price"])
-        .optional(),
-    sortOrder: SortOrder,
+    sortBy: SortBySchema.default("iso_week"),
+    sortOrder: SortOrderSchema,
+});
+export const SectionMonthParamsSchema = PaginationParams.extend({
+    inseeCode: z.string().optional(),
+    section: z.string().optional(),
+    year: z.coerce.number().int().optional(),
+    month: z.coerce.number().int().min(1).max(12).optional(),
+    sortBy: SortBySchema.default("month"),
+    sortOrder: SortOrderSchema,
+});
+export const SectionYearParamsSchema = PaginationParams.extend({
+    inseeCode: z.string().optional(),
+    section: z.string().optional(),
+    year: z.coerce.number().int().optional(),
+    sortBy: SortBySchema.default("year"),
+    sortOrder: SortOrderSchema,
 });

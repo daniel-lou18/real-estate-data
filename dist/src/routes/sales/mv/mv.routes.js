@@ -1,6 +1,6 @@
 import { createRoute, z } from "@hono/zod-openapi";
 import * as HttpStatusCodes from "@/config/http-status-codes";
-import { ApartmentsByInseeMonthSchema, HousesByInseeMonthSchema, ApartmentsByInseeYearSchema, HousesByInseeYearSchema, InseeMonthParamsSchema, InseeYearParamsSchema, InseeWeekParamsSchema, HousesByInseeWeekSchema, ApartmentsByInseeWeekSchema, } from "./mv.schemas";
+import { ApartmentsByInseeMonthSchema, HousesByInseeMonthSchema, ApartmentsByInseeYearSchema, HousesByInseeYearSchema, InseeMonthParamsSchema, InseeYearParamsSchema, InseeWeekParamsSchema, HousesByInseeWeekSchema, ApartmentsByInseeWeekSchema, SectionYearParamsSchema, ApartmentsBySectionYearSchema, HousesBySectionYearSchema, SectionMonthParamsSchema, ApartmentsBySectionMonthSchema, HousesBySectionMonthSchema, } from "./mv.schemas";
 import jsonContent from "@/openapi/helpers/json-content";
 const tags = ["MV"];
 export const getAptsByInseeCodeYear = createRoute({
@@ -67,5 +67,49 @@ export const getHousesByInseeCodeWeek = createRoute({
     },
     responses: {
         [HttpStatusCodes.OK]: jsonContent(z.array(HousesByInseeWeekSchema), "List of houses by insee code, year, week"),
+    },
+});
+export const getAptsBySectionYear = createRoute({
+    tags,
+    method: "get",
+    path: "/apartments/by-section/year",
+    request: {
+        query: SectionYearParamsSchema,
+    },
+    responses: {
+        [HttpStatusCodes.OK]: jsonContent(z.array(ApartmentsBySectionYearSchema), "List of apartments by section, year"),
+    },
+});
+export const getHousesBySectionYear = createRoute({
+    tags,
+    method: "get",
+    path: "/houses/by-section/year",
+    request: {
+        query: SectionYearParamsSchema,
+    },
+    responses: {
+        [HttpStatusCodes.OK]: jsonContent(z.array(HousesBySectionYearSchema), "List of houses by section, year"),
+    },
+});
+export const getAptsBySectionMonth = createRoute({
+    tags,
+    method: "get",
+    path: "/apartments/by-section/month",
+    request: {
+        query: SectionMonthParamsSchema,
+    },
+    responses: {
+        [HttpStatusCodes.OK]: jsonContent(z.array(ApartmentsBySectionMonthSchema), "List of apartments by section, year, month"),
+    },
+});
+export const getHousesBySectionMonth = createRoute({
+    tags,
+    method: "get",
+    path: "/houses/by-section/month",
+    request: {
+        query: SectionMonthParamsSchema,
+    },
+    responses: {
+        [HttpStatusCodes.OK]: jsonContent(z.array(HousesBySectionMonthSchema), "List of houses by section, year, month"),
     },
 });

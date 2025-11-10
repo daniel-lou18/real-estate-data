@@ -1,6 +1,6 @@
 {
-  "id": "391f6186-a47e-4d60-889c-35c4abdb9ef2",
-  "prevId": "24d065d3-fb26-4c14-9fff-8530f40cee6c",
+  "id": "0012-snapshot-id-placeholder",
+  "prevId": "391f6186-a47e-4d60-889c-35c4abdb9ef2",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -664,6 +664,38 @@
     "tables": {}
   },
   "views": {
+    "public.apartments_by_section_month": {
+      "name": "apartments_by_section_month",
+      "schema": "public",
+      "materialized": true,
+      "isExisting": false,
+      "columns": {},
+      "definition": "-- Created in migration 0012 --"
+    },
+    "public.houses_by_section_month": {
+      "name": "houses_by_section_month",
+      "schema": "public",
+      "materialized": true,
+      "isExisting": false,
+      "columns": {},
+      "definition": "-- Created in migration 0012 --"
+    },
+    "public.apartments_by_section_year": {
+      "name": "apartments_by_section_year",
+      "schema": "public",
+      "materialized": true,
+      "isExisting": false,
+      "columns": {},
+      "definition": "-- Created in migration 0012 --"
+    },
+    "public.houses_by_section_year": {
+      "name": "houses_by_section_year",
+      "schema": "public",
+      "materialized": true,
+      "isExisting": false,
+      "columns": {},
+      "definition": "-- Created in migration 0012 --"
+    },
     "public.apartments_by_insee_code_month": {
       "name": "apartments_by_insee_code_month",
       "schema": "public",
@@ -811,226 +843,6 @@
         }
       },
       "definition": "select \"primary_insee_code\", \"anneemut\", count(*)::int as \"total_sales\", round(coalesce(sum(\"valeurfonc\"), 0)) as \"total_price\", round(coalesce(avg(\"valeurfonc\"), 0)) as \"avg_price\", round((coalesce(sum(\"sbatmai\"), 0))::numeric, 1) as \"total_area\", round((coalesce(avg(\"sbatmai\"), 0))::numeric, 1) as \"avg_area\", round(sum(\"valeurfonc\") / nullif(sum(\"sbatmai\"), 0)) as \"avg_price_m2\", coalesce(sum(\"nblocmai\"), 0)::int as \"total_houses\", coalesce(sum(\"nbmai1pp\"), 0)::int as \"house_1_room\", coalesce(sum(\"nbmai2pp\"), 0)::int as \"house_2_room\", coalesce(sum(\"nbmai3pp\"), 0)::int as \"house_3_room\", coalesce(sum(\"nbmai4pp\"), 0)::int as \"house_4_room\", coalesce(sum(\"nbmai5pp\"), 0)::int as \"house_5_room\", jsonb_build_array(\n        round((percentile_cont(0.1) within group (order by \"valeurfonc\" / nullif(\"sbatmai\", 0)))::numeric),\n        round((percentile_cont(0.2) within group (order by \"valeurfonc\" / nullif(\"sbatmai\", 0)))::numeric),\n        round((percentile_cont(0.3) within group (order by \"valeurfonc\" / nullif(\"sbatmai\", 0)))::numeric),\n        round((percentile_cont(0.4) within group (order by \"valeurfonc\" / nullif(\"sbatmai\", 0)))::numeric),\n        round((percentile_cont(0.5) within group (order by \"valeurfonc\" / nullif(\"sbatmai\", 0)))::numeric),\n        round((percentile_cont(0.6) within group (order by \"valeurfonc\" / nullif(\"sbatmai\", 0)))::numeric),\n        round((percentile_cont(0.7) within group (order by \"valeurfonc\" / nullif(\"sbatmai\", 0)))::numeric),\n        round((percentile_cont(0.8) within group (order by \"valeurfonc\" / nullif(\"sbatmai\", 0)))::numeric),\n        round((percentile_cont(0.9) within group (order by \"valeurfonc\" / nullif(\"sbatmai\", 0)))::numeric),\n        round((percentile_cont(1.0) within group (order by \"valeurfonc\" / nullif(\"sbatmai\", 0)))::numeric)\n      ) as \"price_m2_deciles\", round(min(\"valeurfonc\")) as \"min_price\", round(max(\"valeurfonc\")) as \"max_price\", round(percentile_cont(0.5) within group (order by \"valeurfonc\")) as \"median_price\", round((percentile_cont(0.5) within group (order by \"sbatmai\"))::numeric, 1) as \"median_area\", round(min(\"valeurfonc\" / nullif(\"sbatmai\", 0))) as \"min_price_m2\", round(max(\"valeurfonc\" / nullif(\"sbatmai\", 0))) as \"max_price_m2\", round(percentile_cont(0.25) within group (order by \"valeurfonc\" / nullif(\"sbatmai\", 0))) as \"price_m2_p25\", round(percentile_cont(0.75) within group (order by \"valeurfonc\" / nullif(\"sbatmai\", 0))) as \"price_m2_p75\", round((percentile_cont(0.75) within group (order by \"valeurfonc\" / nullif(\"sbatmai\", 0))) - (percentile_cont(0.25) within group (order by \"valeurfonc\" / nullif(\"sbatmai\", 0)))) as \"price_m2_iqr\", round(stddev_samp(\"valeurfonc\" / nullif(\"sbatmai\", 0))) as \"price_m2_stddev\" from \"property_sales\" where (\"property_sales\".\"libtypbien\" in ('UNE MAISON', 'DES MAISONS', 'MAISON - INDETERMINEE') and \"property_sales\".\"sbatmai\" between '20' and '300' and \"property_sales\".\"valeurfonc\" between '1500' and '15000000') group by \"property_sales\".\"primary_insee_code\", \"property_sales\".\"anneemut\"",
-      "materialized": true,
-      "isExisting": false
-    },
-    "public.residential_sales_fact": {
-      "name": "residential_sales_fact",
-      "schema": "public",
-      "columns": {
-        "idmutation": {
-          "name": "idmutation",
-          "type": "integer",
-          "primaryKey": true,
-          "notNull": true
-        },
-        "idopendata": {
-          "name": "idopendata",
-          "type": "varchar(50)",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "datemut": {
-          "name": "datemut",
-          "type": "date",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "anneemut": {
-          "name": "anneemut",
-          "type": "smallint",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "moismut": {
-          "name": "moismut",
-          "type": "smallint",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "coddep": {
-          "name": "coddep",
-          "type": "varchar(5)",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "primary_insee_code": {
-          "name": "primary_insee_code",
-          "type": "varchar(10)",
-          "primaryKey": false,
-          "notNull": false,
-          "generated": {
-            "type": "stored",
-            "as": "l_codinsee->>0"
-          }
-        },
-        "primary_section": {
-          "name": "primary_section",
-          "type": "varchar(5)",
-          "primaryKey": false,
-          "notNull": false,
-          "generated": {
-            "type": "stored",
-            "as": "l_section->>0"
-          }
-        },
-        "libtypbien": {
-          "name": "libtypbien",
-          "type": "property_type_label",
-          "typeSchema": "public",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "vefa": {
-          "name": "vefa",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "valeurfonc": {
-          "name": "valeurfonc",
-          "type": "numeric(12, 2)",
-          "primaryKey": false,
-          "notNull": false
-        }
-      },
-      "definition": "select \"idmutation\", \"idopendata\", \"datemut\", \"anneemut\", \"moismut\", extract(isoyear from \"datemut\")::int as \"iso_year\", extract(week from \"datemut\")::int as \"iso_week\", \"coddep\", \"primary_insee_code\", \"primary_section\", \"libtypbien\", case\n        when \"libtypbien\" in ('UN APPARTEMENT','DEUX APPARTEMENTS','APPARTEMENT INDETERMINE') then 'apartment'\n        when \"libtypbien\" in ('UNE MAISON','DES MAISONS','MAISON - INDETERMINEE') then 'house'\n        else 'other'\n      end as \"res_type\", \"vefa\", \"valeurfonc\", case\n        when \"libtypbien\" in ('UN APPARTEMENT','DEUX APPARTEMENTS','APPARTEMENT INDETERMINE') then \"sbatapt\"\n        when \"libtypbien\" in ('UNE MAISON','DES MAISONS','MAISON - INDETERMINEE') then \"sbatmai\"\n        else \"sbati\"\n      end as \"area\", round(\"valeurfonc\" / nullif(case\n        when \"libtypbien\" in ('UN APPARTEMENT','DEUX APPARTEMENTS','APPARTEMENT INDETERMINE') then \"sbatapt\"\n        when \"libtypbien\" in ('UNE MAISON','DES MAISONS','MAISON - INDETERMINEE') then \"sbatmai\"\n        else \"sbati\"\n      end, 0)) as \"price_per_m2\", case\n        when \"libtypbien\" in ('UN APPARTEMENT','DEUX APPARTEMENTS','APPARTEMENT INDETERMINE') then (\n          case\n            when coalesce(\"nbapt5pp\",0) > 0 then '5+'\n            when coalesce(\"nbapt4pp\",0) > 0 then '4'\n            when coalesce(\"nbapt3pp\",0) > 0 then '3'\n            when coalesce(\"nbapt2pp\",0) > 0 then '2'\n            when coalesce(\"nbapt1pp\",0) > 0 then '1'\n            else null\n          end\n        )\n        when \"libtypbien\" in ('UNE MAISON','DES MAISONS','MAISON - INDETERMINEE') then (\n          case\n            when coalesce(\"nbmai5pp\",0) > 0 then '5+'\n            when coalesce(\"nbmai4pp\",0) > 0 then '4'\n            when coalesce(\"nbmai3pp\",0) > 0 then '3'\n            when coalesce(\"nbmai2pp\",0) > 0 then '2'\n            when coalesce(\"nbmai1pp\",0) > 0 then '1'\n            else null\n          end\n        )\n        else null\n      end as \"rooms_bucket\" from \"property_sales\" where ((\"property_sales\".\"libtypbien\" in ('UN APPARTEMENT', 'DEUX APPARTEMENTS', 'APPARTEMENT INDETERMINE') and \"property_sales\".\"sbatapt\" between '10' and '200' and \"property_sales\".\"valeurfonc\" between '1500' and '5000000') or (\"property_sales\".\"libtypbien\" in ('UNE MAISON', 'DES MAISONS', 'MAISON - INDETERMINEE') and \"property_sales\".\"sbatmai\" between '20' and '300' and \"property_sales\".\"valeurfonc\" between '1500' and '15000000'))",
-      "materialized": true,
-      "isExisting": false
-    },
-    "public.residential_topk_by_insee_month": {
-      "name": "residential_topk_by_insee_month",
-      "schema": "public",
-      "columns": {
-        "idmutation": {
-          "name": "idmutation",
-          "type": "integer",
-          "primaryKey": true,
-          "notNull": true
-        },
-        "datemut": {
-          "name": "datemut",
-          "type": "date",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "anneemut": {
-          "name": "anneemut",
-          "type": "smallint",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "moismut": {
-          "name": "moismut",
-          "type": "smallint",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "coddep": {
-          "name": "coddep",
-          "type": "varchar(5)",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "primary_insee_code": {
-          "name": "primary_insee_code",
-          "type": "varchar(10)",
-          "primaryKey": false,
-          "notNull": false,
-          "generated": {
-            "type": "stored",
-            "as": "l_codinsee->>0"
-          }
-        },
-        "primary_section": {
-          "name": "primary_section",
-          "type": "varchar(5)",
-          "primaryKey": false,
-          "notNull": false,
-          "generated": {
-            "type": "stored",
-            "as": "l_section->>0"
-          }
-        },
-        "vefa": {
-          "name": "vefa",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "valeurfonc": {
-          "name": "valeurfonc",
-          "type": "numeric(12, 2)",
-          "primaryKey": false,
-          "notNull": false
-        }
-      },
-      "definition": "select \"idmutation\", \"datemut\", \"anneemut\", \"moismut\", \"coddep\", \"primary_insee_code\", \"primary_section\", case\n        when \"libtypbien\" in ('UN APPARTEMENT','DEUX APPARTEMENTS','APPARTEMENT INDETERMINE') then 'apartment'\n        when \"libtypbien\" in ('UNE MAISON','DES MAISONS','MAISON - INDETERMINEE') then 'house'\n        else 'other'\n      end as \"res_type\", \"vefa\", \"valeurfonc\", coalesce(\"sbatapt\", \"sbatmai\") as \"area\", round(\"valeurfonc\" / nullif(coalesce(\"sbatapt\", \"sbatmai\"), 0)) as \"price_per_m2\", dense_rank() over (partition by \"primary_insee_code\", \"anneemut\", \"moismut\",\n        case\n          when \"libtypbien\" in ('UN APPARTEMENT','DEUX APPARTEMENTS','APPARTEMENT INDETERMINE') then 'apartment'\n          when \"libtypbien\" in ('UNE MAISON','DES MAISONS','MAISON - INDETERMINEE') then 'house'\n          else 'other'\n        end\n      order by (\"valeurfonc\" / nullif(coalesce(\"sbatapt\", \"sbatmai\"), 0)) asc) as \"rank_asc\", dense_rank() over (partition by \"primary_insee_code\", \"anneemut\", \"moismut\",\n        case\n          when \"libtypbien\" in ('UN APPARTEMENT','DEUX APPARTEMENTS','APPARTEMENT INDETERMINE') then 'apartment'\n          when \"libtypbien\" in ('UNE MAISON','DES MAISONS','MAISON - INDETERMINEE') then 'house'\n          else 'other'\n        end\n      order by (\"valeurfonc\" / nullif(coalesce(\"sbatapt\", \"sbatmai\"), 0)) desc) as \"rank_desc\" from \"property_sales\" where ((\"property_sales\".\"libtypbien\" in ('UN APPARTEMENT', 'DEUX APPARTEMENTS', 'APPARTEMENT INDETERMINE') and \"property_sales\".\"sbatapt\" between '10' and '200' and \"property_sales\".\"valeurfonc\" between '1500' and '5000000') or (\"property_sales\".\"libtypbien\" in ('UNE MAISON', 'DES MAISONS', 'MAISON - INDETERMINEE') and \"property_sales\".\"sbatmai\" between '20' and '300' and \"property_sales\".\"valeurfonc\" between '1500' and '15000000'))",
-      "materialized": true,
-      "isExisting": false
-    },
-    "public.residential_topk_by_insee_year": {
-      "name": "residential_topk_by_insee_year",
-      "schema": "public",
-      "columns": {
-        "idmutation": {
-          "name": "idmutation",
-          "type": "integer",
-          "primaryKey": true,
-          "notNull": true
-        },
-        "datemut": {
-          "name": "datemut",
-          "type": "date",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "anneemut": {
-          "name": "anneemut",
-          "type": "smallint",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "coddep": {
-          "name": "coddep",
-          "type": "varchar(5)",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "primary_insee_code": {
-          "name": "primary_insee_code",
-          "type": "varchar(10)",
-          "primaryKey": false,
-          "notNull": false,
-          "generated": {
-            "type": "stored",
-            "as": "l_codinsee->>0"
-          }
-        },
-        "primary_section": {
-          "name": "primary_section",
-          "type": "varchar(5)",
-          "primaryKey": false,
-          "notNull": false,
-          "generated": {
-            "type": "stored",
-            "as": "l_section->>0"
-          }
-        },
-        "vefa": {
-          "name": "vefa",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "valeurfonc": {
-          "name": "valeurfonc",
-          "type": "numeric(12, 2)",
-          "primaryKey": false,
-          "notNull": false
-        }
-      },
-      "definition": "select \"idmutation\", \"datemut\", \"anneemut\", \"coddep\", \"primary_insee_code\", \"primary_section\", case\n        when \"libtypbien\" in ('UN APPARTEMENT','DEUX APPARTEMENTS','APPARTEMENT INDETERMINE') then 'apartment'\n        when \"libtypbien\" in ('UNE MAISON','DES MAISONS','MAISON - INDETERMINEE') then 'house'\n        else 'other'\n      end as \"res_type\", \"vefa\", \"valeurfonc\", coalesce(\"sbatapt\", \"sbatmai\") as \"area\", round(\"valeurfonc\" / nullif(coalesce(\"sbatapt\", \"sbatmai\"), 0)) as \"price_per_m2\", dense_rank() over (partition by \"primary_insee_code\", \"anneemut\",\n        case\n          when \"libtypbien\" in ('UN APPARTEMENT','DEUX APPARTEMENTS','APPARTEMENT INDETERMINE') then 'apartment'\n          when \"libtypbien\" in ('UNE MAISON','DES MAISONS','MAISON - INDETERMINEE') then 'house'\n          else 'other'\n        end\n      order by (\"valeurfonc\" / nullif(coalesce(\"sbatapt\", \"sbatmai\"), 0)) asc) as \"rank_asc\", dense_rank() over (partition by \"primary_insee_code\", \"anneemut\",\n        case\n          when \"libtypbien\" in ('UN APPARTEMENT','DEUX APPARTEMENTS','APPARTEMENT INDETERMINE') then 'apartment'\n          when \"libtypbien\" in ('UNE MAISON','DES MAISONS','MAISON - INDETERMINEE') then 'house'\n          else 'other'\n        end\n      order by (\"valeurfonc\" / nullif(coalesce(\"sbatapt\", \"sbatmai\"), 0)) desc) as \"rank_desc\" from \"property_sales\" where ((\"property_sales\".\"libtypbien\" in ('UN APPARTEMENT', 'DEUX APPARTEMENTS', 'APPARTEMENT INDETERMINE') and \"property_sales\".\"sbatapt\" between '10' and '200' and \"property_sales\".\"valeurfonc\" between '1500' and '5000000') or (\"property_sales\".\"libtypbien\" in ('UNE MAISON', 'DES MAISONS', 'MAISON - INDETERMINEE') and \"property_sales\".\"sbatmai\" between '20' and '300' and \"property_sales\".\"valeurfonc\" between '1500' and '15000000'))",
       "materialized": true,
       "isExisting": false
     }

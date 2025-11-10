@@ -9,7 +9,7 @@ const tags = ["Sales"];
 export const list = createRoute({
     tags,
     method: "get",
-    path: "/sales",
+    path: "/",
     responses: {
         [HttpStatusCodes.OK]: jsonContent(z.array(SelectPropertySaleSchema), "List of property sales"),
     },
@@ -17,7 +17,7 @@ export const list = createRoute({
 export const getOne = createRoute({
     tags,
     method: "get",
-    path: "/sales/{id}",
+    path: "/{id}",
     request: {
         params: IdParamsSchema,
     },

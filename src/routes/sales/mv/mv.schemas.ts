@@ -4,11 +4,6 @@ import { z } from "zod";
 // Shared metric schemas for MV responses
 // ----------------------------------------------------------------------------
 
-const PriceM2Deciles = z
-  .array(z.number().nullable())
-  .length(10)
-  .describe("Deciles p10..p100 of price per m²");
-
 export const AggregateMetricsMV = z.object({
   // Counts and totals
   total_sales: z.number().int().describe("Total number of transactions"),
@@ -35,7 +30,6 @@ export const AggregateMetricsMV = z.object({
   price_m2_p75: z.number(),
   price_m2_iqr: z.number(),
   price_m2_stddev: z.number(),
-  price_m2_deciles: PriceM2Deciles,
 });
 
 // Apartment composition
