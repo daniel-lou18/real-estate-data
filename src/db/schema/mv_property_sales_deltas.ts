@@ -1,8 +1,18 @@
 import { and, eq, sql } from "drizzle-orm";
-import { integer, numeric, pgTable, varchar } from "drizzle-orm/pg-core";
+import { integer, pgTable, varchar } from "drizzle-orm/pg-core";
 import { pgMaterializedView } from "drizzle-orm/pg-core";
 import { createSelectSchema } from "drizzle-zod";
-
+import {
+  AGG_METRICS,
+  APARTMENT_COMPOSITION_METRICS,
+  HOUSE_COMPOSITION_METRICS,
+  DOUBLE_PRECISION_METRICS,
+} from "./constants";
+import {
+  aggregateColumns,
+  apartmentCompositionColumns,
+  houseCompositionColumns,
+} from "./shared";
 // ----------------------------------------------------------------------------
 // pgTable wrappers for materialized views (for aliasing and type safety)
 // ----------------------------------------------------------------------------
@@ -14,106 +24,7 @@ import { createSelectSchema } from "drizzle-zod";
 const yearlyAggregateColumns = {
   insee_code: varchar("insee_code", { length: 10 }).notNull(),
   year: integer("year").notNull(),
-  total_sales: integer("total_sales").notNull(),
-  total_price: numeric("total_price", {
-    precision: 15,
-    scale: 0,
-    mode: "number",
-  }).notNull(),
-  avg_price: numeric("avg_price", {
-    precision: 15,
-    scale: 0,
-    mode: "number",
-  }).notNull(),
-  total_area: numeric("total_area", {
-    precision: 10,
-    scale: 1,
-    mode: "number",
-  }).notNull(),
-  avg_area: numeric("avg_area", {
-    precision: 10,
-    scale: 1,
-    mode: "number",
-  }).notNull(),
-  avg_price_m2: numeric("avg_price_m2", {
-    precision: 15,
-    scale: 0,
-    mode: "number",
-  }).notNull(),
-  min_price: numeric("min_price", {
-    precision: 15,
-    scale: 0,
-    mode: "number",
-  }).notNull(),
-  max_price: numeric("max_price", {
-    precision: 15,
-    scale: 0,
-    mode: "number",
-  }).notNull(),
-  median_price: numeric("median_price", {
-    precision: 15,
-    scale: 0,
-    mode: "number",
-  }).notNull(),
-  median_area: numeric("median_area", {
-    precision: 10,
-    scale: 1,
-    mode: "number",
-  }).notNull(),
-  min_price_m2: numeric("min_price_m2", {
-    precision: 15,
-    scale: 0,
-    mode: "number",
-  }).notNull(),
-  max_price_m2: numeric("max_price_m2", {
-    precision: 15,
-    scale: 0,
-    mode: "number",
-  }).notNull(),
-  price_m2_p25: numeric("price_m2_p25", {
-    precision: 15,
-    scale: 0,
-    mode: "number",
-  }).notNull(),
-  price_m2_p75: numeric("price_m2_p75", {
-    precision: 15,
-    scale: 0,
-    mode: "number",
-  }).notNull(),
-  price_m2_iqr: numeric("price_m2_iqr", {
-    precision: 15,
-    scale: 0,
-    mode: "number",
-  }).notNull(),
-  price_m2_stddev: numeric("price_m2_stddev", {
-    precision: 15,
-    scale: 0,
-    mode: "number",
-  }).notNull(),
-} as const;
-
-/**
- * Apartment composition columns.
- */
-const apartmentCompositionColumns = {
-  total_apartments: integer("total_apartments").notNull(),
-  apartment_1_room: integer("apartment_1_room").notNull(),
-  apartment_2_room: integer("apartment_2_room").notNull(),
-  apartment_3_room: integer("apartment_3_room").notNull(),
-  apartment_4_room: integer("apartment_4_room").notNull(),
-  apartment_5_room: integer("apartment_5_room").notNull(),
-} as const;
-
-/**
- * House composition columns.
- */
-const houseCompositionColumns = {
-  total_houses: integer("total_houses").notNull(),
-  house_1_room: integer("house_1_room").notNull(),
-  house_2_room: integer("house_2_room").notNull(),
-  house_3_room: integer("house_3_room").notNull(),
-  house_4_room: integer("house_4_room").notNull(),
-  house_5_room: integer("house_5_room").notNull(),
+  ...aggregateColumns,
 } as const;
 
 /**
@@ -153,61 +64,6 @@ const housesBySectionYearTable = pgTable("houses_by_section_year", {
   ...houseCompositionColumns,
   section: varchar("section", { length: 11 }).notNull(),
 });
-
-// ----------------------------------------------------------------------------
-// Centralized metric lists
-// ----------------------------------------------------------------------------
-
-const AGG_METRICS = [
-  "total_sales",
-  "total_price",
-  "avg_price",
-  "total_area",
-  "avg_area",
-  "avg_price_m2",
-  "median_price",
-  "median_area",
-  "price_m2_p25",
-  "price_m2_p75",
-  "price_m2_iqr",
-  "price_m2_stddev",
-] as const;
-
-const APARTMENT_COMPOSITION_METRICS = [
-  "total_apartments",
-  "apartment_1_room",
-  "apartment_2_room",
-  "apartment_3_room",
-  "apartment_4_room",
-  "apartment_5_room",
-] as const;
-
-const HOUSE_COMPOSITION_METRICS = [
-  "total_houses",
-  "house_1_room",
-  "house_2_room",
-  "house_3_room",
-  "house_4_room",
-  "house_5_room",
-] as const;
-
-// ----------------------------------------------------------------------------
-// Helper functions
-// ----------------------------------------------------------------------------
-
-/**
- * Metrics that require double precision casting (numeric fields from source views).
- */
-const DOUBLE_PRECISION_METRICS = [
-  "total_price",
-  "avg_price",
-  "avg_price_m2",
-  "median_price",
-  "price_m2_p25",
-  "price_m2_p75",
-  "price_m2_iqr",
-  "price_m2_stddev",
-] as const;
 
 /**
  * Calculates percentage change: 100 * (current - base) / base

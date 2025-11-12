@@ -10,7 +10,7 @@ import type {
   YearlyDeltasByInsee,
   YearlyDeltasBySection,
   YearDeltaParams,
-} from "@/routes/sales/mv/mv_deltas.schema";
+} from "@/routes/sales/mv/mv_deltas.schemas";
 
 // ----------------------------------------------------------------------------
 // Metric lists (matching the schema)

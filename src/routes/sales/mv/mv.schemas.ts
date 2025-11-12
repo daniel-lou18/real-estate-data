@@ -53,6 +53,53 @@ const HouseComposition = z.object({
 });
 
 // ----------------------------------------------------------------------------
+// Linear regression slope metrics (12-month trailing window)
+// ----------------------------------------------------------------------------
+
+const RegressionWindowMeta = z.object({
+  window_months: z.number().int().min(1).max(12),
+  window_start_year: z.number().int().nullable(),
+  window_start_month: z.number().int().min(1).max(12).nullable(),
+});
+
+const AggregateSlopeMetricsMV = z.object({
+  total_sales_slope: z.number().nullable(),
+  total_price_slope: z.number().nullable(),
+  avg_price_slope: z.number().nullable(),
+  total_area_slope: z.number().nullable(),
+  avg_area_slope: z.number().nullable(),
+  avg_price_m2_slope: z.number().nullable(),
+  min_price_slope: z.number().nullable(),
+  max_price_slope: z.number().nullable(),
+  median_price_slope: z.number().nullable(),
+  median_area_slope: z.number().nullable(),
+  min_price_m2_slope: z.number().nullable(),
+  max_price_m2_slope: z.number().nullable(),
+  price_m2_p25_slope: z.number().nullable(),
+  price_m2_p75_slope: z.number().nullable(),
+  price_m2_iqr_slope: z.number().nullable(),
+  price_m2_stddev_slope: z.number().nullable(),
+});
+
+const ApartmentCompositionSlope = z.object({
+  total_apartments_slope: z.number().nullable(),
+  apartment_1_room_slope: z.number().nullable(),
+  apartment_2_room_slope: z.number().nullable(),
+  apartment_3_room_slope: z.number().nullable(),
+  apartment_4_room_slope: z.number().nullable(),
+  apartment_5_room_slope: z.number().nullable(),
+});
+
+const HouseCompositionSlope = z.object({
+  total_houses_slope: z.number().nullable(),
+  house_1_room_slope: z.number().nullable(),
+  house_2_room_slope: z.number().nullable(),
+  house_3_room_slope: z.number().nullable(),
+  house_4_room_slope: z.number().nullable(),
+  house_5_room_slope: z.number().nullable(),
+});
+
+// ----------------------------------------------------------------------------
 // Monthly aggregates by INSEE
 // ----------------------------------------------------------------------------
 
@@ -68,6 +115,22 @@ export const HousesByInseeMonthSchema = AggregateMetricsMV.extend({
   year: z.number().int(),
   month: z.number().int().min(1).max(12),
   ...HouseComposition.shape,
+});
+
+export const ApartmentsByInseeMonthSlopeSchema = RegressionWindowMeta.extend({
+  inseeCode: z.string(),
+  year: z.number().int(),
+  month: z.number().int().min(1).max(12),
+  ...AggregateSlopeMetricsMV.shape,
+  ...ApartmentCompositionSlope.shape,
+});
+
+export const HousesByInseeMonthSlopeSchema = RegressionWindowMeta.extend({
+  inseeCode: z.string(),
+  year: z.number().int(),
+  month: z.number().int().min(1).max(12),
+  ...AggregateSlopeMetricsMV.shape,
+  ...HouseCompositionSlope.shape,
 });
 
 // ----------------------------------------------------------------------------
@@ -124,6 +187,24 @@ export const HousesBySectionMonthSchema = AggregateMetricsMV.extend({
   ...HouseComposition.shape,
 });
 
+export const ApartmentsBySectionMonthSlopeSchema = RegressionWindowMeta.extend({
+  inseeCode: z.string(),
+  section: z.string(),
+  year: z.number().int(),
+  month: z.number().int().min(1).max(12),
+  ...AggregateSlopeMetricsMV.shape,
+  ...ApartmentCompositionSlope.shape,
+});
+
+export const HousesBySectionMonthSlopeSchema = RegressionWindowMeta.extend({
+  inseeCode: z.string(),
+  section: z.string(),
+  year: z.number().int(),
+  month: z.number().int().min(1).max(12),
+  ...AggregateSlopeMetricsMV.shape,
+  ...HouseCompositionSlope.shape,
+});
+
 // ----------------------------------------------------------------------------
 // Yearly aggregates by section
 // ----------------------------------------------------------------------------
@@ -147,8 +228,8 @@ export const HousesBySectionYearSchema = AggregateMetricsMV.extend({
 // ----------------------------------------------------------------------------
 
 const PaginationParams = z.object({
-  limit: z.coerce.number().int().min(1).max(500).default(200),
-  offset: z.coerce.number().int().min(0).default(0),
+  limit: z.coerce.number().int().min(1).max(500).optional().default(200),
+  offset: z.coerce.number().int().min(0).optional().default(0),
 });
 
 export const SortBySchema = z.enum([
@@ -166,6 +247,46 @@ export const SortBySchema = z.enum([
   "avg_price",
 ]);
 export const SortOrderSchema = z.enum(["asc", "desc"]).default("desc");
+
+const slopeSortValues = [
+  "inseeCode",
+  "section",
+  "year",
+  "month",
+  "window_start_year",
+  "window_start_month",
+  "window_months",
+  "total_sales_slope",
+  "total_price_slope",
+  "avg_price_slope",
+  "total_area_slope",
+  "avg_area_slope",
+  "avg_price_m2_slope",
+  "min_price_slope",
+  "max_price_slope",
+  "median_price_slope",
+  "median_area_slope",
+  "min_price_m2_slope",
+  "max_price_m2_slope",
+  "price_m2_p25_slope",
+  "price_m2_p75_slope",
+  "price_m2_iqr_slope",
+  "price_m2_stddev_slope",
+  "total_apartments_slope",
+  "apartment_1_room_slope",
+  "apartment_2_room_slope",
+  "apartment_3_room_slope",
+  "apartment_4_room_slope",
+  "apartment_5_room_slope",
+  "total_houses_slope",
+  "house_1_room_slope",
+  "house_2_room_slope",
+  "house_3_room_slope",
+  "house_4_room_slope",
+  "house_5_room_slope",
+] as const;
+
+export const SlopeSortBySchema = z.enum(slopeSortValues);
 
 export const InseeMonthParamsSchema = PaginationParams.extend({
   inseeCode: z.string().optional(),
@@ -206,6 +327,23 @@ export const SectionYearParamsSchema = PaginationParams.extend({
   sortBy: SortBySchema.default("year"),
   sortOrder: SortOrderSchema,
 });
+
+export const InseeMonthSlopeParamsSchema = PaginationParams.extend({
+  inseeCode: z.string().optional(),
+  year: z.coerce.number().int().optional(),
+  month: z.coerce.number().int().min(1).max(12).optional(),
+  sortBy: SlopeSortBySchema.optional().default("month"),
+  sortOrder: SortOrderSchema.optional().default("desc"),
+});
+
+export const SectionMonthSlopeParamsSchema = PaginationParams.extend({
+  inseeCode: z.string().optional(),
+  section: z.string().optional(),
+  year: z.coerce.number().int().optional(),
+  month: z.coerce.number().int().min(1).max(12).optional(),
+  sortBy: SlopeSortBySchema.optional().default("month"),
+  sortOrder: SortOrderSchema.optional().default("desc"),
+});
 // ----------------------------------------------------------------------------
 // Type exports
 // ----------------------------------------------------------------------------
@@ -215,6 +353,12 @@ export type ApartmentsByInseeMonth = z.infer<
   typeof ApartmentsByInseeMonthSchema
 >;
 export type HousesByInseeMonth = z.infer<typeof HousesByInseeMonthSchema>;
+export type ApartmentsByInseeMonthSlope = z.infer<
+  typeof ApartmentsByInseeMonthSlopeSchema
+>;
+export type HousesByInseeMonthSlope = z.infer<
+  typeof HousesByInseeMonthSlopeSchema
+>;
 export type ApartmentsByInseeYear = z.infer<typeof ApartmentsByInseeYearSchema>;
 export type HousesByInseeYear = z.infer<typeof HousesByInseeYearSchema>;
 export type ApartmentsByInseeWeek = z.infer<typeof ApartmentsByInseeWeekSchema>;
@@ -227,6 +371,12 @@ export type ApartmentsBySectionMonth = z.infer<
   typeof ApartmentsBySectionMonthSchema
 >;
 export type HousesBySectionMonth = z.infer<typeof HousesBySectionMonthSchema>;
+export type ApartmentsBySectionMonthSlope = z.infer<
+  typeof ApartmentsBySectionMonthSlopeSchema
+>;
+export type HousesBySectionMonthSlope = z.infer<
+  typeof HousesBySectionMonthSlopeSchema
+>;
 
 export type InseeMonthParams = z.infer<typeof InseeMonthParamsSchema>;
 export type InseeYearParams = z.infer<typeof InseeYearParamsSchema>;
@@ -235,3 +385,8 @@ export type SectionMonthParams = z.infer<typeof SectionMonthParamsSchema>;
 export type SectionYearParams = z.infer<typeof SectionYearParamsSchema>;
 export type SortBy = z.infer<typeof SortBySchema>;
 export type SortOrder = z.infer<typeof SortOrderSchema>;
+export type InseeMonthSlopeParams = z.infer<typeof InseeMonthSlopeParamsSchema>;
+export type SectionMonthSlopeParams = z.infer<
+  typeof SectionMonthSlopeParamsSchema
+>;
+export type SlopeSortBy = z.infer<typeof SlopeSortBySchema>;

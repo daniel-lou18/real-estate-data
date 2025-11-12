@@ -1,4 +1,4 @@
-import { and, between, inArray, sql } from "drizzle-orm";
+import { and, between, inArray, SQL, sql } from "drizzle-orm";
 import { propertySales } from "./property_sales";
 import {
   MAX_APARTMENT_AREA,
@@ -13,12 +13,13 @@ import {
 import { pgMaterializedView } from "drizzle-orm/pg-core";
 import type { AnyPgColumn } from "drizzle-orm/pg-core";
 import { createSelectSchema } from "drizzle-zod";
+import type { AggregateMetrics } from "./constants";
 
 /**
  * Generates common aggregate metrics that match AggregateMetricsMV schema.
  * Takes an area column (ApartmentFloorArea or HouseFloorArea) as parameter.
  */
-function buildAggregateMetrics(areaColumn: AnyPgColumn) {
+function buildAggregateMetrics(areaColumn: AnyPgColumn): Record<AggregateMetrics, any> {
   const pricePerM2 = sql`${propertySales.price} / nullif(${areaColumn}, 0)`;
 
   return {

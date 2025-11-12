@@ -78,6 +78,34 @@
       "when": 1761656010389,
       "tag": "0017_fix_yearly_deltas_mv_types",
       "breakpoints": true
+    },
+    {
+      "idx": 19,
+      "version": "7",
+      "when": 1761656010390,
+      "tag": "0017_fix_yearly_deltas_mv_types",
+      "breakpoints": true
+    },
+    {
+      "idx": 20,
+      "version": "7",
+      "when": 1761656010391,
+      "tag": "0018_create_slopes_mvs",
+      "breakpoints": true
+    },
+    {
+      "idx": 21,
+      "version": "7",
+      "when": 1761656010392,
+      "tag": "0018_create_slopes_mvs",
+      "breakpoints": true
+    },
+    {
+      "idx": 22,
+      "version": "7",
+      "when": 1761656010393,
+      "tag": "0018_create_slopes_mvs",
+      "breakpoints": true
     }
   ]
 }

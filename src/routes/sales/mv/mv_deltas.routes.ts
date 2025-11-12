@@ -3,7 +3,7 @@ import {
   YearDeltaParamsSchema,
   YearlyDeltasByInseeSchema,
   YearlyDeltasBySectionSchema,
-} from "./mv_deltas.schema";
+} from "./mv_deltas.schemas";
 import * as HttpStatusCodes from "@/config/http-status-codes";
 import jsonContent from "@/openapi/helpers/json-content";
 import { z } from "zod";
