@@ -1,7 +1,7 @@
 import { useState } from "react";
 import PriceLegend from "./PriceLegend";
 import { useMapLegend, useFilters } from "@/hooks/map";
-import type { MapLegendBucket } from "@/types";
+import type { MapLegendBucket } from "@app/shared";
 import { MAP_BUCKET_COLORS } from "./colors";
 import { formatMetricValue, humanizeMetricName } from "./mapLegendUtils";
 

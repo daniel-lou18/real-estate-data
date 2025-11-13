@@ -12,13 +12,13 @@ import {
   MetricTableHeader,
   type TableStatus,
 } from "./MetricTableShared";
-import { METRIC_CATALOG } from "@/constants/catalog";
+import { METRIC_CATALOG } from "@app/shared";
 import type {
   NumericMetricField,
   SectionTableData,
   SectionMetricRow,
   SectionYoYTableData,
-} from "@/types";
+} from "./types";
 import { CountCell, MetricValueCell, SparklineCell } from "./MetricTableCell";
 import { DimensionTableCell } from "./DimensionTableCell";
 import {

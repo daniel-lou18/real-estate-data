@@ -11,7 +11,7 @@ import type {
   MetricField,
   NumericFilter,
   PropertyType,
-} from "@/types";
+} from "@app/shared";
 import { useSyncUrlWithFilters } from "./useFiltersNavigate";
 
 export interface FilterState {

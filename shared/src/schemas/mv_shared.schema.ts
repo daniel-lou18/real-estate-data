@@ -1,9 +1,9 @@
-import { z } from "zod";
-import type { MetricField } from "@/types";
-
 // ----------------------------------------------------------------------------
 // Shared metric schemas for MV responses
 // ----------------------------------------------------------------------------
+
+import { z } from "zod";
+import { MetricField } from "../types";
 
 export const AggregateMetricsMVSchema = z.object<
   Record<MetricField, z.ZodType<number>>
@@ -54,3 +54,10 @@ export const HouseComposition = z.object({
   house_4_room: z.coerce.number().int(),
   house_5_room: z.coerce.number().int(),
 });
+
+export const PaginationParamsSchema = z.object({
+  limit: z.coerce.number().int().min(1).max(500).optional().default(200),
+  offset: z.coerce.number().int().min(0).optional().default(0),
+});
+
+export const SortOrderSchema = z.enum(["asc", "desc"]).default("desc");

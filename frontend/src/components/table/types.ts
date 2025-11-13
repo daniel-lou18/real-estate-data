@@ -1,6 +1,10 @@
-import type { MetricPercentChangeField } from "@/types";
-import type { MetricDelta } from "@/services/api/types";
-import type { AggregateMetricsMV, DimensionField, MetricField } from "@/types";
+import type {
+  MetricPercentChangeField,
+  AggregateMetricsMV,
+  DimensionField,
+  MetricField,
+} from "@app/shared";
+import type { MetricDelta } from "@app/shared";
 
 export type CommuneTableData = {
   inseeCode: string;

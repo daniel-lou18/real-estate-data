@@ -1,4 +1,4 @@
-import type { MapFeature } from "@/types";
+import type { MapFeature } from "@app/shared";
 
 // MapLibre layer styles
 export const arrondissementLayerStyles = {

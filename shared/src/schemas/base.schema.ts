@@ -1,21 +1,19 @@
+import { z } from "zod";
 import {
   FEATURE_LEVELS,
   FEATURE_YEARS,
-  ISO_WEEKS,
   METRIC_FIELDS,
-  MONTHS,
   PROPERTY_TYPES,
-} from "@/constants/base";
-import { z } from "zod";
+} from "../constants/base";
 
 export const INSEE_CODE_SCHEMA = z
   .string()
   .length(5)
-  .describe("INSEE code for the commune");
+  .describe("INSEE code for the commune, e.g. '75112'");
 export const SECTION_SCHEMA = z
   .string()
   .length(10)
-  .describe("Section identifier within the commune");
+  .describe("Section identifier within the commune, e.g. '75112000BZ'");
 
 // Array variants that accept both single values and arrays (for backward compatibility)
 export const INSEE_CODE_ARRAY_SCHEMA = z
@@ -45,21 +43,13 @@ export const YEAR_SCHEMA = z.coerce
   .int()
   .min(FEATURE_YEARS[0])
   .max(FEATURE_YEARS[FEATURE_YEARS.length - 1]);
-export const MONTH_SCHEMA = z.coerce
-  .number()
-  .int()
-  .min(MONTHS[0])
-  .max(MONTHS[MONTHS.length - 1]);
+export const MONTH_SCHEMA = z.coerce.number().int().min(1).max(12);
 export const ISO_YEAR_SCHEMA = z.coerce
   .number()
   .int()
   .min(FEATURE_YEARS[0])
   .max(FEATURE_YEARS[FEATURE_YEARS.length - 1]);
-export const ISO_WEEK_SCHEMA = z.coerce
-  .number()
-  .int()
-  .min(ISO_WEEKS[0])
-  .max(ISO_WEEKS[ISO_WEEKS.length - 1]);
+export const ISO_WEEK_SCHEMA = z.coerce.number().int().min(1).max(53);
 
 export const LEVEL_SCHEMA = z.enum(FEATURE_LEVELS).default("commune");
 export const PROPERTY_TYPE_SCHEMA = z.enum(PROPERTY_TYPES).default("apartment");
@@ -68,14 +58,29 @@ export const METRIC_FIELD_SCHEMA = z
   .enum(METRIC_FIELDS)
   .default("avg_price_m2");
 
-export const FilterStateSchema = z.object({
-  level: LEVEL_SCHEMA,
-  inseeCodes: z.array(INSEE_CODE_SCHEMA).optional(),
-  sections: z.array(SECTION_SCHEMA).optional(),
-  year: YEAR_SCHEMA.optional(),
-  month: MONTH_SCHEMA.optional(),
-  iso_year: ISO_YEAR_SCHEMA.optional(),
-  iso_week: ISO_WEEK_SCHEMA.optional(),
-  propertyType: PROPERTY_TYPE_SCHEMA.default("apartment"),
-  metric: METRIC_FIELD_SCHEMA.optional(),
-});
+// Numeric Filter Schemas
+export const NUMERIC_FILTER_OPERATIONS = ["gte", "lte", "between"] as const;
+
+export const NumericFilterOperation = z.enum(NUMERIC_FILTER_OPERATIONS);
+export const NumericFilterValueSchema = z.union([
+  z.number(),
+  z.array(z.number()),
+]);
+
+export const NumericFilterSchema = z
+  .record(
+    z.string(),
+    z.object({
+      operation: NumericFilterOperation,
+      value: NumericFilterValueSchema,
+    })
+  )
+  .refine(
+    (filters) => {
+      const keys = Object.keys(filters);
+      return keys.every((key) => METRIC_FIELDS.includes(key as any));
+    },
+    {
+      message: "Filter keys must be one of the allowed filter keys",
+    }
+  );

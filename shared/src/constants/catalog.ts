@@ -3,8 +3,8 @@ import type {
   DimensionField,
   MetricCatalogItem,
   MetricField,
-} from "@/types";
-import * as baseSchemas from "@/services/api/schemas/base";
+} from "../types";
+import * as schemas from "../schemas/";
 import { METRIC_FIELDS } from "./base/metrics";
 
 const TOTAL_SALES: MetricCatalogItem = {
@@ -198,7 +198,7 @@ const INSEE_CODE: DimensionCatalogItem = {
   label: "INSEE Code",
   category: "spatial",
   level: "commune",
-  type: baseSchemas.INSEE_CODE_SCHEMA,
+  type: schemas.INSEE_CODE_SCHEMA,
 };
 
 const SECTION: DimensionCatalogItem = {
@@ -206,35 +206,35 @@ const SECTION: DimensionCatalogItem = {
   label: "Section",
   category: "spatial",
   level: "section",
-  type: baseSchemas.SECTION_SCHEMA,
+  type: schemas.SECTION_SCHEMA,
 };
 
 const YEAR: DimensionCatalogItem = {
   id: "year",
   label: "Year",
   category: "temporal",
-  type: baseSchemas.YEAR_SCHEMA,
+  type: schemas.YEAR_SCHEMA,
 };
 
 const MONTH: DimensionCatalogItem = {
   id: "month",
   label: "Month",
   category: "temporal",
-  type: baseSchemas.MONTH_SCHEMA,
+  type: schemas.MONTH_SCHEMA,
 };
 
 const ISO_YEAR: DimensionCatalogItem = {
   id: "iso_year",
   label: "ISO Year",
   category: "temporal",
-  type: baseSchemas.ISO_YEAR_SCHEMA,
+  type: schemas.ISO_YEAR_SCHEMA,
 };
 
 const ISO_WEEK: DimensionCatalogItem = {
   id: "iso_week",
   label: "ISO Week",
   category: "temporal",
-  type: baseSchemas.ISO_WEEK_SCHEMA,
+  type: schemas.ISO_WEEK_SCHEMA,
 };
 
 export const DIMENSION_CATALOG: Record<DimensionField, DimensionCatalogItem> = {

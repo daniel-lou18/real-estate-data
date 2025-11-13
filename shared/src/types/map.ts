@@ -1,5 +1,5 @@
-import type { MetricField } from "@/types/metrics";
-import type { FeatureLevel, PropertyType } from "@/types/dimensions";
+import type { MetricField } from "./metrics";
+import type { FeatureLevel, PropertyType } from "./dimensions";
 import type { Feature, FeatureCollection, MultiPolygon } from "geojson";
 
 export type BaseFeatureProperties = {

@@ -1,5 +1,4 @@
-import { METRIC_CATALOG } from "@/constants/catalog";
-import type { MetricField } from "@/types";
+import { METRIC_CATALOG, type MetricField } from "@app/shared";
 import { cn } from "@/lib/utils";
 
 export function PercentChangeCell({

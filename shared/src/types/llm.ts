@@ -1,7 +1,7 @@
-import type { NumericFilterSchema } from "@/services/api/schemas/userIntent";
 import type { DimensionField, Year, Month } from "./dimensions";
 import type { MetricField } from "./metrics";
-import type z from "zod";
+import type { NumericFilterSchema } from "../schemas/base.schema";
+import type { z } from "zod";
 
 type Intent = "rank" | "filter" | "compare" | "show";
 

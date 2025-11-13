@@ -1,12 +1,9 @@
-import { z } from "zod";
 import type {
   COMPOSITION_FIELDS,
   HOUSE_COMPOSITION_FIELDS,
   METRIC_FIELDS,
-} from "@/constants/base";
-import type { AggregateMetricsMVSchema } from "@/services/api/schemas";
+} from "../constants/base";
 
-export type AggregateMetricsMV = z.infer<typeof AggregateMetricsMVSchema>;
 export type MetricField = (typeof METRIC_FIELDS)[number];
 
 export type MetricPercentChangeField = `${MetricField}_pct_change`;

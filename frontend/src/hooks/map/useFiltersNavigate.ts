@@ -4,7 +4,7 @@ import {
   inseeCodeFromCommuneParam,
   sectionFromSectionParam,
 } from "@/utils/urlUtils";
-import type { FeatureLevel } from "@/types";
+import type { FeatureLevel } from "@app/shared";
 
 export function useSyncUrlWithFilters(setLevel: (level: FeatureLevel) => void) {
   const { commune, section } = useParams();

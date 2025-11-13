@@ -1,7 +1,7 @@
 import { memo } from "react";
 import { Source, Layer } from "react-map-gl/maplibre";
 
-import type { MapFeatureCollection, FeatureLevel } from "@/types";
+import type { MapFeatureCollection, FeatureLevel } from "@app/shared";
 import { arrondissementLayerStyles, sectionLayerStyles } from "./config";
 import { useStyleMap, useMapFeatureCollection } from "@/hooks/map";
 

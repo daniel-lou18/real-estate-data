@@ -6,7 +6,7 @@ import type {
   MapFeatureParams,
   MapLegendParams,
   MapLegendResponse,
-} from "@/types";
+} from "@app/shared";
 import { GC_TIME, STALE_TIME } from "@/hooks/data/constants";
 import { useFilters } from "./useFilters";
 

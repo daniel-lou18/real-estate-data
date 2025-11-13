@@ -1,4 +1,4 @@
-import type { MetricPercentChangeField } from "@/types";
+import type { MetricPercentChangeField } from "@app/shared";
 import type {
   CommuneTableData,
   SectionTableData,

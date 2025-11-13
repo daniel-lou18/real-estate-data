@@ -2,7 +2,7 @@ import { useMemo } from "react";
 
 import { useMapLegend } from "./useMapData";
 import { MAP_BUCKET_COLOR_HEX } from "@/components/map/colors";
-import type { MapLegendResponse } from "@/types";
+import type { MapLegendResponse } from "@app/shared";
 import type { ExpressionSpecification } from "maplibre-gl";
 import { useFilters } from "./useFilters";
 

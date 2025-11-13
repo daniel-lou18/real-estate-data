@@ -1,4 +1,4 @@
-import type { CommuneFeature, SectionFeature } from "@/types";
+import type { CommuneFeature, SectionFeature } from "@app/shared";
 import { createSlug } from "@/utils/urlUtils";
 import { useLocation, useNavigate } from "react-router";
 

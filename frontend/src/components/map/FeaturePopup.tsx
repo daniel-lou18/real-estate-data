@@ -4,7 +4,7 @@ import type {
   MapFeature,
   CommuneFeatureProperties,
   SectionFeatureProperties,
-} from "@/types";
+} from "@app/shared";
 import { formatMetricValue, humanizeMetricName } from "./mapLegendUtils";
 
 interface FeaturePopupProps {

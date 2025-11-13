@@ -7,7 +7,7 @@ import type {
   FEATURE_YEARS,
   MONTHS,
   ISO_WEEKS,
-} from "@/constants/base";
+} from "../constants/base";
 
 export type DimensionCatalogItem = {
   id: DimensionField;

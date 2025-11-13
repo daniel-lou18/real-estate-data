@@ -1,5 +1,10 @@
 import { apiService } from "./baseApiService";
-import type { MapFeatureParams, MapLegendParams, MapFeatureCollection, MapLegendResponse } from "@/types";
+import type {
+  MapFeatureParams,
+  MapLegendParams,
+  MapFeatureCollection,
+  MapLegendResponse,
+} from "@app/shared";
 
 function createQueryString(params: MapFeatureParams | MapLegendParams): string {
   const searchParams = new URLSearchParams();
