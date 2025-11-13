@@ -1,0 +1,666 @@
+{
+  "id": "5e7c9eed-cb0f-4219-8233-e39b4f0d988a",
+  "prevId": "00000000-0000-0000-0000-000000000000",
+  "version": "7",
+  "dialect": "postgresql",
+  "tables": {
+    "public.communes_geom": {
+      "name": "communes_geom",
+      "schema": "",
+      "columns": {
+        "insee_code": {
+          "name": "insee_code",
+          "type": "varchar(5)",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "geom": {
+          "name": "geom",
+          "type": "geometry(point)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "idx_communes_geom_geom_gist": {
+          "name": "idx_communes_geom_geom_gist",
+          "columns": [
+            {
+              "expression": "geom",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "gist",
+          "with": {}
+        }
+      },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.property_sales": {
+      "name": "property_sales",
+      "schema": "",
+      "columns": {
+        "idmutation": {
+          "name": "idmutation",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "idmutinvar": {
+          "name": "idmutinvar",
+          "type": "varchar(50)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "idopendata": {
+          "name": "idopendata",
+          "type": "varchar(50)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "idnatmut": {
+          "name": "idnatmut",
+          "type": "smallint",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "codservch": {
+          "name": "codservch",
+          "type": "varchar(10)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "refdoc": {
+          "name": "refdoc",
+          "type": "varchar(50)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "datemut": {
+          "name": "datemut",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "anneemut": {
+          "name": "anneemut",
+          "type": "smallint",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "moismut": {
+          "name": "moismut",
+          "type": "smallint",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "coddep": {
+          "name": "coddep",
+          "type": "varchar(5)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "libnatmut": {
+          "name": "libnatmut",
+          "type": "varchar(100)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "vefa": {
+          "name": "vefa",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "valeurfonc": {
+          "name": "valeurfonc",
+          "type": "numeric(12, 2)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "nbdispo": {
+          "name": "nbdispo",
+          "type": "smallint",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "nblot": {
+          "name": "nblot",
+          "type": "smallint",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "nbcomm": {
+          "name": "nbcomm",
+          "type": "smallint",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "l_codinsee": {
+          "name": "l_codinsee",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "primary_insee_code": {
+          "name": "primary_insee_code",
+          "type": "varchar(10)",
+          "primaryKey": false,
+          "notNull": false,
+          "generated": {
+            "as": "l_codinsee->>0",
+            "type": "stored"
+          }
+        },
+        "nbsection": {
+          "name": "nbsection",
+          "type": "smallint",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "l_section": {
+          "name": "l_section",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "primary_section": {
+          "name": "primary_section",
+          "type": "varchar(5)",
+          "primaryKey": false,
+          "notNull": false,
+          "generated": {
+            "as": "l_section->>0",
+            "type": "stored"
+          }
+        },
+        "nbpar": {
+          "name": "nbpar",
+          "type": "smallint",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "l_idpar": {
+          "name": "l_idpar",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "primary_parcel_id": {
+          "name": "primary_parcel_id",
+          "type": "varchar(15)",
+          "primaryKey": false,
+          "notNull": false,
+          "generated": {
+            "as": "l_idpar->>0",
+            "type": "stored"
+          }
+        },
+        "nbparmut": {
+          "name": "nbparmut",
+          "type": "smallint",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "l_idparmut": {
+          "name": "l_idparmut",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "nbsuf": {
+          "name": "nbsuf",
+          "type": "smallint",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "sterr": {
+          "name": "sterr",
+          "type": "numeric(10, 2)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "nbvolmut": {
+          "name": "nbvolmut",
+          "type": "smallint",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "nblocmut": {
+          "name": "nblocmut",
+          "type": "smallint",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "l_idlocmut": {
+          "name": "l_idlocmut",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "nblocmai": {
+          "name": "nblocmai",
+          "type": "smallint",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "nblocapt": {
+          "name": "nblocapt",
+          "type": "smallint",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "nblocdep": {
+          "name": "nblocdep",
+          "type": "smallint",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "nblocact": {
+          "name": "nblocact",
+          "type": "smallint",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "nbapt1pp": {
+          "name": "nbapt1pp",
+          "type": "smallint",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "nbapt2pp": {
+          "name": "nbapt2pp",
+          "type": "smallint",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "nbapt3pp": {
+          "name": "nbapt3pp",
+          "type": "smallint",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "nbapt4pp": {
+          "name": "nbapt4pp",
+          "type": "smallint",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "nbapt5pp": {
+          "name": "nbapt5pp",
+          "type": "smallint",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "nbmai1pp": {
+          "name": "nbmai1pp",
+          "type": "smallint",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "nbmai2pp": {
+          "name": "nbmai2pp",
+          "type": "smallint",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "nbmai3pp": {
+          "name": "nbmai3pp",
+          "type": "smallint",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "nbmai4pp": {
+          "name": "nbmai4pp",
+          "type": "smallint",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "nbmai5pp": {
+          "name": "nbmai5pp",
+          "type": "smallint",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "sbati": {
+          "name": "sbati",
+          "type": "numeric(10, 2)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "sbatmai": {
+          "name": "sbatmai",
+          "type": "numeric(10, 2)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "sbatapt": {
+          "name": "sbatapt",
+          "type": "numeric(10, 2)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "sbatact": {
+          "name": "sbatact",
+          "type": "numeric(10, 2)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "sapt1pp": {
+          "name": "sapt1pp",
+          "type": "numeric(10, 2)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "sapt2pp": {
+          "name": "sapt2pp",
+          "type": "numeric(10, 2)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "sapt3pp": {
+          "name": "sapt3pp",
+          "type": "numeric(10, 2)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "sapt4pp": {
+          "name": "sapt4pp",
+          "type": "numeric(10, 2)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "sapt5pp": {
+          "name": "sapt5pp",
+          "type": "numeric(10, 2)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "smai1pp": {
+          "name": "smai1pp",
+          "type": "numeric(10, 2)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "smai2pp": {
+          "name": "smai2pp",
+          "type": "numeric(10, 2)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "smai3pp": {
+          "name": "smai3pp",
+          "type": "numeric(10, 2)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "smai4pp": {
+          "name": "smai4pp",
+          "type": "numeric(10, 2)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "smai5pp": {
+          "name": "smai5pp",
+          "type": "numeric(10, 2)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "codtypbien": {
+          "name": "codtypbien",
+          "type": "smallint",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "libtypbien": {
+          "name": "libtypbien",
+          "type": "property_type_label",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "idx_property_sales_datemut": {
+          "name": "idx_property_sales_datemut",
+          "columns": [
+            {
+              "expression": "datemut",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "idx_property_sales_coddep": {
+          "name": "idx_property_sales_coddep",
+          "columns": [
+            {
+              "expression": "coddep",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "idx_property_sales_anneemut": {
+          "name": "idx_property_sales_anneemut",
+          "columns": [
+            {
+              "expression": "anneemut",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "idx_property_sales_codtypbien": {
+          "name": "idx_property_sales_codtypbien",
+          "columns": [
+            {
+              "expression": "codtypbien",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "idx_property_sales_valeurfonc": {
+          "name": "idx_property_sales_valeurfonc",
+          "columns": [
+            {
+              "expression": "valeurfonc",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.sections_geom": {
+      "name": "sections_geom",
+      "schema": "",
+      "columns": {
+        "section": {
+          "name": "section",
+          "type": "varchar(11)",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "insee_code": {
+          "name": "insee_code",
+          "type": "varchar(5)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "prefix": {
+          "name": "prefix",
+          "type": "varchar(3)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "code": {
+          "name": "code",
+          "type": "varchar(2)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "geom": {
+          "name": "geom",
+          "type": "geometry(point)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "idx_sections_geom_insee_code": {
+          "name": "idx_sections_geom_insee_code",
+          "columns": [
+            {
+              "expression": "insee_code",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "idx_sections_geom_geom_gist": {
+          "name": "idx_sections_geom_geom_gist",
+          "columns": [
+            {
+              "expression": "geom",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "gist",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "sections_geom_insee_code_communes_geom_insee_code_fk": {
+          "name": "sections_geom_insee_code_communes_geom_insee_code_fk",
+          "tableFrom": "sections_geom",
+          "tableTo": "communes_geom",
+          "columnsFrom": [
+            "insee_code"
+          ],
+          "columnsTo": [
+            "insee_code"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    }
+  },
+  "enums": {
+    "public.property_type_label": {
+      "name": "property_type_label",
+      "schema": "public",
+      "values": [
+        "ACTIVITE",
+        "APPARTEMENT INDETERMINE",
+        "BATI - INDETERMINE : Vefa sans descriptif",
+        "BATI - INDETERMINE : Vente avec volume(s)",
+        "BATI MIXTE - LOGEMENT/ACTIVITE",
+        "BATI MIXTE - LOGEMENTS",
+        "DES DEPENDANCES",
+        "DES MAISONS",
+        "DEUX APPARTEMENTS",
+        "MAISON - INDETERMINEE",
+        "TERRAIN ARTIFICIALISE MIXTE",
+        "TERRAIN D'AGREMENT",
+        "TERRAIN DE TYPE RESEAU",
+        "TERRAIN DE TYPE TAB",
+        "UN APPARTEMENT",
+        "UNE DEPENDANCE",
+        "UNE MAISON"
+      ]
+    }
+  },
+  "schemas": {},
+  "sequences": {},
+  "roles": {},
+  "policies": {},
+  "_meta": {
+    "columns": {},
+    "schemas": {},
+    "tables": {}
+  }
+}

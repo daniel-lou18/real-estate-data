@@ -1,0 +1,16 @@
+services:
+  db:
+    image: postgis/postgis:18-3.6
+    container_name: pg-dev
+    restart: unless-stopped
+    environment:
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+      - POSTGRES_DB=${DB_NAME}
+    ports:
+      - ${DB_PORT}:5432
+    volumes:
+      - pg_data:/var/lib/postgresql/data # Named volume (safer in WSL)
+
+volumes:
+  pg_data: # Defines the named volume
