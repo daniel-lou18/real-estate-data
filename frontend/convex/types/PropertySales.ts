@@ -1,0 +1,27 @@
+export type PropertySales = {
+  id: string;
+  inseeCode: string;
+  section: string;
+  year: number;
+  month: number;
+  date: string;
+  mutationType: string;
+  propertyType: string;
+  propertyTypeCode: number;
+  price: number | null;
+  floorArea: number;
+  numberOfStudioApartments: number;
+  numberOf1BedroomApartments: number;
+  numberOf2BedroomApartments: number;
+  numberOf3BedroomApartments: number;
+  numberOf4BedroomApartments: number;
+  numberOfWorkspaces: number;
+  numberOfAppartments: number;
+  numberOfHouses: number;
+  numberOfSecondaryUnits: number;
+  numberOfStudioHouses: number;
+  numberOf1BedroomHouses: number;
+  numberOf2BedroomHouses: number;
+  numberOf3BedroomHouses: number;
+  numberOf4BedroomHouses: number;
+};
