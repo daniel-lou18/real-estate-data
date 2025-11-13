@@ -1,4 +1,10 @@
 import { z } from "zod";
+import type {
+  ApartmentCompositionField,
+  HouseCompositionField,
+  MetricField,
+} from "../shared/types";
+import * as schemas from "../shared/schemas";
 
 // ----------------------------------------------------------------------------
 // Shared numeric helper (allows nulls for pct_change when base==0 or missing)
@@ -23,7 +29,9 @@ const MetricDelta = z.object({
 // Yearly deltas aggregate: core metrics (modeled after AggregateMetricsMV)
 // Each metric from AggregateMetricsMV gets a MetricDelta object
 // ----------------------------------------------------------------------------
-export const YearlyDeltasMetrics = z.object({
+export const YearlyDeltasMetrics = z.object<
+  Record<MetricField, typeof MetricDelta>
+>({
   // Counts and totals
   total_sales: MetricDelta.describe("Deltas for total number of transactions"),
   total_price: MetricDelta.describe("Deltas for sum of transaction prices"),
@@ -39,8 +47,12 @@ export const YearlyDeltasMetrics = z.object({
   ),
 
   // Distribution statistics
+  min_price: MetricDelta.describe("Deltas for minimum price"),
+  max_price: MetricDelta.describe("Deltas for maximum price"),
   median_price: MetricDelta.describe("Deltas for median price"),
   median_area: MetricDelta.describe("Deltas for median area"),
+  min_price_m2: MetricDelta.describe("Deltas for minimum price/m²"),
+  max_price_m2: MetricDelta.describe("Deltas for maximum price/m²"),
   price_m2_p25: MetricDelta.describe("Deltas for 25th percentile price/m²"),
   price_m2_p75: MetricDelta.describe("Deltas for 75th percentile price/m²"),
   price_m2_iqr: MetricDelta.describe("Deltas for IQR of price/m²"),
@@ -50,7 +62,9 @@ export const YearlyDeltasMetrics = z.object({
 // ----------------------------------------------------------------------------
 // Optional composition breakdowns (keep if you need apartment/house breakdown)
 // ----------------------------------------------------------------------------
-const ApartmentCompositionDeltas = z.object({
+const ApartmentCompositionDeltas = z.object<
+  Record<ApartmentCompositionField, typeof MetricDelta>
+>({
   total_apartments: MetricDelta,
   apartment_1_room: MetricDelta,
   apartment_2_room: MetricDelta,
@@ -59,7 +73,9 @@ const ApartmentCompositionDeltas = z.object({
   apartment_5_room: MetricDelta,
 });
 
-const HouseCompositionDeltas = z.object({
+const HouseCompositionDeltas = z.object<
+  Record<HouseCompositionField, typeof MetricDelta>
+>({
   total_houses: MetricDelta,
   house_1_room: MetricDelta,
   house_2_room: MetricDelta,
@@ -73,12 +89,11 @@ const HouseCompositionDeltas = z.object({
 // ----------------------------------------------------------------------------
 export const YearlyDeltasByInseeSchema = z.object({
   // Dimensions
-  inseeCode: z.string().describe("INSEE code for the commune"),
-  year: z.number().int().describe("Comparison year (current period)"),
-  base_year: z
-    .number()
-    .int()
-    .describe("Base year used for the delta (e.g. year - 1)"),
+  inseeCode: schemas.INSEE_CODE_SCHEMA.describe("INSEE code for the commune"),
+  year: schemas.YEAR_SCHEMA.describe("Comparison year (current period)"),
+  base_year: schemas.YEAR_SCHEMA.describe(
+    "Base year used for the delta (e.g. year - 1)"
+  ),
 
   // Core metrics deltas
   ...YearlyDeltasMetrics.shape,
@@ -92,49 +107,25 @@ export const YearlyDeltasByInseeSchema = z.object({
 // Yearly deltas by SECTION (if you want section-level MV rows)
 // ----------------------------------------------------------------------------
 export const YearlyDeltasBySectionSchema = YearlyDeltasByInseeSchema.extend({
-  section: z.string().describe("Section identifier within the commune"),
+  section: schemas.SECTION_SCHEMA.describe(
+    "Section identifier within the commune"
+  ),
   // inseeCode, year, base_year and metrics are inherited
 });
 
 // ----------------------------------------------------------------------------
 // Query param schemas for delta endpoints
 // ----------------------------------------------------------------------------
-const PaginationParams = z.object({
-  limit: z.coerce.number().int().min(1).max(2000).default(200),
-  offset: z.coerce.number().int().min(0).default(0),
-});
 
-export const YearDeltaParamsSchema = PaginationParams.extend({
-  level: z.enum(["insee", "section"]).default("insee"),
-  inseeCode: z.string().optional(),
-  section: z.string().optional(),
-  year: z.coerce
-    .number()
-    .int()
-    .describe("Comparison year (e.g. 2024)")
-    .optional(),
-  base_year: z.coerce
-    .number()
-    .int()
-    .describe("Base year (e.g. 2023)")
-    .optional(),
-  metric: z
-    .enum([
-      "total_sales",
-      "total_price",
-      "avg_price",
-      "total_area",
-      "avg_area",
-      "avg_price_m2",
-      "median_price",
-      "median_area",
-      "price_m2_p25",
-      "price_m2_p75",
-      "price_m2_iqr",
-      "price_m2_stddev",
-    ])
-    .optional()
-    .describe("If provided, limit sorting/filters to this metric"),
+export const YearDeltaParamsSchema = schemas.PaginationParams.extend({
+  level: schemas.LEVEL_SCHEMA,
+  inseeCode: schemas.INSEE_CODE_ARRAY_SCHEMA,
+  section: schemas.SECTION_ARRAY_SCHEMA,
+  year: schemas.YEAR_SCHEMA.describe("Comparison year (e.g. 2024)").optional(),
+  base_year: schemas.YEAR_SCHEMA.describe("Base year (e.g. 2023)").optional(),
+  metric: schemas.METRIC_FIELD_SCHEMA.optional().describe(
+    "If provided, limit sorting/filters to this metric"
+  ),
   sortBy: z
     .enum([
       "pct_change",
@@ -147,7 +138,7 @@ export const YearDeltaParamsSchema = PaginationParams.extend({
     ])
     .optional()
     .describe("Sort ordering applied to the returned rows"),
-  sortOrder: z.enum(["asc", "desc"]).default("desc"),
+  sortOrder: schemas.SortOrderSchema,
   tag: z
     .string()
     .optional()

@@ -12,11 +12,11 @@ import {
   apartments_by_section_year,
 } from "@/db/schema";
 import {
-  type AggregateMetricsMVKey,
   type MapFeatureParams,
   type MapCommuneFeatureCollection,
   type MapSectionFeatureCollection,
 } from "@/routes/sales/map/map.schemas";
+import type { MetricField } from "@/routes/sales/shared/types";
 import { and, eq, sql } from "drizzle-orm";
 
 type GetMapFeaturesParams = MapFeatureParams & {
@@ -135,7 +135,7 @@ function computeCollectionBbox(
 
 async function fetchCommuneFeatures(params: {
   mv: CommuneMV;
-  field: AggregateMetricsMVKey;
+  field: MetricField;
   year: number;
   month?: number;
   bbox: [number, number, number, number];
@@ -192,7 +192,7 @@ async function fetchCommuneFeatures(params: {
 
 async function fetchSectionFeatures(params: {
   mv: SectionMV;
-  field: AggregateMetricsMVKey;
+  field: MetricField;
   year: number;
   month?: number;
   bbox: [number, number, number, number];

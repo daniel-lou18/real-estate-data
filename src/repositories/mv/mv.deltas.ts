@@ -1,4 +1,4 @@
-import { and, asc, desc, eq, gte, lte, sql } from "drizzle-orm";
+import { and, asc, desc, eq, gte, inArray, lte, sql } from "drizzle-orm";
 import { db } from "@/db";
 import {
   apartments_by_insee_code_year_deltas,
@@ -11,43 +11,11 @@ import type {
   YearlyDeltasBySection,
   YearDeltaParams,
 } from "@/routes/sales/mv/mv_deltas.schemas";
-
-// ----------------------------------------------------------------------------
-// Metric lists (matching the schema)
-// ----------------------------------------------------------------------------
-
-const AGG_METRICS = [
-  "total_sales",
-  "total_price",
-  "avg_price",
-  "total_area",
-  "avg_area",
-  "avg_price_m2",
-  "median_price",
-  "median_area",
-  "price_m2_p25",
-  "price_m2_p75",
-  "price_m2_iqr",
-  "price_m2_stddev",
-] as const;
-
-const APARTMENT_COMPOSITION_METRICS = [
-  "total_apartments",
-  "apartment_1_room",
-  "apartment_2_room",
-  "apartment_3_room",
-  "apartment_4_room",
-  "apartment_5_room",
-] as const;
-
-const HOUSE_COMPOSITION_METRICS = [
-  "total_houses",
-  "house_1_room",
-  "house_2_room",
-  "house_3_room",
-  "house_4_room",
-  "house_5_room",
-] as const;
+import {
+  APARTMENT_COMPOSITION_FIELDS,
+  HOUSE_COMPOSITION_FIELDS,
+  METRIC_FIELDS,
+} from "@/routes/sales/shared/constants";
 
 // ----------------------------------------------------------------------------
 // Transformation helpers: Convert flat DB structure to nested Zod schema
@@ -126,7 +94,7 @@ function transformDeltaRow<
   }
 
   // Transform core metrics
-  for (const metric of AGG_METRICS) {
+  for (const metric of METRIC_FIELDS) {
     base[metric] = transformMetricDelta(row, metric);
   }
 
@@ -134,12 +102,12 @@ function transformDeltaRow<
   if (hasApartments) {
     base.apartments = transformCompositionDeltas(
       row,
-      APARTMENT_COMPOSITION_METRICS
+      APARTMENT_COMPOSITION_FIELDS
     );
   }
 
   if (hasHouses) {
-    base.houses = transformCompositionDeltas(row, HOUSE_COMPOSITION_METRICS);
+    base.houses = transformCompositionDeltas(row, HOUSE_COMPOSITION_FIELDS);
   }
 
   return base as T;
@@ -194,24 +162,69 @@ function getDeltaOrderBy(
 // Where condition builders
 // ----------------------------------------------------------------------------
 
-function buildInseeDeltaWhereConditions(
-  view:
-    | typeof apartments_by_insee_code_year_deltas
-    | typeof houses_by_insee_code_year_deltas,
-  params: YearDeltaParams
-) {
-  const conditions = [];
-  if (params.inseeCode) {
-    conditions.push(eq(sql`insee_code`, params.inseeCode));
+/**
+ * Adds inseeCode filter conditions to the conditions array
+ */
+function addInseeCodeConditions<T extends { inseeCode: any }>(
+  conditions: ReturnType<typeof eq>[],
+  view: T,
+  inseeCodes: string[] | undefined
+): void {
+  if (!inseeCodes || inseeCodes.length === 0) return;
+
+  // Ensure it's an array (schema transform should handle this, but be defensive)
+  const codes = Array.isArray(inseeCodes) ? inseeCodes : [inseeCodes];
+
+  if (codes.length === 1) {
+    conditions.push(eq(view.inseeCode, codes[0]));
+  } else {
+    conditions.push(inArray(view.inseeCode, codes));
   }
+}
+
+/**
+ * Adds section filter conditions to the conditions array
+ */
+function addSectionConditions<T extends { section: any }>(
+  conditions: ReturnType<typeof eq>[],
+  view: T,
+  sections: string[] | undefined
+): void {
+  if (!sections || sections.length === 0) return;
+
+  // Ensure it's an array (schema transform should handle this, but be defensive)
+  const secs = Array.isArray(sections) ? sections : [sections];
+
+  if (secs.length === 1) {
+    conditions.push(eq(view.section, secs[0]));
+  } else {
+    conditions.push(inArray(view.section, secs));
+  }
+}
+
+/**
+ * Adds temporal filter conditions (year, base_year) to the conditions array
+ */
+function addTemporalConditions<T extends { year: any; base_year: any }>(
+  conditions: ReturnType<typeof eq>[],
+  view: T,
+  params: YearDeltaParams
+): void {
   if (params.year) {
-    conditions.push(eq(sql`year`, params.year));
+    conditions.push(eq(view.year, params.year));
   }
   if (params.base_year) {
-    conditions.push(eq(sql`base_year`, params.base_year));
+    conditions.push(eq(view.base_year, params.base_year));
   }
+}
 
-  // Metric-specific filters (if metric is provided)
+/**
+ * Adds metric-specific filter conditions to the conditions array
+ */
+function addMetricFilterConditions(
+  conditions: ReturnType<typeof eq>[],
+  params: YearDeltaParams
+): void {
   const metric = params.metric || "total_sales";
   const getMetricColumn = (suffix: string) => {
     const columnName = `${metric}_${suffix}`;
@@ -233,8 +246,44 @@ function buildInseeDeltaWhereConditions(
   if (params.min_pct_change !== undefined) {
     conditions.push(gte(getMetricColumn("pct_change"), params.min_pct_change));
   }
+}
+
+/**
+ * Builds where conditions for delta queries.
+ * @param view - The materialized view to query
+ * @param params - Query parameters
+ * @param includeSection - Whether to include section filtering (for section-level views)
+ */
+function buildDeltaWhereConditions<
+  T extends { inseeCode: any; year: any; base_year: any; section?: any }
+>(
+  view: T,
+  params: YearDeltaParams,
+  includeSection: boolean = false
+): ReturnType<typeof eq>[] {
+  const conditions: ReturnType<typeof eq>[] = [];
+
+  addInseeCodeConditions(conditions, view, params.inseeCode);
+  if (includeSection && view.section) {
+    addSectionConditions(
+      conditions,
+      view as T & { section: any },
+      params.section
+    );
+  }
+  addTemporalConditions(conditions, view, params);
+  addMetricFilterConditions(conditions, params);
 
   return conditions;
+}
+
+function buildInseeDeltaWhereConditions(
+  view:
+    | typeof apartments_by_insee_code_year_deltas
+    | typeof houses_by_insee_code_year_deltas,
+  params: YearDeltaParams
+) {
+  return buildDeltaWhereConditions(view as any, params, false);
 }
 
 function buildSectionDeltaWhereConditions(
@@ -243,44 +292,7 @@ function buildSectionDeltaWhereConditions(
     | typeof houses_by_section_year_deltas,
   params: YearDeltaParams
 ) {
-  const conditions = [];
-  if (params.inseeCode) {
-    conditions.push(eq(sql`insee_code`, params.inseeCode));
-  }
-  if (params.section) {
-    conditions.push(eq(sql`section`, params.section));
-  }
-  if (params.year) {
-    conditions.push(eq(sql`year`, params.year));
-  }
-  if (params.base_year) {
-    conditions.push(eq(sql`base_year`, params.base_year));
-  }
-
-  // Metric-specific filters (if metric is provided)
-  const metric = params.metric || "total_sales";
-  const getMetricColumn = (suffix: string) => {
-    const columnName = `${metric}_${suffix}`;
-    return sql<number>`${sql.raw(`"${columnName}"`)}`;
-  };
-
-  if (params.min_current !== undefined) {
-    conditions.push(gte(getMetricColumn("current"), params.min_current));
-  }
-  if (params.max_current !== undefined) {
-    conditions.push(lte(getMetricColumn("current"), params.max_current));
-  }
-  if (params.min_base !== undefined) {
-    conditions.push(gte(getMetricColumn("base"), params.min_base));
-  }
-  if (params.min_delta !== undefined) {
-    conditions.push(gte(getMetricColumn("delta"), params.min_delta));
-  }
-  if (params.min_pct_change !== undefined) {
-    conditions.push(gte(getMetricColumn("pct_change"), params.min_pct_change));
-  }
-
-  return conditions;
+  return buildDeltaWhereConditions(view as any, params, true);
 }
 
 // ----------------------------------------------------------------------------

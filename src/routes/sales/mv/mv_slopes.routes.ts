@@ -8,7 +8,7 @@ import {
   HousesBySectionMonthSlopeSchema,
   InseeMonthSlopeParamsSchema,
   SectionMonthSlopeParamsSchema,
-} from "./mv.schemas";
+} from "./mv_slopes.schemas";
 
 const tags = ["MV"];
 

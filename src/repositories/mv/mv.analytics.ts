@@ -1,4 +1,4 @@
-import { and, asc, desc, eq } from "drizzle-orm";
+import { and, asc, desc, eq, inArray } from "drizzle-orm";
 import { db } from "@/db";
 import {
   apartments_by_insee_code_month,
@@ -13,8 +13,6 @@ import {
   houses_by_section_year,
 } from "@/db/schema/mv_property_sales";
 import type {
-  ApartmentsByInseeMonth,
-  HousesByInseeMonth,
   ApartmentsByInseeYear,
   HousesByInseeYear,
   ApartmentsByInseeWeek,
@@ -23,15 +21,16 @@ import type {
   InseeYearParams,
   InseeWeekParams,
   SortBy,
-  SortOrder,
   ApartmentsBySectionMonth,
   HousesBySectionMonth,
   ApartmentsBySectionYear,
   HousesBySectionYear,
   SectionMonthParams,
   SectionYearParams,
+  ApartmentsByInseeMonth,
+  HousesByInseeMonth,
 } from "@/routes/sales/mv/mv.schemas";
-
+import type { SortOrder } from "@/routes/sales/shared/schemas";
 /**
  * Generic orderBy helper that works for all views.
  * Returns an array of sort expressions for multi-field sorting.
@@ -115,14 +114,82 @@ function getOrderBy<
   }
 }
 
+// ----------------------------------------------------------------------------
+// Where condition builders
+// ----------------------------------------------------------------------------
+
+/**
+ * Adds inseeCode filter conditions to the conditions array
+ */
+function addInseeCodeConditions<T extends { inseeCode: any }>(
+  conditions: ReturnType<typeof eq>[],
+  view: T,
+  inseeCodes: string[] | undefined
+): void {
+  if (!inseeCodes) return;
+
+  // Ensure it's an array (schema transform should handle this, but be defensive)
+  const codes = Array.isArray(inseeCodes) ? inseeCodes : [inseeCodes];
+
+  if (codes.length === 0) return;
+
+  if (codes.length === 1) {
+    conditions.push(eq(view.inseeCode, codes[0]));
+  } else {
+    conditions.push(inArray(view.inseeCode, codes));
+  }
+}
+
+/**
+ * Adds section filter conditions to the conditions array
+ */
+function addSectionConditions<T extends { section: any }>(
+  conditions: ReturnType<typeof eq>[],
+  view: T,
+  sections: string[] | undefined
+): void {
+  if (!sections) return;
+
+  // Ensure it's an array (schema transform should handle this, but be defensive)
+  const secs = Array.isArray(sections) ? sections : [sections];
+
+  if (secs.length === 0) return;
+
+  if (secs.length === 1) {
+    conditions.push(eq(view.section, secs[0]));
+  } else {
+    conditions.push(inArray(view.section, secs));
+  }
+}
+
+function buildInseeWhereConditions<T extends { inseeCode: any }>(
+  view: T,
+  params: InseeMonthParams | InseeYearParams | InseeWeekParams
+): ReturnType<typeof eq>[] {
+  const conditions: ReturnType<typeof eq>[] = [];
+  addInseeCodeConditions(conditions, view, params.inseeCode);
+  return conditions;
+}
+
+function buildSectionWhereConditions<
+  T extends { inseeCode: any; section: any }
+>(
+  view: T,
+  params: SectionMonthParams | SectionYearParams
+): ReturnType<typeof eq>[] {
+  const conditions: ReturnType<typeof eq>[] = [];
+  addInseeCodeConditions(conditions, view, params.inseeCode);
+  addSectionConditions(conditions, view, params.section);
+  return conditions;
+}
+
 function buildMonthWhereConditions(
   view:
     | typeof apartments_by_insee_code_month
     | typeof houses_by_insee_code_month,
   params: InseeMonthParams
 ) {
-  const conditions = [];
-  if (params.inseeCode) conditions.push(eq(view.inseeCode, params.inseeCode));
+  const conditions = buildInseeWhereConditions(view, params);
   if (params.year) conditions.push(eq(view.year, params.year));
   if (params.month) conditions.push(eq(view.month, params.month));
   return conditions;
@@ -132,8 +199,7 @@ function buildYearWhereConditions(
   view: typeof apartments_by_insee_code_year | typeof houses_by_insee_code_year,
   params: InseeYearParams
 ) {
-  const conditions = [];
-  if (params.inseeCode) conditions.push(eq(view.inseeCode, params.inseeCode));
+  const conditions = buildInseeWhereConditions(view, params);
   if (params.year) conditions.push(eq(view.year, params.year));
   return conditions;
 }
@@ -142,8 +208,7 @@ function buildWeekWhereConditions(
   view: typeof apartments_by_insee_code_week | typeof houses_by_insee_code_week,
   params: InseeWeekParams
 ) {
-  const conditions = [];
-  if (params.inseeCode) conditions.push(eq(view.inseeCode, params.inseeCode));
+  const conditions = buildInseeWhereConditions(view, params);
   if (params.iso_year) conditions.push(eq(view.iso_year, params.iso_year));
   if (params.iso_week) conditions.push(eq(view.iso_week, params.iso_week));
   return conditions;
@@ -153,9 +218,7 @@ function buildSectionMonthWhereConditions(
   view: typeof apartments_by_section_month | typeof houses_by_section_month,
   params: SectionMonthParams
 ) {
-  const conditions = [];
-  if (params.inseeCode) conditions.push(eq(view.inseeCode, params.inseeCode));
-  if (params.section) conditions.push(eq(view.section, params.section));
+  const conditions = buildSectionWhereConditions(view, params);
   if (params.year) conditions.push(eq(view.year, params.year));
   if (params.month) conditions.push(eq(view.month, params.month));
   return conditions;
@@ -165,9 +228,7 @@ function buildSectionYearWhereConditions(
   view: typeof apartments_by_section_year | typeof houses_by_section_year,
   params: SectionYearParams
 ) {
-  const conditions = [];
-  if (params.inseeCode) conditions.push(eq(view.inseeCode, params.inseeCode));
-  if (params.section) conditions.push(eq(view.section, params.section));
+  const conditions = buildSectionWhereConditions(view, params);
   if (params.year) conditions.push(eq(view.year, params.year));
   return conditions;
 }

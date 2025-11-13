@@ -1,10 +1,6 @@
 import { db } from "@/db";
 import { communesGeom, sectionsGeom } from "@/db/schema";
-import type {
-  Legend,
-  MapFeatureParams,
-  AggregateMetricsMVKey,
-} from "@/routes/sales/map/map.schemas";
+import type { Legend, MapFeatureParams } from "@/routes/sales/map/map.schemas";
 import { and, sql } from "drizzle-orm";
 import {
   getMv,
@@ -12,6 +8,7 @@ import {
   buildSpatialEnvelope,
 } from "./map.features";
 import type { CommuneMV, SectionMV } from "./map.features";
+import type { MetricField } from "@/routes/sales/shared/types";
 
 type GetLegendParams = MapFeatureParams & {
   bbox?: [number, number, number, number];
@@ -49,7 +46,7 @@ function formatBucketLabel(min: number | null, max: number | null): string {
 
 async function computeCommuneLegend(params: {
   mv: CommuneMV;
-  field: AggregateMetricsMVKey;
+  field: MetricField;
   year: number;
   month?: number;
   bbox?: [number, number, number, number];
@@ -100,7 +97,7 @@ async function computeCommuneLegend(params: {
 
 async function computeSectionLegend(params: {
   mv: SectionMV;
-  field: AggregateMetricsMVKey;
+  field: MetricField;
   inseeCode?: string;
   year: number;
   month?: number;
@@ -156,7 +153,7 @@ async function computeSectionLegend(params: {
 
 async function countInBucket(params: {
   mv: CommuneMV | SectionMV;
-  field: AggregateMetricsMVKey;
+  field: MetricField;
   inseeCode?: string;
   year: number;
   month?: number;
