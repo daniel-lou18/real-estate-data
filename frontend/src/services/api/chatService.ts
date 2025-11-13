@@ -1,4 +1,4 @@
-import type { TableData } from "@/types";
+import type { TableData } from "@/components/table/types";
 import { apiService } from "./baseApiService";
 import type { ModelMessage } from "ai";
 

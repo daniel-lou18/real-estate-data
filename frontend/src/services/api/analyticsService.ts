@@ -1,7 +1,6 @@
 import { z } from "zod";
 import { apiService, BaseApiService } from "./baseApiService";
-import * as mvSchemas from "./schemas";
-import type * as mvTypes from "./types";
+import * as shared from "@app/shared";
 
 type QueryParams = Record<string, string | number | boolean>;
 
@@ -70,135 +69,135 @@ export class AnalyticsService {
   }
 
   async getApartmentsByInseeYear(
-    params: Partial<mvTypes.InseeYearParams> = {}
-  ): Promise<mvTypes.ApartmentsByInseeYear[]> {
+    params: Partial<shared.InseeYearParams> = {}
+  ): Promise<shared.ApartmentsByInseeYear[]> {
     return this.fetchCollection(
       "/apartments/by-insee-code/year",
-      mvSchemas.ApartmentsByInseeYearSchema.array(),
+      shared.ApartmentsByInseeYearSchema.array(),
       params
     );
   }
 
   async getHousesByInseeYear(
-    params: Partial<mvTypes.InseeYearParams> = {}
-  ): Promise<mvTypes.HousesByInseeYear[]> {
+    params: Partial<shared.InseeYearParams> = {}
+  ): Promise<shared.HousesByInseeYear[]> {
     return this.fetchCollection(
       "/houses/by-insee-code/year",
-      mvSchemas.HousesByInseeYearSchema.array(),
+      shared.HousesByInseeYearSchema.array(),
       params
     );
   }
 
-  async getApartmentsByInseeYoY(params: Partial<mvTypes.YearDeltaParams> = {}) {
+  async getApartmentsByInseeYoY(params: Partial<shared.YearDeltaParams> = {}) {
     return this.fetchCollection(
       "/apartments/by-insee-code/year/deltas",
-      mvSchemas.YearlyDeltasByInseeSchema.array(),
+      shared.YearlyDeltasByInseeSchema.array(),
       params
     );
   }
 
-  async getHousesByInseeYoY(params: Partial<mvTypes.YearDeltaParams> = {}) {
+  async getHousesByInseeYoY(params: Partial<shared.YearDeltaParams> = {}) {
     return this.fetchCollection(
       "/houses/by-insee-code/year/deltas",
-      mvSchemas.YearlyDeltasByInseeSchema.array(),
+      shared.YearlyDeltasByInseeSchema.array(),
       params
     );
   }
 
   async getApartmentsByInseeMonth(
-    params: Partial<mvTypes.InseeMonthParams> = {}
-  ): Promise<mvTypes.ApartmentsByInseeMonth[]> {
+    params: Partial<shared.InseeMonthParams> = {}
+  ): Promise<shared.ApartmentsByInseeMonth[]> {
     return this.fetchCollection(
       "/apartments/by-insee-code/month",
-      mvSchemas.ApartmentsByInseeMonthSchema.array(),
+      shared.ApartmentsByInseeMonthSchema.array(),
       params
     );
   }
 
   async getHousesByInseeMonth(
-    params: Partial<mvTypes.InseeMonthParams> = {}
-  ): Promise<mvTypes.HousesByInseeMonth[]> {
+    params: Partial<shared.InseeMonthParams> = {}
+  ): Promise<shared.HousesByInseeMonth[]> {
     return this.fetchCollection(
       "/houses/by-insee-code/month",
-      mvSchemas.HousesByInseeMonthSchema.array(),
+      shared.HousesByInseeMonthSchema.array(),
       params
     );
   }
 
   async getApartmentsByInseeWeek(
-    params: Partial<mvTypes.InseeWeekParams> = {}
-  ): Promise<mvTypes.ApartmentsByInseeWeek[]> {
+    params: Partial<shared.InseeWeekParams> = {}
+  ): Promise<shared.ApartmentsByInseeWeek[]> {
     return this.fetchCollection(
       "/apartments/by-insee-code/week",
-      mvSchemas.ApartmentsByInseeWeekSchema.array(),
+      shared.ApartmentsByInseeWeekSchema.array(),
       params
     );
   }
 
   async getHousesByInseeWeek(
-    params: Partial<mvTypes.InseeWeekParams> = {}
-  ): Promise<mvTypes.HousesByInseeWeek[]> {
+    params: Partial<shared.InseeWeekParams> = {}
+  ): Promise<shared.HousesByInseeWeek[]> {
     return this.fetchCollection(
       "/houses/by-insee-code/week",
-      mvSchemas.HousesByInseeWeekSchema.array(),
+      shared.HousesByInseeWeekSchema.array(),
       params
     );
   }
 
   async getApartmentsBySectionYear(
-    params: Partial<mvTypes.SectionYearParams> = {}
-  ): Promise<mvTypes.ApartmentsBySectionYear[]> {
+    params: Partial<shared.SectionYearParams> = {}
+  ): Promise<shared.ApartmentsBySectionYear[]> {
     return this.fetchCollection(
       "/apartments/by-section/year",
-      mvSchemas.ApartmentsBySectionYearSchema.array(),
+      shared.ApartmentsBySectionYearSchema.array(),
       params
     );
   }
 
   async getApartmentsBySectionYoY(
-    params: Partial<mvTypes.YearDeltaParams> = {}
+    params: Partial<shared.YearDeltaParams> = {}
   ) {
     return this.fetchCollection(
       "/apartments/by-section/year/deltas",
-      mvSchemas.YearlyDeltasBySectionSchema.array(),
+      shared.YearlyDeltasBySectionSchema.array(),
       params
     );
   }
 
-  async getHousesBySectionYoY(params: Partial<mvTypes.YearDeltaParams> = {}) {
+  async getHousesBySectionYoY(params: Partial<shared.YearDeltaParams> = {}) {
     return this.fetchCollection(
       "/houses/by-section/year/deltas",
-      mvSchemas.YearlyDeltasBySectionSchema.array(),
+      shared.YearlyDeltasBySectionSchema.array(),
       params
     );
   }
 
   async getHousesBySectionYear(
-    params: Partial<mvTypes.SectionYearParams> = {}
-  ): Promise<mvTypes.HousesBySectionYear[]> {
+    params: Partial<shared.SectionYearParams> = {}
+  ): Promise<shared.HousesBySectionYear[]> {
     return this.fetchCollection(
       "/houses/by-section/year",
-      mvSchemas.HousesBySectionYearSchema.array(),
+      shared.HousesBySectionYearSchema.array(),
       params
     );
   }
 
   async getApartmentsBySectionMonth(
-    params: Partial<mvTypes.SectionMonthParams> = {}
-  ): Promise<mvTypes.ApartmentsBySectionMonth[]> {
+    params: Partial<shared.SectionMonthParams> = {}
+  ): Promise<shared.ApartmentsBySectionMonth[]> {
     return this.fetchCollection(
       "/apartments/by-section/month",
-      mvSchemas.ApartmentsBySectionMonthSchema.array(),
+      shared.ApartmentsBySectionMonthSchema.array(),
       params
     );
   }
 
   async getHousesBySectionMonth(
-    params: Partial<mvTypes.SectionMonthParams> = {}
-  ): Promise<mvTypes.HousesBySectionMonth[]> {
+    params: Partial<shared.SectionMonthParams> = {}
+  ): Promise<shared.HousesBySectionMonth[]> {
     return this.fetchCollection(
       "/houses/by-section/month",
-      mvSchemas.HousesBySectionMonthSchema.array(),
+      shared.HousesBySectionMonthSchema.array(),
       params
     );
   }
