@@ -3,19 +3,18 @@ import type {
   Year,
   Month,
   FeatureLevel,
-  PropertyTypeField,
-  MetricField,
-} from "@/routes/sales/shared/types";
-import { NumericFilterSchema, UserIntentSchema } from "./schemas";
-import type { z } from "zod";
-
-export type NumericFilter = z.infer<typeof NumericFilterSchema>;
-
-export type UserIntent = z.infer<typeof UserIntentSchema>;
+  PropertyType,
+} from "./dimensions";
+import type { MetricField } from "./metrics";
+import type {
+  NumericFilterSchema,
+  UserIntentSchema,
+} from "../schemas/intent.schemas";
+import { z } from "zod";
 
 export interface FilterState {
   level: FeatureLevel;
-  propertyType: PropertyTypeField;
+  propertyType: PropertyType;
   field: MetricField;
   year: Year;
   inseeCodes: string[];
@@ -28,3 +27,7 @@ export interface FilterState {
   offset?: number;
   bbox?: [number, number, number, number];
 }
+
+export type UserIntent = z.infer<typeof UserIntentSchema>;
+
+export type NumericFilter = z.infer<typeof NumericFilterSchema>;

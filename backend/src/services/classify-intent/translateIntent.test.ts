@@ -1,7 +1,7 @@
 import { describe, it, expect } from "vitest";
 import { translateIntent } from "./translateIntent";
-import type { UserIntent } from "./types";
-import { FEATURE_YEARS, MONTHS } from "@/routes/sales/shared/constants";
+import type { UserIntent } from "@app/shared";
+import { FEATURE_YEARS, MONTHS } from "@app/shared";
 import { ZodError } from "zod";
 
 describe("translateIntent", () => {

@@ -15,7 +15,7 @@ import type {
   SectionMonthSlopeParams,
   SlopeSortBy,
   SortOrder,
-} from "@/routes/sales/mv/mv.schemas";
+} from "@app/shared";
 
 // ----------------------------------------------------------------------------
 // Helpers
@@ -64,8 +64,8 @@ function getSlopeOrderBy<T extends Record<string, any>>(
   const defaultOrder = (view as any).inseeCode
     ? [dir((view as any).inseeCode)]
     : (view as any).section
-    ? [dir((view as any).section)]
-    : [];
+      ? [dir((view as any).section)]
+      : [];
 
   switch (sortBy) {
     case "inseeCode":

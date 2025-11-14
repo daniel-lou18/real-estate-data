@@ -6,16 +6,14 @@ import {
   apartments_by_section_year_deltas,
   houses_by_section_year_deltas,
 } from "@/db/schema/mv_property_sales_deltas";
-import type {
-  YearlyDeltasByInsee,
-  YearlyDeltasBySection,
-  YearDeltaParams,
-} from "@/routes/sales/mv/mv_deltas.schemas";
 import {
   APARTMENT_COMPOSITION_FIELDS,
   HOUSE_COMPOSITION_FIELDS,
   METRIC_FIELDS,
-} from "@/routes/sales/shared/constants";
+  type YearlyDeltasByInsee,
+  type YearlyDeltasBySection,
+  type YearDeltaParams,
+} from "@app/shared";
 
 // ----------------------------------------------------------------------------
 // Transformation helpers: Convert flat DB structure to nested Zod schema
@@ -76,7 +74,7 @@ function transformCompositionDeltas(
  * Transforms a raw delta row from the database into the Zod schema format
  */
 function transformDeltaRow<
-  T extends { inseeCode: string; year: number; base_year: number }
+  T extends { inseeCode: string; year: number; base_year: number },
 >(
   row: Record<string, any>,
   hasSection: boolean,
@@ -255,7 +253,7 @@ function addMetricFilterConditions(
  * @param includeSection - Whether to include section filtering (for section-level views)
  */
 function buildDeltaWhereConditions<
-  T extends { inseeCode: any; year: any; base_year: any; section?: any }
+  T extends { inseeCode: any; year: any; base_year: any; section?: any },
 >(
   view: T,
   params: YearDeltaParams,

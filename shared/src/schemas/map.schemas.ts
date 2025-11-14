@@ -1,5 +1,5 @@
-import z from "zod";
-import * as schemas from "../shared/schemas";
+import { z } from "zod";
+import * as schemas from "./base.schemas";
 
 // GeoJSON Position = [longitude, latitude]
 const PositionSchema = z.tuple([z.number(), z.number()]);
@@ -130,14 +130,3 @@ export const LegendSchema = z.object({
   breaks: z.array(z.number()),
   stats: LegendStats,
 });
-
-export type MapFeatureParams = z.infer<typeof MapFeatureParamsSchema>;
-export type MapCommuneProperties = z.infer<typeof MapCommunePropertiesSchema>;
-export type MapSectionProperties = z.infer<typeof MapSectionPropertiesSchema>;
-export type MapCommuneFeatureCollection = z.infer<
-  typeof MapCommuneFeatureCollectionSchema
->;
-export type MapSectionFeatureCollection = z.infer<
-  typeof MapSectionFeatureCollectionSchema
->;
-export type Legend = z.infer<typeof LegendSchema>;

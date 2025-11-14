@@ -13,13 +13,13 @@ import {
 import { pgMaterializedView } from "drizzle-orm/pg-core";
 import type { AnyPgColumn } from "drizzle-orm/pg-core";
 import { createSelectSchema } from "drizzle-zod";
-import type { AggregateMetrics } from "./constants";
+import type { MetricField } from "@app/shared";
 
 /**
  * Generates common aggregate metrics that match AggregateMetricsMV schema.
  * Takes an area column (ApartmentFloorArea or HouseFloorArea) as parameter.
  */
-function buildAggregateMetrics(areaColumn: AnyPgColumn): Record<AggregateMetrics, any> {
+function buildAggregateMetrics(areaColumn: AnyPgColumn): Record<MetricField, any> {
   const pricePerM2 = sql`${propertySales.price} / nullif(${areaColumn}, 0)`;
 
   return {

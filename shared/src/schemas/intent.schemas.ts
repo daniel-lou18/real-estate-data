@@ -1,25 +1,24 @@
+import { z } from "zod";
+import { METRIC_FIELDS } from "../constants/base/metrics";
 import {
-  DIMENSION_FIELDS,
-  METRIC_FIELDS,
-} from "@/routes/sales/shared/constants";
-import {
-  INSEE_CODE_ARRAY_SCHEMA,
   METRIC_FIELD_SCHEMA,
-  PROPERTY_TYPE_SCHEMA,
-  MONTH_SCHEMA,
-  SECTION_ARRAY_SCHEMA,
   YEAR_SCHEMA,
-} from "@/routes/sales/shared/schemas";
-import z from "zod";
+  MONTH_SCHEMA,
+  PROPERTY_TYPE_SCHEMA,
+  SECTION_ARRAY_SCHEMA,
+  INSEE_CODE_ARRAY_SCHEMA,
+} from "./base.schemas";
+import { DIMENSION_FIELDS } from "../constants/base/dimensions";
 
-export const NumericFilterOperations = ["gte", "lte", "between"] as const;
+// Numeric Filter Schemas
+export const NUMERIC_FILTER_OPERATIONS = ["gte", "lte", "between"] as const;
 
-export const NumericFilterKey = z.enum(METRIC_FIELDS);
-export const NumericFilterOperation = z.enum(NumericFilterOperations);
+export const NumericFilterOperation = z.enum(NUMERIC_FILTER_OPERATIONS);
 export const NumericFilterValueSchema = z.union([
   z.number(),
   z.array(z.number()),
 ]);
+
 export const NumericFilterSchema = z
   .record(
     z.string(),

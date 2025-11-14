@@ -57,30 +57,3 @@ export const PROPERTY_TYPE_SCHEMA = z.enum(PROPERTY_TYPES).default("apartment");
 export const METRIC_FIELD_SCHEMA = z
   .enum(METRIC_FIELDS)
   .default("avg_price_m2");
-
-// Numeric Filter Schemas
-export const NUMERIC_FILTER_OPERATIONS = ["gte", "lte", "between"] as const;
-
-export const NumericFilterOperation = z.enum(NUMERIC_FILTER_OPERATIONS);
-export const NumericFilterValueSchema = z.union([
-  z.number(),
-  z.array(z.number()),
-]);
-
-export const NumericFilterSchema = z
-  .record(
-    z.string(),
-    z.object({
-      operation: NumericFilterOperation,
-      value: NumericFilterValueSchema,
-    })
-  )
-  .refine(
-    (filters) => {
-      const keys = Object.keys(filters);
-      return keys.every((key) => METRIC_FIELDS.includes(key as any));
-    },
-    {
-      message: "Filter keys must be one of the allowed filter keys",
-    }
-  );

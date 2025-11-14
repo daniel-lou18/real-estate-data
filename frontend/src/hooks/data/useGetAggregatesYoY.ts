@@ -5,7 +5,7 @@ import type {
   YearDeltaParams,
   YearlyDeltasByInsee,
   YearlyDeltasBySection,
-} from "@/services/api/types";
+} from "@app/shared";
 
 import { GC_TIME, STALE_TIME } from "./constants";
 import type { QueryOptions } from "./useGetAggregates";

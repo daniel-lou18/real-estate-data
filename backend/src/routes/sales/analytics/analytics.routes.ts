@@ -10,7 +10,7 @@ import {
   SalesByYearSchema,
   SalesSummarySchema,
   PricePerM2DecilesSchema,
-} from "./analytics.schemas";
+} from "@app/shared";
 
 const tags = ["Analytics"];
 

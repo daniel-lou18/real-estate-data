@@ -6,7 +6,7 @@ import type {
   ApartmentsBySectionYear,
   InseeYearParams,
   SectionYearParams,
-} from "@/services/api/types";
+} from "@app/shared";
 
 export type QueryOptions<TQueryFnData, TData = TQueryFnData> = Omit<
   UseQueryOptions<TQueryFnData, Error, TData>,

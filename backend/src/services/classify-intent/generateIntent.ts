@@ -1,12 +1,13 @@
 import { generateObjectService } from "@/services/llm/generateObjectService";
-import { NumericFilterOperations, UserIntentSchema } from "./schemas";
 import {
   DIMENSION_FIELDS,
   FEATURE_YEARS,
   METRIC_FIELDS,
   MONTHS,
   PROPERTY_TYPES,
-} from "@/routes/sales/shared/constants";
+  NUMERIC_FILTER_OPERATIONS,
+  UserIntentSchema,
+} from "@app/shared";
 import type { ModelMessage } from "ai";
 import type { UserIntent } from "./types";
 
@@ -32,7 +33,7 @@ function createUserIntentSystemPrompt(): string {
   const dimensionValues = formatList(DIMENSION_FIELDS);
   const metricValues = formatList(METRIC_FIELDS);
   const propertyTypeValues = formatList(PROPERTY_TYPES);
-  const filterOperations = formatList(NumericFilterOperations);
+  const filterOperations = formatList(NUMERIC_FILTER_OPERATIONS);
   const minYear = FEATURE_YEARS[0];
   const maxYear = FEATURE_YEARS[FEATURE_YEARS.length - 1];
   const minMonth = MONTHS[0];

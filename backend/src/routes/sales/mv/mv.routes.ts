@@ -16,7 +16,7 @@ import {
   SectionMonthParamsSchema,
   ApartmentsBySectionMonthSchema,
   HousesBySectionMonthSchema,
-} from "./mv.schemas";
+} from "@app/shared";
 import jsonContent from "@/openapi/helpers/json-content";
 
 const tags = ["MV"];

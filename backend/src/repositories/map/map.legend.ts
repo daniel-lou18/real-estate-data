@@ -1,6 +1,6 @@
 import { db } from "@/db";
 import { communesGeom, sectionsGeom } from "@/db/schema";
-import type { Legend, MapFeatureParams } from "@/routes/sales/map/map.schemas";
+import type { Legend, MapFeatureParams, MetricField } from "@app/shared";
 import { and, sql } from "drizzle-orm";
 import {
   getMv,
@@ -8,7 +8,6 @@ import {
   buildSpatialEnvelope,
 } from "./map.features";
 import type { CommuneMV, SectionMV } from "./map.features";
-import type { MetricField } from "@/routes/sales/shared/types";
 
 type GetLegendParams = MapFeatureParams & {
   bbox?: [number, number, number, number];

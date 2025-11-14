@@ -7,10 +7,10 @@ import {
 } from "drizzle-orm/pg-core";
 import { createSelectSchema } from "drizzle-zod";
 import {
-  AGG_METRICS,
-  APARTMENT_COMPOSITION_METRICS,
-  HOUSE_COMPOSITION_METRICS,
-} from "./constants";
+  METRIC_FIELDS,
+  APARTMENT_COMPOSITION_FIELDS,
+  HOUSE_COMPOSITION_FIELDS,
+} from "@app/shared";
 import {
   apartmentCompositionColumns,
   houseCompositionColumns,
@@ -117,7 +117,7 @@ function buildLatestYearSlopeMetrics<
   Table extends {
     year: any;
     month: any;
-  }
+  },
 >(metrics: readonly string[], table: Table, source: SQL, alias: string) {
   const latestYear = latestYearSubquery(source);
   const yearColumn = columnRef(table.year, alias);
@@ -156,13 +156,13 @@ export const apartments_by_insee_code_month_slopes = pgMaterializedView(
 ).as((qb) => {
   const source = tableIdentifier("apartments_by_insee_code_month");
   const aggregates = buildLatestYearSlopeMetrics(
-    AGG_METRICS,
+    METRIC_FIELDS,
     apartmentsByInseeCodeMonthTable,
     source,
     "current"
   );
   const composition = buildLatestYearSlopeMetrics(
-    APARTMENT_COMPOSITION_METRICS,
+    APARTMENT_COMPOSITION_FIELDS,
     apartmentsByInseeCodeMonthTable,
     source,
     "current"
@@ -196,13 +196,13 @@ export const houses_by_insee_code_month_slopes = pgMaterializedView(
 ).as((qb) => {
   const source = tableIdentifier("houses_by_insee_code_month");
   const aggregates = buildLatestYearSlopeMetrics(
-    AGG_METRICS,
+    METRIC_FIELDS,
     housesByInseeCodeMonthTable,
     source,
     "current"
   );
   const composition = buildLatestYearSlopeMetrics(
-    HOUSE_COMPOSITION_METRICS,
+    HOUSE_COMPOSITION_FIELDS,
     housesByInseeCodeMonthTable,
     source,
     "current"
@@ -236,13 +236,13 @@ export const apartments_by_section_month_slopes = pgMaterializedView(
 ).as((qb) => {
   const source = tableIdentifier("apartments_by_section_month");
   const aggregates = buildLatestYearSlopeMetrics(
-    AGG_METRICS,
+    METRIC_FIELDS,
     apartmentsBySectionMonthTable,
     source,
     "current"
   );
   const composition = buildLatestYearSlopeMetrics(
-    APARTMENT_COMPOSITION_METRICS,
+    APARTMENT_COMPOSITION_FIELDS,
     apartmentsBySectionMonthTable,
     source,
     "current"
@@ -282,13 +282,13 @@ export const houses_by_section_month_slopes = pgMaterializedView(
 ).as((qb) => {
   const source = tableIdentifier("houses_by_section_month");
   const aggregates = buildLatestYearSlopeMetrics(
-    AGG_METRICS,
+    METRIC_FIELDS,
     housesBySectionMonthTable,
     source,
     "current"
   );
   const composition = buildLatestYearSlopeMetrics(
-    HOUSE_COMPOSITION_METRICS,
+    HOUSE_COMPOSITION_FIELDS,
     housesBySectionMonthTable,
     source,
     "current"

@@ -20,7 +20,7 @@ import type {
   SalesByPropertyType,
   SalesByYear,
   SalesSummary,
-} from "../routes/sales/analytics/analytics.schemas";
+} from "@app/shared";
 import { and, between, eq, gte, isNotNull, lte, sql } from "drizzle-orm";
 import { db } from "@/db";
 import { propertySales } from "@/db/schema";

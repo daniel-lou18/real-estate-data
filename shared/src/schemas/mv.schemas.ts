@@ -158,7 +158,3 @@ export const SectionYearParamsSchema = schemas.PaginationParamsSchema.extend({
   sortBy: SortBySchema.default("year"),
   sortOrder: schemas.SortOrderSchema,
 });
-
-// ----------------------------------------------------------------------------
-// Type exports
-// ----------------------------------------------------------------------------

@@ -1,5 +1,5 @@
 import type {
-  COMPOSITION_FIELDS,
+  APARTMENT_COMPOSITION_FIELDS,
   HOUSE_COMPOSITION_FIELDS,
   METRIC_FIELDS,
 } from "../constants/base";
@@ -31,5 +31,6 @@ export type ColumnTemplate =
   | "slope" // linear trend slope
   | "qualityBadge"; // data quality indicator
 
-export type ApartmentCompositionField = (typeof COMPOSITION_FIELDS)[number];
+export type ApartmentCompositionField =
+  (typeof APARTMENT_COMPOSITION_FIELDS)[number];
 export type HouseCompositionField = (typeof HOUSE_COMPOSITION_FIELDS)[number];

@@ -20,7 +20,6 @@ import type {
   InseeMonthParams,
   InseeYearParams,
   InseeWeekParams,
-  SortBy,
   ApartmentsBySectionMonth,
   HousesBySectionMonth,
   ApartmentsBySectionYear,
@@ -29,8 +28,9 @@ import type {
   SectionYearParams,
   ApartmentsByInseeMonth,
   HousesByInseeMonth,
-} from "@/routes/sales/mv/mv.schemas";
-import type { SortOrder } from "@/routes/sales/shared/schemas";
+  SortBy,
+  SortOrder,
+} from "@app/shared";
 /**
  * Generic orderBy helper that works for all views.
  * Returns an array of sort expressions for multi-field sorting.
@@ -53,7 +53,7 @@ function getOrderBy<
     avg_price_m2: any;
     total_price: any;
     avg_price: any;
-  }
+  },
 >(view: T, sortBy: SortBy | undefined, sortOrder: SortOrder) {
   const dir = sortOrder === "asc" ? asc : desc;
 
@@ -172,7 +172,7 @@ function buildInseeWhereConditions<T extends { inseeCode: any }>(
 }
 
 function buildSectionWhereConditions<
-  T extends { inseeCode: any; section: any }
+  T extends { inseeCode: any; section: any },
 >(
   view: T,
   params: SectionMonthParams | SectionYearParams

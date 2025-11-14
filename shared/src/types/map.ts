@@ -1,6 +1,7 @@
 import type { MetricField } from "./metrics";
-import type { FeatureLevel, PropertyType } from "./dimensions";
 import type { Feature, FeatureCollection, MultiPolygon } from "geojson";
+import type * as schemas from "../schemas";
+import { z } from "zod";
 
 export type BaseFeatureProperties = {
   metricName: MetricField;
@@ -56,17 +57,32 @@ export interface MapLegendResponse {
   stats: MapLegendStats;
 }
 
-export interface MapFeatureParams {
-  level?: FeatureLevel;
-  propertyType?: PropertyType;
-  field?: MetricField;
-  year?: number;
-  month?: number;
-  bbox?: [number, number, number, number];
-  limit?: number;
-  offset?: number;
-  inseeCodes?: string[];
-  sections?: string[];
-}
+// export interface MapFeatureParams {
+//   level?: FeatureLevel;
+//   propertyType?: PropertyType;
+//   field?: MetricField;
+//   year?: number;
+//   month?: number;
+//   bbox?: [number, number, number, number];
+//   limit?: number;
+//   offset?: number;
+//   inseeCodes?: string[];
+//   sections?: string[];
+// }
 
 export type MapLegendParams = MapFeatureParams;
+
+export type MapFeatureParams = z.infer<typeof schemas.MapFeatureParamsSchema>;
+export type MapCommuneProperties = z.infer<
+  typeof schemas.MapCommunePropertiesSchema
+>;
+export type MapSectionProperties = z.infer<
+  typeof schemas.MapSectionPropertiesSchema
+>;
+export type MapCommuneFeatureCollection = z.infer<
+  typeof schemas.MapCommuneFeatureCollectionSchema
+>;
+export type MapSectionFeatureCollection = z.infer<
+  typeof schemas.MapSectionFeatureCollectionSchema
+>;
+export type Legend = z.infer<typeof schemas.LegendSchema>;

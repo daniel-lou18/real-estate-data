@@ -3,7 +3,7 @@ import {
   MapFeatureCollectionSchema,
   MapFeatureParamsSchema,
   LegendSchema,
-} from "./map.schemas";
+} from "@app/shared";
 import * as HttpStatusCodes from "@/config/http-status-codes";
 import jsonContent from "@/openapi/helpers/json-content";
 

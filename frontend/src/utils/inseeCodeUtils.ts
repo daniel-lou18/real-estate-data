@@ -1,4 +1,4 @@
-import { type TableData } from "@/types";
+import type { TableData } from "@/types";
 
 /**
  * Extracts INSEE codes/arrondissements from an array of data objects

@@ -2,12 +2,12 @@ import { and, eq, sql } from "drizzle-orm";
 import { integer, pgTable, varchar } from "drizzle-orm/pg-core";
 import { pgMaterializedView } from "drizzle-orm/pg-core";
 import { createSelectSchema } from "drizzle-zod";
+import { DOUBLE_PRECISION_METRICS } from "./constants";
 import {
-  AGG_METRICS,
-  APARTMENT_COMPOSITION_METRICS,
-  HOUSE_COMPOSITION_METRICS,
-  DOUBLE_PRECISION_METRICS,
-} from "./constants";
+  METRIC_FIELDS,
+  APARTMENT_COMPOSITION_FIELDS,
+  HOUSE_COMPOSITION_FIELDS,
+} from "@app/shared";
 import {
   aggregateColumns,
   apartmentCompositionColumns,
@@ -168,8 +168,8 @@ export const apartments_by_insee_code_year_deltas = pgMaterializedView(
       inseeCode: sql<string>`current.${current.insee_code}`.as("insee_code"),
       year: sql<number>`current.${current.year}`.as("year"),
       base_year: sql<number>`base.${base.year}`.as("base_year"),
-      ...buildDeltasFromMetrics(AGG_METRICS, current, base),
-      ...buildDeltasFromMetrics(APARTMENT_COMPOSITION_METRICS, current, base),
+      ...buildDeltasFromMetrics(METRIC_FIELDS, current, base),
+      ...buildDeltasFromMetrics(APARTMENT_COMPOSITION_FIELDS, current, base),
     })
     .from(sql`apartments_by_insee_code_year AS current`)
     .innerJoin(
@@ -192,8 +192,8 @@ export const houses_by_insee_code_year_deltas = pgMaterializedView(
       inseeCode: sql<string>`current.${current.insee_code}`.as("insee_code"),
       year: sql<number>`current.${current.year}`.as("year"),
       base_year: sql<number>`base.${base.year}`.as("base_year"),
-      ...buildDeltasFromMetrics(AGG_METRICS, current, base),
-      ...buildDeltasFromMetrics(HOUSE_COMPOSITION_METRICS, current, base),
+      ...buildDeltasFromMetrics(METRIC_FIELDS, current, base),
+      ...buildDeltasFromMetrics(HOUSE_COMPOSITION_FIELDS, current, base),
     })
     .from(sql`houses_by_insee_code_year AS current`)
     .innerJoin(
@@ -221,8 +221,8 @@ export const apartments_by_section_year_deltas = pgMaterializedView(
       section: sql<string>`current.${current.section}`.as("section"),
       year: sql<number>`current.${current.year}`.as("year"),
       base_year: sql<number>`base.${base.year}`.as("base_year"),
-      ...buildDeltasFromMetrics(AGG_METRICS, current, base),
-      ...buildDeltasFromMetrics(APARTMENT_COMPOSITION_METRICS, current, base),
+      ...buildDeltasFromMetrics(METRIC_FIELDS, current, base),
+      ...buildDeltasFromMetrics(APARTMENT_COMPOSITION_FIELDS, current, base),
     })
     .from(sql`apartments_by_section_year AS current`)
     .innerJoin(
@@ -246,8 +246,8 @@ export const houses_by_section_year_deltas = pgMaterializedView(
       section: sql<string>`current.${current.section}`.as("section"),
       year: sql<number>`current.${current.year}`.as("year"),
       base_year: sql<number>`base.${base.year}`.as("base_year"),
-      ...buildDeltasFromMetrics(AGG_METRICS, current, base),
-      ...buildDeltasFromMetrics(HOUSE_COMPOSITION_METRICS, current, base),
+      ...buildDeltasFromMetrics(METRIC_FIELDS, current, base),
+      ...buildDeltasFromMetrics(HOUSE_COMPOSITION_FIELDS, current, base),
     })
     .from(sql`houses_by_section_year AS current`)
     .innerJoin(

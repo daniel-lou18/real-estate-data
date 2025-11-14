@@ -30,9 +30,7 @@ export class MapService {
   private api = apiService;
   private readonly baseUrl = "/sales/analytics/map";
 
-  async getFeatures(
-    params: MapFeatureParams = {}
-  ): Promise<MapFeatureCollection> {
+  async getFeatures(params: MapFeatureParams): Promise<MapFeatureCollection> {
     const queryString = createQueryString(params);
     const endpoint = queryString
       ? `${this.baseUrl}/features.geojson?${queryString}`
@@ -43,7 +41,7 @@ export class MapService {
     return response.data;
   }
 
-  async getLegend(params: MapLegendParams = {}): Promise<MapLegendResponse> {
+  async getLegend(params: MapLegendParams): Promise<MapLegendResponse> {
     const queryString = createQueryString(params);
     const endpoint = queryString
       ? `${this.baseUrl}/legend?${queryString}`

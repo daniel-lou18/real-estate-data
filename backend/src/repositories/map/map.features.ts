@@ -15,8 +15,8 @@ import {
   type MapFeatureParams,
   type MapCommuneFeatureCollection,
   type MapSectionFeatureCollection,
-} from "@/routes/sales/map/map.schemas";
-import type { MetricField } from "@/routes/sales/shared/types";
+  type MetricField,
+} from "@app/shared";
 import { and, eq, sql } from "drizzle-orm";
 
 type GetMapFeaturesParams = MapFeatureParams & {

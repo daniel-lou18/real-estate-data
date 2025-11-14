@@ -17,7 +17,7 @@ export const METRIC_FIELDS = [
   "price_m2_stddev",
 ] as const;
 
-export const COMPOSITION_FIELDS = [
+export const APARTMENT_COMPOSITION_FIELDS = [
   "total_apartments",
   "apartment_1_room",
   "apartment_2_room",

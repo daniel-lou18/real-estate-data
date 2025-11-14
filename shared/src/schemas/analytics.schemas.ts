@@ -340,16 +340,3 @@ export const PricePerM2DecilesSchema = z.object({
     .int()
     .describe("Total number of transactions analyzed"),
 });
-
-export type SalesByInseeCode = z.infer<typeof SalesByInseeCodeSchema>;
-export type SalesByInseeCodeAndSection = z.infer<
-  typeof SalesByInseeCodeAndSectionSchema
->;
-export type SalesByPropertyType = z.infer<typeof SalesByPropertyTypeSchema>;
-export type SalesByYear = z.infer<typeof SalesByYearSchema>;
-export type SalesByMonth = z.infer<typeof SalesByMonthSchema>;
-export type SalesSummary = z.infer<typeof SalesSummarySchema>;
-export type PricePerM2Deciles = z.infer<typeof PricePerM2DecilesSchema>;
-
-export type BaseQueryParams = z.infer<typeof BaseQueryParamsSchema>;
-export type AnalyticsQueryParams = z.infer<typeof AnalyticsQueryParamsSchema>;

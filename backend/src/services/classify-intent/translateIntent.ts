@@ -1,5 +1,4 @@
-import { FEATURE_YEARS, MONTHS } from "@/routes/sales/shared/constants";
-import { UserIntentSchema } from "./schemas";
+import { FEATURE_YEARS, MONTHS, UserIntentSchema } from "@app/shared";
 import type { FilterState, NumericFilter, UserIntent } from "./types";
 
 const DEFAULT_FIELD: FilterState["field"] = "avg_price_m2";
