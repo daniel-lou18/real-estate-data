@@ -15,27 +15,23 @@ export const SECTION_SCHEMA = z
   .length(10)
   .describe("Section identifier within the commune, e.g. '75112000BZ'");
 
-// Array variants that accept both single values and arrays (for backward compatibility)
+// Array schemas - only accept arrays (transforms cannot be represented in JSON Schema)
 export const INSEE_CODE_ARRAY_SCHEMA = z
-  .union([INSEE_CODE_SCHEMA, z.array(INSEE_CODE_SCHEMA).min(1).max(100)])
+  .array(INSEE_CODE_SCHEMA)
+  .min(0)
+  .max(100)
   .optional()
-  .transform((val) => {
-    if (val === undefined) return undefined;
-    return Array.isArray(val) ? val : [val];
-  })
   .describe(
-    "INSEE code(s) for the commune(s). Can be a single code or an array, e.g. '75112' or ['75112', '75113']"
+    "INSEE code(s) for the commune(s). Array of 5-digit codes, e.g. ['75112', '75113']. Omit for no filtering."
   );
 
 export const SECTION_ARRAY_SCHEMA = z
-  .union([SECTION_SCHEMA, z.array(SECTION_SCHEMA).min(1).max(100)])
+  .array(SECTION_SCHEMA)
+  .min(0)
+  .max(100)
   .optional()
-  .transform((val) => {
-    if (val === undefined) return undefined;
-    return Array.isArray(val) ? val : [val];
-  })
   .describe(
-    "Section identifier(s) within the commune(s). Can be a single section or an array, e.g. '75112000BZ' or ['75112000BZ', '75107000AY']"
+    "Section identifier(s) within the commune(s). Array of 10-character identifiers, e.g. ['75112000BZ', '75107000AY']. Omit for no filtering."
   );
 
 export const YEAR_SCHEMA = z.coerce

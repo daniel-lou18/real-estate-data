@@ -1,6 +1,6 @@
 import { db } from "@/db";
 import { communesGeom, sectionsGeom, apartments_by_insee_code_month, apartments_by_insee_code_year, houses_by_insee_code_month, houses_by_insee_code_year, houses_by_section_year, houses_by_section_month, apartments_by_section_month, apartments_by_section_year, } from "@/db/schema";
-import {} from "@/routes/sales/map/map.schemas";
+import {} from "@app/shared";
 import { and, eq, sql } from "drizzle-orm";
 export function getMv(level, propertyType, useMonth) {
     if (level === "commune" && propertyType === "apartment") {

@@ -18,23 +18,15 @@ export const NumericFilterValueSchema = z.union([
   z.array(z.number()),
 ]);
 
-export const NumericFilterSchema = z
-  .record(
-    z.string(),
-    z.object({
-      operation: NumericFilterOperation,
-      value: NumericFilterValueSchema,
-    })
-  )
-  .refine(
-    (filters) => {
-      const keys = Object.keys(filters);
-      return keys.every((key) => METRIC_FIELDS.includes(key as any));
-    },
-    {
-      message: "Filter keys must be one of the allowed filter keys",
-    }
-  );
+// Using z.enum as record key - more elegant and type-safe
+// Note: This should work with Zod v4, but may have issues with JSON Schema conversion
+export const NumericFilterSchema = z.record(
+  z.enum(METRIC_FIELDS),
+  z.object({
+    operation: NumericFilterOperation,
+    value: NumericFilterValueSchema,
+  })
+);
 
 export const UserIntentSchema = z.object({
   primaryDimension: z.enum(DIMENSION_FIELDS).optional(),

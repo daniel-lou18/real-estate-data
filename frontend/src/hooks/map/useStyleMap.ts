@@ -21,7 +21,8 @@ export function useStyleMap() {
   const sectionLegend = useMapLegend({
     level: "section",
     year: filterState.year,
-    inseeCodes: filterState.inseeCodes,
+    // Map schema uses singular inseeCode to filter sections by commune
+    inseeCode: filterState.inseeCodes[0],
   });
 
   const arrondissementFillColor = useMemo(

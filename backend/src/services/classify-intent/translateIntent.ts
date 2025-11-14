@@ -1,5 +1,11 @@
-import { FEATURE_YEARS, MONTHS, UserIntentSchema } from "@app/shared";
-import type { FilterState, NumericFilter, UserIntent } from "./types";
+import {
+  FEATURE_YEARS,
+  MONTHS,
+  UserIntentSchema,
+  type FilterState,
+  type NumericFilter,
+  type UserIntent,
+} from "@app/shared";
 
 const DEFAULT_FIELD: FilterState["field"] = "avg_price_m2";
 const DEFAULT_PROPERTY_TYPE: FilterState["propertyType"] = "apartment";

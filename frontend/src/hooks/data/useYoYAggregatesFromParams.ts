@@ -35,7 +35,7 @@ export function useYoYAggregatesFromParams() {
   // Always call both hooks to avoid conditional hook calls
   const communeQuery: UseQueryResult<CommuneYoYTableData[], Error> =
     useGetAggregatesYoYByInseeCode(
-      { inseeCode },
+      { ...(inseeCode ? { inseeCodes: [inseeCode] } : {}) },
       {
         select: (data) =>
           data.map((item) => ({
@@ -52,7 +52,10 @@ export function useYoYAggregatesFromParams() {
 
   const sectionQuery: UseQueryResult<SectionYoYTableData[], Error> =
     useGetAggregatesYoYByInseeCodeAndSection(
-      { inseeCode, section },
+      {
+        ...(inseeCode ? { inseeCodes: [inseeCode] } : {}),
+        ...(section ? { sections: [section] } : {}),
+      },
       {
         select: (data) =>
           data.map((item) => ({

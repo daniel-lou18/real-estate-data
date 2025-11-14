@@ -14,4 +14,5 @@ export const chatQueryKeys = {
   // New keys for cache-based state management
   conversation: () => [...chatQueryKeys.all, "conversation"] as const,
   data: () => [...chatQueryKeys.all, "data"] as const,
+  intent: () => [...chatQueryKeys.all, "intent"] as const,
 } as const;

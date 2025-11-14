@@ -129,7 +129,7 @@ export const HousesBySectionMonthSlopeSchema = RegressionWindowMeta.extend({
 
 export const InseeMonthSlopeParamsSchema = shared.PaginationParamsSchema.extend(
   {
-    inseeCode: base.INSEE_CODE_SCHEMA.optional(),
+    inseeCodes: base.INSEE_CODE_ARRAY_SCHEMA.optional(),
     year: base.YEAR_SCHEMA.optional(),
     month: base.MONTH_SCHEMA.optional(),
     sortBy: SlopeSortBySchema.optional().default("month"),
@@ -139,8 +139,8 @@ export const InseeMonthSlopeParamsSchema = shared.PaginationParamsSchema.extend(
 
 export const SectionMonthSlopeParamsSchema =
   shared.PaginationParamsSchema.extend({
-    inseeCode: base.INSEE_CODE_SCHEMA.optional(),
-    section: base.SECTION_SCHEMA.optional(),
+    inseeCodes: base.INSEE_CODE_ARRAY_SCHEMA.optional(),
+    sections: base.SECTION_ARRAY_SCHEMA.optional(),
     year: base.YEAR_SCHEMA.optional(),
     month: base.MONTH_SCHEMA.optional(),
     sortBy: SlopeSortBySchema.optional().default("month"),

@@ -1,4 +1,4 @@
-import { and, asc, desc, eq } from "drizzle-orm";
+import { and, asc, desc, eq, inArray } from "drizzle-orm";
 import { db } from "@/db";
 import {
   apartments_by_insee_code_month_slopes,
@@ -21,16 +21,48 @@ import type {
 // Helpers
 // ----------------------------------------------------------------------------
 
+/**
+ * Adds inseeCode filter conditions to the conditions array
+ */
+function addInseeCodeConditions<T extends { inseeCode: any }>(
+  conditions: ReturnType<typeof eq>[],
+  view: T,
+  inseeCodes: string[] | undefined
+): void {
+  if (!inseeCodes || inseeCodes.length === 0) return;
+
+  if (inseeCodes.length === 1) {
+    conditions.push(eq(view.inseeCode, inseeCodes[0]));
+  } else {
+    conditions.push(inArray(view.inseeCode, inseeCodes));
+  }
+}
+
+/**
+ * Adds section filter conditions to the conditions array
+ */
+function addSectionConditions<T extends { section: any }>(
+  conditions: ReturnType<typeof eq>[],
+  view: T,
+  sections: string[] | undefined
+): void {
+  if (!sections || sections.length === 0) return;
+
+  if (sections.length === 1) {
+    conditions.push(eq(view.section, sections[0]));
+  } else {
+    conditions.push(inArray(view.section, sections));
+  }
+}
+
 function buildInseeMonthWhere(
   view:
     | typeof apartments_by_insee_code_month_slopes
     | typeof houses_by_insee_code_month_slopes,
   params: InseeMonthSlopeParams
 ) {
-  const conditions = [];
-  if (params.inseeCode) {
-    conditions.push(eq(view.inseeCode, params.inseeCode));
-  }
+  const conditions: ReturnType<typeof eq>[] = [];
+  addInseeCodeConditions(conditions, view as any, params.inseeCodes);
   // Note: year and month filters removed - views now have one row per location
   // with latest year metadata, so filtering by year/month doesn't make sense
   return conditions;
@@ -42,13 +74,9 @@ function buildSectionMonthWhere(
     | typeof houses_by_section_month_slopes,
   params: SectionMonthSlopeParams
 ) {
-  const conditions = [];
-  if (params.inseeCode) {
-    conditions.push(eq(view.inseeCode, params.inseeCode));
-  }
-  if (params.section) {
-    conditions.push(eq(view.section, params.section));
-  }
+  const conditions: ReturnType<typeof eq>[] = [];
+  addInseeCodeConditions(conditions, view as any, params.inseeCodes);
+  addSectionConditions(conditions, view as any, params.sections);
   // Note: year and month filters removed - views now have one row per location
   // with latest year metadata, so filtering by year/month doesn't make sense
   return conditions;

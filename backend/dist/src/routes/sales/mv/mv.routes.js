@@ -1,6 +1,6 @@
 import { createRoute, z } from "@hono/zod-openapi";
 import * as HttpStatusCodes from "@/config/http-status-codes";
-import { ApartmentsByInseeMonthSchema, HousesByInseeMonthSchema, ApartmentsByInseeYearSchema, HousesByInseeYearSchema, InseeMonthParamsSchema, InseeYearParamsSchema, InseeWeekParamsSchema, HousesByInseeWeekSchema, ApartmentsByInseeWeekSchema, SectionYearParamsSchema, ApartmentsBySectionYearSchema, HousesBySectionYearSchema, SectionMonthParamsSchema, ApartmentsBySectionMonthSchema, HousesBySectionMonthSchema, } from "./mv.schemas";
+import { ApartmentsByInseeMonthSchema, HousesByInseeMonthSchema, ApartmentsByInseeYearSchema, HousesByInseeYearSchema, InseeMonthParamsSchema, InseeYearParamsSchema, InseeWeekParamsSchema, HousesByInseeWeekSchema, ApartmentsByInseeWeekSchema, SectionYearParamsSchema, ApartmentsBySectionYearSchema, HousesBySectionYearSchema, SectionMonthParamsSchema, ApartmentsBySectionMonthSchema, HousesBySectionMonthSchema, } from "@app/shared";
 import jsonContent from "@/openapi/helpers/json-content";
 const tags = ["MV"];
 export const getAptsByInseeCodeYear = createRoute({

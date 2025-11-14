@@ -33,7 +33,7 @@ export function useAggregatesFromParams() {
   // Always call both hooks to avoid conditional hook calls
   const communeQuery: UseQueryResult<CommuneTableData[], Error> =
     useGetAggregatesByInseeCode(
-      { inseeCode },
+      { ...(inseeCode ? { inseeCodes: [inseeCode] } : {}) },
       {
         select: (data) =>
           data.map((item) => ({
@@ -47,7 +47,10 @@ export function useAggregatesFromParams() {
 
   const sectionQuery: UseQueryResult<SectionTableData[], Error> =
     useGetAggregatesByInseeCodeAndSection(
-      { inseeCode, section },
+      {
+        ...(inseeCode ? { inseeCodes: [inseeCode] } : {}),
+        ...(section ? { sections: [section] } : {}),
+      },
       {
         select: (data) =>
           data.map((item) => ({

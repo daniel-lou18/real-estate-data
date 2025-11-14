@@ -1,5 +1,5 @@
 import { createRoute } from "@hono/zod-openapi";
-import { MapFeatureCollectionSchema, MapFeatureParamsSchema, LegendSchema, } from "./map.schemas";
+import { MapFeatureCollectionSchema, MapFeatureParamsSchema, LegendSchema, } from "@app/shared";
 import * as HttpStatusCodes from "@/config/http-status-codes";
 import jsonContent from "@/openapi/helpers/json-content";
 const tags = ["Map"];

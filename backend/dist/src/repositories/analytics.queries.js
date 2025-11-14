@@ -96,13 +96,13 @@ const baseAggregationFields = {
     // Transaction count
     count: sql `count(*)::int`,
     // Price aggregates (in euros) - rounded to nearest euro
-    totalPrice: sql `coalesce(round(sum(${propertySales.price})), 0)`,
-    avgPrice: sql `coalesce(round(avg(${propertySales.price})), 0)`,
-    minPrice: sql `coalesce(round(min(${propertySales.price})), 0)`,
-    maxPrice: sql `coalesce(round(max(${propertySales.price})), 0)`,
+    totalPrice: sql `coalesce(round(sum(${propertySales.price})), 0)::double precision`,
+    avgPrice: sql `coalesce(round(avg(${propertySales.price})), 0)::double precision`,
+    minPrice: sql `coalesce(round(min(${propertySales.price})), 0)::double precision`,
+    maxPrice: sql `coalesce(round(max(${propertySales.price})), 0)::double precision`,
     // Floor area aggregates (in m²) - rounded to 1 decimal place
-    totalFloorArea: sql `coalesce(round(sum(${propertySales.floorArea}), 1), 0)`,
-    avgFloorArea: sql `coalesce(round(avg(${propertySales.floorArea}), 1), 0)`,
+    totalFloorArea: sql `coalesce(round(sum(${propertySales.floorArea}), 1), 0)::double precision`,
+    avgFloorArea: sql `coalesce(round(avg(${propertySales.floorArea}), 1), 0)::double precision`,
     // Computed metric: Average price per m² (AFTER aggregation - weighted average)
     // This is the CORRECT way: SUM(price) / SUM(floorArea)
     // NOT: AVG(price / floorArea) which would be wrong
@@ -123,7 +123,7 @@ const baseAggregationFields = {
         WHERE ${propertySales.propertyTypeLabel} IN ('UN APPARTEMENT', 'DEUX APPARTEMENTS', 'APPARTEMENT INDETERMINE', 'UNE MAISON', 'DES MAISONS', 'MAISON - INDETERMINEE')
         AND ${propertySales.floorArea} >= ${MIN_RESIDENTIAL_AREA} AND ${propertySales.floorArea} <= ${MAX_RESIDENTIAL_AREA}
         AND ${propertySales.price} >= ${MIN_RESIDENTIAL_PRICE} AND ${propertySales.price} <= ${MAX_RESIDENTIAL_PRICE}
-      ))
+      ))::double precision
       else null
     end
   `,
@@ -155,7 +155,7 @@ const apartmentSpecificFields = {
         WHERE ${propertySales.propertyTypeLabel} IN ('UN APPARTEMENT', 'DEUX APPARTEMENTS', 'APPARTEMENT INDETERMINE')
       )),
       0
-    )
+    )::double precision
   `,
     apartmentAvgPrice: sql `
     coalesce(
@@ -163,7 +163,7 @@ const apartmentSpecificFields = {
         WHERE ${propertySales.propertyTypeLabel} IN ('UN APPARTEMENT', 'DEUX APPARTEMENTS', 'APPARTEMENT INDETERMINE')
       )),
       0
-    )
+    )::double precision
   `,
     apartmentTotalFloorArea: sql `
     coalesce(
@@ -171,7 +171,7 @@ const apartmentSpecificFields = {
         WHERE ${propertySales.propertyTypeLabel} IN ('UN APPARTEMENT', 'DEUX APPARTEMENTS', 'APPARTEMENT INDETERMINE')
       ), 1),
       0
-    )
+    )::double precision
   `,
     apartmentAvgFloorArea: sql `
     coalesce(
@@ -179,7 +179,7 @@ const apartmentSpecificFields = {
         WHERE ${propertySales.propertyTypeLabel} IN ('UN APPARTEMENT', 'DEUX APPARTEMENTS', 'APPARTEMENT INDETERMINE')
       ), 1),
       0
-    )
+    )::double precision
   `,
     apartmentAvgPricePerM2: sql `
     case
@@ -196,7 +196,7 @@ const apartmentSpecificFields = {
         WHERE ${propertySales.propertyTypeLabel} IN ('UN APPARTEMENT', 'DEUX APPARTEMENTS', 'APPARTEMENT INDETERMINE')
         AND ${propertySales.ApartmentFloorArea} >= ${MIN_APARTMENT_AREA} AND ${propertySales.ApartmentFloorArea} <= ${MAX_APARTMENT_AREA}
         AND ${propertySales.price} >= ${MIN_APARTMENT_PRICE} AND ${propertySales.price} <= ${MAX_APARTMENT_PRICE}
-      ))
+      ))::double precision
       else null
     end
   `,
@@ -217,7 +217,7 @@ const houseSpecificFields = {
         WHERE ${propertySales.propertyTypeLabel} IN ('UNE MAISON', 'DES MAISONS', 'MAISON - INDETERMINEE')
       )),
       0
-    )
+    )::double precision
   `,
     houseAvgPrice: sql `
     coalesce(
@@ -225,7 +225,7 @@ const houseSpecificFields = {
         WHERE ${propertySales.propertyTypeLabel} IN ('UNE MAISON', 'DES MAISONS', 'MAISON - INDETERMINEE')
       )),
       0
-    )
+    )::double precision
   `,
     houseTotalFloorArea: sql `
     coalesce(
@@ -233,7 +233,7 @@ const houseSpecificFields = {
         WHERE ${propertySales.propertyTypeLabel} IN ('UNE MAISON', 'DES MAISONS', 'MAISON - INDETERMINEE')
       ), 1),
       0
-    )
+    )::double precision
   `,
     houseAvgFloorArea: sql `
     coalesce(
@@ -241,7 +241,7 @@ const houseSpecificFields = {
         WHERE ${propertySales.propertyTypeLabel} IN ('UNE MAISON', 'DES MAISONS', 'MAISON - INDETERMINEE')
       ), 1),
       0
-    )
+    )::double precision
   `,
     houseAvgPricePerM2: sql `
     case
@@ -258,7 +258,7 @@ const houseSpecificFields = {
         WHERE ${propertySales.propertyTypeLabel} IN ('UNE MAISON', 'DES MAISONS', 'MAISON - INDETERMINEE')
         AND ${propertySales.HouseFloorArea} >= ${MIN_HOUSE_AREA} AND ${propertySales.HouseFloorArea} <= ${MAX_HOUSE_AREA}
         AND ${propertySales.price} >= ${MIN_HOUSE_PRICE} AND ${propertySales.price} <= ${MAX_HOUSE_PRICE}
-      ))
+      ))::double precision
       else null
     end
   `,
@@ -434,9 +434,9 @@ export async function getApartmentStats(whereClause) {
         count: sql `sum(${propertySales.nbApartments})::int`,
         totalPrice: sql `
         sum(${propertySales.price} * ${propertySales.nbApartments}::numeric /
-            nullif((${propertySales.nbApartments} + ${propertySales.nbHouses}), 0))
+            nullif((${propertySales.nbApartments} + ${propertySales.nbHouses}), 0))::double precision
       `,
-        totalFloorArea: sql `sum(${propertySales.ApartmentFloorArea})`,
+        totalFloorArea: sql `sum(${propertySales.ApartmentFloorArea})::double precision`,
         // Room distribution
         oneRoom: sql `coalesce(sum(${propertySales.nbapt1pp}), 0)::int`,
         twoRoom: sql `coalesce(sum(${propertySales.nbapt2pp}), 0)::int`,
@@ -478,9 +478,9 @@ export async function getHouseStats(whereClause) {
         count: sql `sum(${propertySales.nbHouses})::int`,
         totalPrice: sql `
         sum(${propertySales.price} * ${propertySales.nbHouses}::numeric /
-            nullif((${propertySales.nbApartments} + ${propertySales.nbHouses}), 0))
+            nullif((${propertySales.nbApartments} + ${propertySales.nbHouses}), 0))::double precision
       `,
-        totalFloorArea: sql `sum(${propertySales.HouseFloorArea})`,
+        totalFloorArea: sql `sum(${propertySales.HouseFloorArea})::double precision`,
         // Room distribution
         oneRoom: sql `coalesce(sum(${propertySales.nbmai1pp}), 0)::int`,
         twoRoom: sql `coalesce(sum(${propertySales.nbmai2pp}), 0)::int`,
@@ -522,16 +522,16 @@ export async function getPricePerM2Deciles(params = {}) {
     const whereClause = buildWhereClause(params);
     const results = await db
         .select({
-        decile1: sql `round(percentile_cont(0.1) within group (order by ${propertySales.price} / nullif(${propertySales.floorArea}, 0)))`,
-        decile2: sql `round(percentile_cont(0.2) within group (order by ${propertySales.price} / nullif(${propertySales.floorArea}, 0)))`,
-        decile3: sql `round(percentile_cont(0.3) within group (order by ${propertySales.price} / nullif(${propertySales.floorArea}, 0)))`,
-        decile4: sql `round(percentile_cont(0.4) within group (order by ${propertySales.price} / nullif(${propertySales.floorArea}, 0)))`,
-        decile5: sql `round(percentile_cont(0.5) within group (order by ${propertySales.price} / nullif(${propertySales.floorArea}, 0)))`,
-        decile6: sql `round(percentile_cont(0.6) within group (order by ${propertySales.price} / nullif(${propertySales.floorArea}, 0)))`,
-        decile7: sql `round(percentile_cont(0.7) within group (order by ${propertySales.price} / nullif(${propertySales.floorArea}, 0)))`,
-        decile8: sql `round(percentile_cont(0.8) within group (order by ${propertySales.price} / nullif(${propertySales.floorArea}, 0)))`,
-        decile9: sql `round(percentile_cont(0.9) within group (order by ${propertySales.price} / nullif(${propertySales.floorArea}, 0)))`,
-        decile10: sql `round(percentile_cont(1.0) within group (order by ${propertySales.price} / nullif(${propertySales.floorArea}, 0)))`,
+        decile1: sql `round(percentile_cont(0.1) within group (order by ${propertySales.price} / nullif(${propertySales.floorArea}, 0)))::double precision`,
+        decile2: sql `round(percentile_cont(0.2) within group (order by ${propertySales.price} / nullif(${propertySales.floorArea}, 0)))::double precision`,
+        decile3: sql `round(percentile_cont(0.3) within group (order by ${propertySales.price} / nullif(${propertySales.floorArea}, 0)))::double precision`,
+        decile4: sql `round(percentile_cont(0.4) within group (order by ${propertySales.price} / nullif(${propertySales.floorArea}, 0)))::double precision`,
+        decile5: sql `round(percentile_cont(0.5) within group (order by ${propertySales.price} / nullif(${propertySales.floorArea}, 0)))::double precision`,
+        decile6: sql `round(percentile_cont(0.6) within group (order by ${propertySales.price} / nullif(${propertySales.floorArea}, 0)))::double precision`,
+        decile7: sql `round(percentile_cont(0.7) within group (order by ${propertySales.price} / nullif(${propertySales.floorArea}, 0)))::double precision`,
+        decile8: sql `round(percentile_cont(0.8) within group (order by ${propertySales.price} / nullif(${propertySales.floorArea}, 0)))::double precision`,
+        decile9: sql `round(percentile_cont(0.9) within group (order by ${propertySales.price} / nullif(${propertySales.floorArea}, 0)))::double precision`,
+        decile10: sql `round(percentile_cont(1.0) within group (order by ${propertySales.price} / nullif(${propertySales.floorArea}, 0)))::double precision`,
         totalTransactions: sql `count(*)::int`,
     })
         .from(propertySales)

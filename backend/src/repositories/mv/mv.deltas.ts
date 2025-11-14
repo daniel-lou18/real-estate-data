@@ -261,12 +261,12 @@ function buildDeltaWhereConditions<
 ): ReturnType<typeof eq>[] {
   const conditions: ReturnType<typeof eq>[] = [];
 
-  addInseeCodeConditions(conditions, view, params.inseeCode);
+  addInseeCodeConditions(conditions, view, params.inseeCodes);
   if (includeSection && view.section) {
     addSectionConditions(
       conditions,
       view as T & { section: any },
-      params.section
+      params.sections
     );
   }
   addTemporalConditions(conditions, view, params);

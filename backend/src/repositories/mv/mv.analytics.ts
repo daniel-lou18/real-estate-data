@@ -126,17 +126,12 @@ function addInseeCodeConditions<T extends { inseeCode: any }>(
   view: T,
   inseeCodes: string[] | undefined
 ): void {
-  if (!inseeCodes) return;
+  if (!inseeCodes || inseeCodes.length === 0) return;
 
-  // Ensure it's an array (schema transform should handle this, but be defensive)
-  const codes = Array.isArray(inseeCodes) ? inseeCodes : [inseeCodes];
-
-  if (codes.length === 0) return;
-
-  if (codes.length === 1) {
-    conditions.push(eq(view.inseeCode, codes[0]));
+  if (inseeCodes.length === 1) {
+    conditions.push(eq(view.inseeCode, inseeCodes[0]));
   } else {
-    conditions.push(inArray(view.inseeCode, codes));
+    conditions.push(inArray(view.inseeCode, inseeCodes));
   }
 }
 
@@ -148,17 +143,12 @@ function addSectionConditions<T extends { section: any }>(
   view: T,
   sections: string[] | undefined
 ): void {
-  if (!sections) return;
+  if (!sections || sections.length === 0) return;
 
-  // Ensure it's an array (schema transform should handle this, but be defensive)
-  const secs = Array.isArray(sections) ? sections : [sections];
-
-  if (secs.length === 0) return;
-
-  if (secs.length === 1) {
-    conditions.push(eq(view.section, secs[0]));
+  if (sections.length === 1) {
+    conditions.push(eq(view.section, sections[0]));
   } else {
-    conditions.push(inArray(view.section, secs));
+    conditions.push(inArray(view.section, sections));
   }
 }
 
@@ -167,7 +157,7 @@ function buildInseeWhereConditions<T extends { inseeCode: any }>(
   params: InseeMonthParams | InseeYearParams | InseeWeekParams
 ): ReturnType<typeof eq>[] {
   const conditions: ReturnType<typeof eq>[] = [];
-  addInseeCodeConditions(conditions, view, params.inseeCode);
+  addInseeCodeConditions(conditions, view, params.inseeCodes);
   return conditions;
 }
 
@@ -178,8 +168,8 @@ function buildSectionWhereConditions<
   params: SectionMonthParams | SectionYearParams
 ): ReturnType<typeof eq>[] {
   const conditions: ReturnType<typeof eq>[] = [];
-  addInseeCodeConditions(conditions, view, params.inseeCode);
-  addSectionConditions(conditions, view, params.section);
+  addInseeCodeConditions(conditions, view, params.inseeCodes);
+  addSectionConditions(conditions, view, params.sections);
   return conditions;
 }
 

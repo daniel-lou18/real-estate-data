@@ -1,7 +1,10 @@
 import { and, eq, sql } from "drizzle-orm";
-import { integer, numeric, pgTable, varchar } from "drizzle-orm/pg-core";
+import { integer, pgTable, varchar } from "drizzle-orm/pg-core";
 import { pgMaterializedView } from "drizzle-orm/pg-core";
 import { createSelectSchema } from "drizzle-zod";
+import { DOUBLE_PRECISION_METRICS } from "./constants";
+import { METRIC_FIELDS, APARTMENT_COMPOSITION_FIELDS, HOUSE_COMPOSITION_FIELDS, } from "@app/shared";
+import { aggregateColumns, apartmentCompositionColumns, houseCompositionColumns, } from "./shared";
 // ----------------------------------------------------------------------------
 // pgTable wrappers for materialized views (for aliasing and type safety)
 // ----------------------------------------------------------------------------
@@ -12,104 +15,7 @@ import { createSelectSchema } from "drizzle-zod";
 const yearlyAggregateColumns = {
     insee_code: varchar("insee_code", { length: 10 }).notNull(),
     year: integer("year").notNull(),
-    total_sales: integer("total_sales").notNull(),
-    total_price: numeric("total_price", {
-        precision: 15,
-        scale: 0,
-        mode: "number",
-    }).notNull(),
-    avg_price: numeric("avg_price", {
-        precision: 15,
-        scale: 0,
-        mode: "number",
-    }).notNull(),
-    total_area: numeric("total_area", {
-        precision: 10,
-        scale: 1,
-        mode: "number",
-    }).notNull(),
-    avg_area: numeric("avg_area", {
-        precision: 10,
-        scale: 1,
-        mode: "number",
-    }).notNull(),
-    avg_price_m2: numeric("avg_price_m2", {
-        precision: 15,
-        scale: 0,
-        mode: "number",
-    }).notNull(),
-    min_price: numeric("min_price", {
-        precision: 15,
-        scale: 0,
-        mode: "number",
-    }).notNull(),
-    max_price: numeric("max_price", {
-        precision: 15,
-        scale: 0,
-        mode: "number",
-    }).notNull(),
-    median_price: numeric("median_price", {
-        precision: 15,
-        scale: 0,
-        mode: "number",
-    }).notNull(),
-    median_area: numeric("median_area", {
-        precision: 10,
-        scale: 1,
-        mode: "number",
-    }).notNull(),
-    min_price_m2: numeric("min_price_m2", {
-        precision: 15,
-        scale: 0,
-        mode: "number",
-    }).notNull(),
-    max_price_m2: numeric("max_price_m2", {
-        precision: 15,
-        scale: 0,
-        mode: "number",
-    }).notNull(),
-    price_m2_p25: numeric("price_m2_p25", {
-        precision: 15,
-        scale: 0,
-        mode: "number",
-    }).notNull(),
-    price_m2_p75: numeric("price_m2_p75", {
-        precision: 15,
-        scale: 0,
-        mode: "number",
-    }).notNull(),
-    price_m2_iqr: numeric("price_m2_iqr", {
-        precision: 15,
-        scale: 0,
-        mode: "number",
-    }).notNull(),
-    price_m2_stddev: numeric("price_m2_stddev", {
-        precision: 15,
-        scale: 0,
-        mode: "number",
-    }).notNull(),
-};
-/**
- * Apartment composition columns.
- */
-const apartmentCompositionColumns = {
-    total_apartments: integer("total_apartments").notNull(),
-    apartment_1_room: integer("apartment_1_room").notNull(),
-    apartment_2_room: integer("apartment_2_room").notNull(),
-    apartment_3_room: integer("apartment_3_room").notNull(),
-    apartment_4_room: integer("apartment_4_room").notNull(),
-    apartment_5_room: integer("apartment_5_room").notNull(),
-};
-/**
- * House composition columns.
- */
-const houseCompositionColumns = {
-    total_houses: integer("total_houses").notNull(),
-    house_1_room: integer("house_1_room").notNull(),
-    house_2_room: integer("house_2_room").notNull(),
-    house_3_room: integer("house_3_room").notNull(),
-    house_4_room: integer("house_4_room").notNull(),
-    house_5_room: integer("house_5_room").notNull(),
+    ...aggregateColumns,
 };
 /**
  * pgTable wrapper for apartments_by_insee_code_year materialized view.
@@ -142,59 +48,33 @@ const housesBySectionYearTable = pgTable("houses_by_section_year", {
     ...houseCompositionColumns,
     section: varchar("section", { length: 11 }).notNull(),
 });
-// ----------------------------------------------------------------------------
-// Centralized metric lists
-// ----------------------------------------------------------------------------
-const AGG_METRICS = [
-    "total_sales",
-    "total_price",
-    "avg_price",
-    "total_area",
-    "avg_area",
-    "avg_price_m2",
-    "median_price",
-    "median_area",
-    "price_m2_p25",
-    "price_m2_p75",
-    "price_m2_iqr",
-    "price_m2_stddev",
-];
-const APARTMENT_COMPOSITION_METRICS = [
-    "total_apartments",
-    "apartment_1_room",
-    "apartment_2_room",
-    "apartment_3_room",
-    "apartment_4_room",
-    "apartment_5_room",
-];
-const HOUSE_COMPOSITION_METRICS = [
-    "total_houses",
-    "house_1_room",
-    "house_2_room",
-    "house_3_room",
-    "house_4_room",
-    "house_5_room",
-];
-// ----------------------------------------------------------------------------
-// Helper functions
-// ----------------------------------------------------------------------------
 /**
  * Calculates percentage change: 100 * (current - base) / base
  * Returns NULL if base is NULL or 0.
+ * Casts result to double precision to match SQL migration.
  */
 function pctChange(current, base) {
     return sql `
     CASE
       WHEN ${base} IS NULL OR ${base} = 0 THEN NULL
-      ELSE round(100.0 * (${current} - ${base}) / ${base}, 2)
+      ELSE round((100.0 * (${current} - ${base}) / ${base})::numeric, 2)::double precision
     END
   `;
 }
 /**
  * Builds delta metrics for a given metric field.
  * Returns base, current, delta, and pct_change for a single metric.
+ * Handles double precision casting for numeric fields to match SQL migration.
  */
-function buildMetricDelta(currentCol, baseCol, metricName) {
+function buildMetricDelta(currentCol, baseCol, metricName, needsDoublePrecision = false) {
+    if (needsDoublePrecision) {
+        return {
+            [`${metricName}_base`]: sql `${baseCol}::double precision`.as(`${metricName}_base`),
+            [`${metricName}_current`]: sql `${currentCol}::double precision`.as(`${metricName}_current`),
+            [`${metricName}_delta`]: sql `(${currentCol}::double precision - ${baseCol}::double precision)::double precision`.as(`${metricName}_delta`),
+            [`${metricName}_pct_change`]: pctChange(sql `${currentCol}::double precision`, sql `${baseCol}::double precision`).as(`${metricName}_pct_change`),
+        };
+    }
     return {
         [`${metricName}_base`]: baseCol.as(`${metricName}_base`),
         [`${metricName}_current`]: currentCol.as(`${metricName}_current`),
@@ -205,12 +85,14 @@ function buildMetricDelta(currentCol, baseCol, metricName) {
 /**
  * Builds all delta metrics from a list of metric names.
  * Uses column objects directly from the table definition for type safety.
+ * Handles double precision casting for numeric fields to match SQL migration.
  */
 function buildDeltasFromMetrics(metrics, currentTable, baseTable) {
     return Object.assign({}, ...metrics.map((metric) => {
         const currentCol = currentTable[metric];
         const baseCol = baseTable[metric];
-        return buildMetricDelta(sql `current.${currentCol}`, sql `base.${baseCol}`, metric);
+        const needsDoublePrecision = DOUBLE_PRECISION_METRICS.includes(metric);
+        return buildMetricDelta(sql `current.${currentCol}`, sql `base.${baseCol}`, metric, needsDoublePrecision);
     }));
 }
 // ----------------------------------------------------------------------------
@@ -224,8 +106,8 @@ export const apartments_by_insee_code_year_deltas = pgMaterializedView("apartmen
         inseeCode: sql `current.${current.insee_code}`.as("insee_code"),
         year: sql `current.${current.year}`.as("year"),
         base_year: sql `base.${base.year}`.as("base_year"),
-        ...buildDeltasFromMetrics(AGG_METRICS, current, base),
-        ...buildDeltasFromMetrics(APARTMENT_COMPOSITION_METRICS, current, base),
+        ...buildDeltasFromMetrics(METRIC_FIELDS, current, base),
+        ...buildDeltasFromMetrics(APARTMENT_COMPOSITION_FIELDS, current, base),
     })
         .from(sql `apartments_by_insee_code_year AS current`)
         .innerJoin(sql `apartments_by_insee_code_year AS base`, and(eq(sql `current.${current.insee_code}`, sql `base.${base.insee_code}`), eq(sql `current.${current.year}`, sql `base.${base.year} + 1`)));
@@ -238,8 +120,8 @@ export const houses_by_insee_code_year_deltas = pgMaterializedView("houses_by_in
         inseeCode: sql `current.${current.insee_code}`.as("insee_code"),
         year: sql `current.${current.year}`.as("year"),
         base_year: sql `base.${base.year}`.as("base_year"),
-        ...buildDeltasFromMetrics(AGG_METRICS, current, base),
-        ...buildDeltasFromMetrics(HOUSE_COMPOSITION_METRICS, current, base),
+        ...buildDeltasFromMetrics(METRIC_FIELDS, current, base),
+        ...buildDeltasFromMetrics(HOUSE_COMPOSITION_FIELDS, current, base),
     })
         .from(sql `houses_by_insee_code_year AS current`)
         .innerJoin(sql `houses_by_insee_code_year AS base`, and(eq(sql `current.${current.insee_code}`, sql `base.${base.insee_code}`), eq(sql `current.${current.year}`, sql `base.${base.year} + 1`)));
@@ -256,8 +138,8 @@ export const apartments_by_section_year_deltas = pgMaterializedView("apartments_
         section: sql `current.${current.section}`.as("section"),
         year: sql `current.${current.year}`.as("year"),
         base_year: sql `base.${base.year}`.as("base_year"),
-        ...buildDeltasFromMetrics(AGG_METRICS, current, base),
-        ...buildDeltasFromMetrics(APARTMENT_COMPOSITION_METRICS, current, base),
+        ...buildDeltasFromMetrics(METRIC_FIELDS, current, base),
+        ...buildDeltasFromMetrics(APARTMENT_COMPOSITION_FIELDS, current, base),
     })
         .from(sql `apartments_by_section_year AS current`)
         .innerJoin(sql `apartments_by_section_year AS base`, and(eq(sql `current.${current.section}`, sql `base.${base.section}`), eq(sql `current.${current.year}`, sql `base.${base.year} + 1`)));
@@ -271,8 +153,8 @@ export const houses_by_section_year_deltas = pgMaterializedView("houses_by_secti
         section: sql `current.${current.section}`.as("section"),
         year: sql `current.${current.year}`.as("year"),
         base_year: sql `base.${base.year}`.as("base_year"),
-        ...buildDeltasFromMetrics(AGG_METRICS, current, base),
-        ...buildDeltasFromMetrics(HOUSE_COMPOSITION_METRICS, current, base),
+        ...buildDeltasFromMetrics(METRIC_FIELDS, current, base),
+        ...buildDeltasFromMetrics(HOUSE_COMPOSITION_FIELDS, current, base),
     })
         .from(sql `houses_by_section_year AS current`)
         .innerJoin(sql `houses_by_section_year AS base`, and(eq(sql `current.${current.section}`, sql `base.${base.section}`), eq(sql `current.${current.year}`, sql `base.${base.year} + 1`)));

@@ -1,4 +1,4 @@
-import { and, asc, desc, eq } from "drizzle-orm";
+import { and, asc, desc, eq, inArray } from "drizzle-orm";
 import { db } from "@/db";
 import { apartments_by_insee_code_month, houses_by_insee_code_month, apartments_by_insee_code_year, houses_by_insee_code_year, apartments_by_insee_code_week, houses_by_insee_code_week, apartments_by_section_month, houses_by_section_month, apartments_by_section_year, houses_by_section_year, } from "@/db/schema/mv_property_sales";
 /**
@@ -68,10 +68,48 @@ function getOrderBy(view, sortBy, sortOrder) {
             return [dir(view.total_sales)];
     }
 }
-function buildMonthWhereConditions(view, params) {
+// ----------------------------------------------------------------------------
+// Where condition builders
+// ----------------------------------------------------------------------------
+/**
+ * Adds inseeCode filter conditions to the conditions array
+ */
+function addInseeCodeConditions(conditions, view, inseeCodes) {
+    if (!inseeCodes || inseeCodes.length === 0)
+        return;
+    if (inseeCodes.length === 1) {
+        conditions.push(eq(view.inseeCode, inseeCodes[0]));
+    }
+    else {
+        conditions.push(inArray(view.inseeCode, inseeCodes));
+    }
+}
+/**
+ * Adds section filter conditions to the conditions array
+ */
+function addSectionConditions(conditions, view, sections) {
+    if (!sections || sections.length === 0)
+        return;
+    if (sections.length === 1) {
+        conditions.push(eq(view.section, sections[0]));
+    }
+    else {
+        conditions.push(inArray(view.section, sections));
+    }
+}
+function buildInseeWhereConditions(view, params) {
     const conditions = [];
-    if (params.inseeCode)
-        conditions.push(eq(view.inseeCode, params.inseeCode));
+    addInseeCodeConditions(conditions, view, params.inseeCodes);
+    return conditions;
+}
+function buildSectionWhereConditions(view, params) {
+    const conditions = [];
+    addInseeCodeConditions(conditions, view, params.inseeCodes);
+    addSectionConditions(conditions, view, params.sections);
+    return conditions;
+}
+function buildMonthWhereConditions(view, params) {
+    const conditions = buildInseeWhereConditions(view, params);
     if (params.year)
         conditions.push(eq(view.year, params.year));
     if (params.month)
@@ -79,17 +117,13 @@ function buildMonthWhereConditions(view, params) {
     return conditions;
 }
 function buildYearWhereConditions(view, params) {
-    const conditions = [];
-    if (params.inseeCode)
-        conditions.push(eq(view.inseeCode, params.inseeCode));
+    const conditions = buildInseeWhereConditions(view, params);
     if (params.year)
         conditions.push(eq(view.year, params.year));
     return conditions;
 }
 function buildWeekWhereConditions(view, params) {
-    const conditions = [];
-    if (params.inseeCode)
-        conditions.push(eq(view.inseeCode, params.inseeCode));
+    const conditions = buildInseeWhereConditions(view, params);
     if (params.iso_year)
         conditions.push(eq(view.iso_year, params.iso_year));
     if (params.iso_week)
@@ -97,11 +131,7 @@ function buildWeekWhereConditions(view, params) {
     return conditions;
 }
 function buildSectionMonthWhereConditions(view, params) {
-    const conditions = [];
-    if (params.inseeCode)
-        conditions.push(eq(view.inseeCode, params.inseeCode));
-    if (params.section)
-        conditions.push(eq(view.section, params.section));
+    const conditions = buildSectionWhereConditions(view, params);
     if (params.year)
         conditions.push(eq(view.year, params.year));
     if (params.month)
@@ -109,11 +139,7 @@ function buildSectionMonthWhereConditions(view, params) {
     return conditions;
 }
 function buildSectionYearWhereConditions(view, params) {
-    const conditions = [];
-    if (params.inseeCode)
-        conditions.push(eq(view.inseeCode, params.inseeCode));
-    if (params.section)
-        conditions.push(eq(view.section, params.section));
+    const conditions = buildSectionWhereConditions(view, params);
     if (params.year)
         conditions.push(eq(view.year, params.year));
     return conditions;

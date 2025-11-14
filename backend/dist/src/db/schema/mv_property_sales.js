@@ -1,4 +1,4 @@
-import { and, between, inArray, sql } from "drizzle-orm";
+import { and, between, inArray, SQL, sql } from "drizzle-orm";
 import { propertySales } from "./property_sales";
 import { MAX_APARTMENT_AREA, MAX_APARTMENT_PRICE, MIN_APARTMENT_AREA, MIN_APARTMENT_PRICE, MAX_HOUSE_AREA, MAX_HOUSE_PRICE, MIN_HOUSE_AREA, MIN_HOUSE_PRICE, } from "@/repositories/constants";
 import { pgMaterializedView } from "drizzle-orm/pg-core";
@@ -11,21 +11,21 @@ function buildAggregateMetrics(areaColumn) {
     const pricePerM2 = sql `${propertySales.price} / nullif(${areaColumn}, 0)`;
     return {
         total_sales: sql `count(*)::int`.as("total_sales"),
-        total_price: sql `round(coalesce(sum(${propertySales.price}), 0))`.as("total_price"),
-        avg_price: sql `round(coalesce(avg(${propertySales.price}), 0))`.as("avg_price"),
-        total_area: sql `round((coalesce(sum(${areaColumn}), 0))::numeric, 1)`.as("total_area"),
-        avg_area: sql `round((coalesce(avg(${areaColumn}), 0))::numeric, 1)`.as("avg_area"),
-        avg_price_m2: sql `round(sum(${propertySales.price}) / nullif(sum(${areaColumn}), 0))`.as("avg_price_m2"),
-        min_price: sql `round(min(${propertySales.price}))`.as("min_price"),
-        max_price: sql `round(max(${propertySales.price}))`.as("max_price"),
+        total_price: sql `round(coalesce(sum(${propertySales.price}), 0))::double precision`.as("total_price"),
+        avg_price: sql `round(coalesce(avg(${propertySales.price}), 0))::double precision`.as("avg_price"),
+        total_area: sql `round((coalesce(sum(${areaColumn}), 0))::double precision, 1)`.as("total_area"),
+        avg_area: sql `round((coalesce(avg(${areaColumn}), 0))::double precision, 1)`.as("avg_area"),
+        avg_price_m2: sql `round(sum(${propertySales.price}) / nullif(sum(${areaColumn}), 0))::double precision`.as("avg_price_m2"),
+        min_price: sql `round(min(${propertySales.price}))::double precision`.as("min_price"),
+        max_price: sql `round(max(${propertySales.price}))::double precision`.as("max_price"),
         median_price: sql `round(percentile_cont(0.5) within group (order by ${propertySales.price}))`.as("median_price"),
-        median_area: sql `round((percentile_cont(0.5) within group (order by ${areaColumn}))::numeric, 1)`.as("median_area"),
-        min_price_m2: sql `round(min(${pricePerM2}))`.as("min_price_m2"),
-        max_price_m2: sql `round(max(${pricePerM2}))`.as("max_price_m2"),
+        median_area: sql `round((percentile_cont(0.5) within group (order by ${areaColumn}))::numeric, 1)::double precision`.as("median_area"),
+        min_price_m2: sql `round(min(${pricePerM2}))::double precision`.as("min_price_m2"),
+        max_price_m2: sql `round(max(${pricePerM2}))::double precision`.as("max_price_m2"),
         price_m2_p25: sql `round(percentile_cont(0.25) within group (order by ${pricePerM2}))`.as("price_m2_p25"),
         price_m2_p75: sql `round(percentile_cont(0.75) within group (order by ${pricePerM2}))`.as("price_m2_p75"),
         price_m2_iqr: sql `round((percentile_cont(0.75) within group (order by ${pricePerM2})) - (percentile_cont(0.25) within group (order by ${pricePerM2})))`.as("price_m2_iqr"),
-        price_m2_stddev: sql `round(stddev_samp(${pricePerM2}))`.as("price_m2_stddev"),
+        price_m2_stddev: sql `round(stddev_samp(${pricePerM2}))::double precision`.as("price_m2_stddev"),
     };
 }
 function buildApartmentComposition() {

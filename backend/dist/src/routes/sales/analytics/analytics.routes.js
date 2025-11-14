@@ -1,7 +1,7 @@
 import { createRoute, z } from "@hono/zod-openapi";
 import * as HttpStatusCodes from "@/config/http-status-codes";
 import jsonContent from "@/openapi/helpers/json-content";
-import { AnalyticsQueryParamsSchema, SalesByInseeCodeSchema, SalesByMonthSchema, SalesByPropertyTypeSchema, SalesByInseeCodeAndSectionSchema, SalesByYearSchema, SalesSummarySchema, PricePerM2DecilesSchema, } from "./analytics.schemas";
+import { AnalyticsQueryParamsSchema, SalesByInseeCodeSchema, SalesByMonthSchema, SalesByPropertyTypeSchema, SalesByInseeCodeAndSectionSchema, SalesByYearSchema, SalesSummarySchema, PricePerM2DecilesSchema, } from "@app/shared";
 const tags = ["Analytics"];
 export const groupedByInseeCode = createRoute({
     tags,

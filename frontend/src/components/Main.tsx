@@ -10,6 +10,7 @@ import Topbar from "./topbar";
 import { useFilters } from "@/hooks/map";
 import { SectionMetricTable, CommuneMetricTable } from "./table";
 import { useYoYAggregatesFromParams } from "@/hooks/data/useYoYAggregatesFromParams";
+import { useIntent } from "@/hooks/chat";
 
 function App() {
   const tableState = useTableState();
@@ -38,6 +39,14 @@ function App() {
     isError: isSectionError,
     error: sectionError,
   } = useYoYAggregatesFromParams().sectionQuery;
+
+  const {
+    intent,
+    handleSendMessage: handleIntentSendMessage,
+    isProcessing: isIntentProcessing,
+  } = useIntent();
+
+  console.log("intent", intent);
 
   const [hoveredFeatureId, setHoveredFeatureId] = useState<string | null>(null);
 
@@ -123,8 +132,8 @@ function App() {
         {/* Input Bar at the bottom with sticky and higher z-index */}
         <div className="sticky bottom-0 z-50 bg-gray-50 pt-4">
           <MessageInput
-            onSubmit={handleSendMessage}
-            isProcessing={isProcessing}
+            onSubmit={handleIntentSendMessage}
+            isProcessing={isIntentProcessing}
           />
         </div>
       </div>

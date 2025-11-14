@@ -1,11 +1,14 @@
-import type { TableData } from "@/types";
+import type { TableData, UserIntent } from "@/types";
 import { apiService } from "./baseApiService";
 import type { ModelMessage } from "ai";
 
-export type DataChatResponse = {
+type ChatResponse<TData> = {
   messages: ModelMessage[];
-  data: TableData[];
+  data: TData;
 };
+
+export type DataChatResponse = ChatResponse<TableData[]>;
+export type IntentChatResponse = ChatResponse<UserIntent>;
 
 /**
  * Chat API service for handling chat-related requests
@@ -32,6 +35,18 @@ export class ChatService {
       return response.data;
     } catch (error) {
       console.error("Error sending chat message:", error);
+      throw error;
+    }
+  }
+
+  async getIntent(messages: ModelMessage[]): Promise<IntentChatResponse> {
+    try {
+      const response = await this.api.post<IntentChatResponse>("/chat/intent", {
+        messages,
+      });
+      return response.data;
+    } catch (error) {
+      console.error("Error getting intent:", error);
       throw error;
     }
   }

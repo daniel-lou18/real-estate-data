@@ -19,7 +19,8 @@ export default function MapLegend({
     isLoading,
     error,
   } = useMapLegend({
-    inseeCodes: filters.inseeCodes,
+    // Map schema uses singular inseeCode to filter sections by commune
+    inseeCode: filters.inseeCodes[0],
   });
 
   if (isLoading) {
