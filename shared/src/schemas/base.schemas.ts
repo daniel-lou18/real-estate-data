@@ -33,6 +33,44 @@ export const SECTION_ARRAY_SCHEMA = z
     "Section identifier(s) within the commune(s). Array of 10-character identifiers, e.g. ['75112000BZ', '75107000AY']. Omit for no filtering."
   );
 
+/**
+ * Preprocessed version of INSEE_CODE_ARRAY_SCHEMA that accepts comma-separated strings.
+ * Can parse strings like "75112,75113" into ["75112", "75113"].
+ * Also accepts arrays directly.
+ */
+export const INSEE_CODE_ARRAY_PREPROCESSED_SCHEMA = z
+  .union([
+    INSEE_CODE_ARRAY_SCHEMA,
+    z.string().transform((val) => {
+      const split = val
+        .split(",")
+        .map((item) => item.trim())
+        .filter((item) => item.length > 0);
+      // Return empty array if no valid items (will be handled by optional if needed)
+      return split;
+    }),
+  ])
+  .pipe(INSEE_CODE_ARRAY_SCHEMA);
+
+/**
+ * Preprocessed version of SECTION_ARRAY_SCHEMA that accepts comma-separated strings.
+ * Can parse strings like "75112000BZ,75107000AY" into ["75112000BZ", "75107000AY"].
+ * Also accepts arrays directly.
+ */
+export const SECTION_ARRAY_PREPROCESSED_SCHEMA = z
+  .union([
+    SECTION_ARRAY_SCHEMA,
+    z.string().transform((val) => {
+      const split = val
+        .split(",")
+        .map((item) => item.trim())
+        .filter((item) => item.length > 0);
+      // Return empty array if no valid items (will be handled by optional if needed)
+      return split;
+    }),
+  ])
+  .pipe(SECTION_ARRAY_SCHEMA);
+
 export const YEAR_SCHEMA = z.coerce
   .number()
   .int()

@@ -25,26 +25,26 @@ describe("toQueryParams", () => {
     expect(result).toEqual({ active: true, deleted: false });
   });
 
-  it("should convert string arrays to arrays", () => {
+  it("should convert string arrays to comma-separated strings", () => {
     const result = toQueryParams({ inseeCodes: ["75112", "75113", "75114"] });
-    expect(result).toEqual({ inseeCodes: ["75112", "75113", "75114"] });
+    expect(result).toEqual({ inseeCodes: "75112,75113,75114" });
   });
 
-  it("should convert number arrays to arrays", () => {
+  it("should convert number arrays to comma-separated strings", () => {
     const result = toQueryParams({ years: [2021, 2022, 2023] });
-    expect(result).toEqual({ years: [2021, 2022, 2023] });
+    expect(result).toEqual({ years: "2021,2022,2023" });
   });
 
-  it("should convert mixed type arrays to arrays", () => {
+  it("should convert mixed type arrays to comma-separated strings", () => {
     const result = toQueryParams({ values: ["abc", 123, true] });
-    expect(result).toEqual({ values: ["abc", 123, true] });
+    expect(result).toEqual({ values: "abc,123,true" });
   });
 
-  it("should filter out non-primitive values from arrays", () => {
+  it("should filter out non-primitive values from arrays and convert to comma-separated string", () => {
     const result = toQueryParams({
       codes: ["75112", { nested: "object" }, null, undefined, "75113"],
     });
-    expect(result).toEqual({ codes: ["75112", "75113"] });
+    expect(result).toEqual({ codes: "75112,75113" });
   });
 
   it("should handle empty arrays", () => {
@@ -79,8 +79,8 @@ describe("toQueryParams", () => {
       active: true,
     });
     expect(result).toEqual({
-      inseeCodes: ["75112", "75113"],
-      sections: ["75112000BZ", "75113000AY"],
+      inseeCodes: "75112,75113",
+      sections: "75112000BZ,75113000AY",
       year: 2023,
       limit: 50,
       active: true,
@@ -89,7 +89,7 @@ describe("toQueryParams", () => {
 
   it("should handle arrays with single element", () => {
     const result = toQueryParams({ inseeCodes: ["75112"] });
-    expect(result).toEqual({ inseeCodes: ["75112"] });
+    expect(result).toEqual({ inseeCodes: "75112" });
   });
 
   it("should ignore non-primitive, non-array values", () => {
@@ -100,7 +100,7 @@ describe("toQueryParams", () => {
     });
     expect(result).toEqual({
       name: "test",
-      arr: [1, 2, 3],
+      arr: "1,2,3",
     });
   });
 
@@ -111,7 +111,7 @@ describe("toQueryParams", () => {
     });
     expect(result).toEqual({
       single: "  test  ",
-      array: ["  value1  ", "  value2  "],
+      array: "  value1  ,  value2  ",
     });
   });
 });

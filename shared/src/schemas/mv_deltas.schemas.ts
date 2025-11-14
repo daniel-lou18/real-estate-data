@@ -130,8 +130,8 @@ export const YearlyDeltasBySectionSchema = YearlyDeltasByInseeSchema.extend({
 
 export const YearDeltaParamsSchema = shared.PaginationParamsSchema.extend({
   level: base.LEVEL_SCHEMA,
-  inseeCodes: base.INSEE_CODE_ARRAY_SCHEMA,
-  sections: base.SECTION_ARRAY_SCHEMA,
+  inseeCodes: base.INSEE_CODE_ARRAY_PREPROCESSED_SCHEMA,
+  sections: base.SECTION_ARRAY_PREPROCESSED_SCHEMA,
   year: base.YEAR_SCHEMA.describe("Comparison year (e.g. 2024)").optional(),
   base_year: base.YEAR_SCHEMA.describe("Base year (e.g. 2023)").optional(),
   metric: base.METRIC_FIELD_SCHEMA.optional().describe(

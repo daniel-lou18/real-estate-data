@@ -120,7 +120,7 @@ export const SortBySchema = z.enum([
 ]);
 
 export const InseeMonthParamsSchema = shared.PaginationParamsSchema.extend({
-  inseeCodes: base.INSEE_CODE_ARRAY_SCHEMA,
+  inseeCodes: base.INSEE_CODE_ARRAY_PREPROCESSED_SCHEMA,
   year: base.YEAR_SCHEMA.optional(),
   month: base.MONTH_SCHEMA.optional(),
   sortBy: SortBySchema.default("month"),
@@ -128,14 +128,14 @@ export const InseeMonthParamsSchema = shared.PaginationParamsSchema.extend({
 });
 
 export const InseeYearParamsSchema = shared.PaginationParamsSchema.extend({
-  inseeCodes: base.INSEE_CODE_ARRAY_SCHEMA,
+  inseeCodes: base.INSEE_CODE_ARRAY_PREPROCESSED_SCHEMA,
   year: base.YEAR_SCHEMA.optional(),
   sortBy: SortBySchema.default("year"),
   sortOrder: shared.SortOrderSchema,
 });
 
 export const InseeWeekParamsSchema = shared.PaginationParamsSchema.extend({
-  inseeCodes: base.INSEE_CODE_ARRAY_SCHEMA,
+  inseeCodes: base.INSEE_CODE_ARRAY_PREPROCESSED_SCHEMA,
   iso_year: base.ISO_YEAR_SCHEMA.optional(),
   iso_week: base.ISO_WEEK_SCHEMA.optional(),
   sortBy: SortBySchema.default("iso_week"),
@@ -143,8 +143,8 @@ export const InseeWeekParamsSchema = shared.PaginationParamsSchema.extend({
 });
 
 export const SectionMonthParamsSchema = shared.PaginationParamsSchema.extend({
-  inseeCodes: base.INSEE_CODE_ARRAY_SCHEMA,
-  sections: base.SECTION_ARRAY_SCHEMA,
+  inseeCodes: base.INSEE_CODE_ARRAY_PREPROCESSED_SCHEMA,
+  sections: base.SECTION_ARRAY_PREPROCESSED_SCHEMA,
   year: base.YEAR_SCHEMA.optional(),
   month: base.MONTH_SCHEMA.optional(),
   sortBy: SortBySchema.default("month"),
@@ -152,8 +152,8 @@ export const SectionMonthParamsSchema = shared.PaginationParamsSchema.extend({
 });
 
 export const SectionYearParamsSchema = shared.PaginationParamsSchema.extend({
-  inseeCodes: base.INSEE_CODE_ARRAY_SCHEMA,
-  sections: base.SECTION_ARRAY_SCHEMA,
+  inseeCodes: base.INSEE_CODE_ARRAY_PREPROCESSED_SCHEMA,
+  sections: base.SECTION_ARRAY_PREPROCESSED_SCHEMA,
   year: base.YEAR_SCHEMA.optional(),
   sortBy: SortBySchema.default("year"),
   sortOrder: shared.SortOrderSchema,

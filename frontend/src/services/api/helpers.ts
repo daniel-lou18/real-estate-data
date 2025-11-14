@@ -22,7 +22,7 @@ export const toQueryParams = (
           typeof item === "boolean"
       );
       if (filtered.length > 0) {
-        queryParams[key] = filtered;
+        queryParams[key] = filtered.map(String).join(",");
       }
       return;
     }
