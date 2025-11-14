@@ -15,7 +15,6 @@ export const SECTION_SCHEMA = z
   .length(10)
   .describe("Section identifier within the commune, e.g. '75112000BZ'");
 
-// Array schemas - only accept arrays (transforms cannot be represented in JSON Schema)
 export const INSEE_CODE_ARRAY_SCHEMA = z
   .array(INSEE_CODE_SCHEMA)
   .min(0)

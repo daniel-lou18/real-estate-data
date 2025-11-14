@@ -1,48 +1,7 @@
 import { z } from "zod";
 import { apiService, BaseApiService } from "./baseApiService";
 import * as shared from "@app/shared";
-
-type QueryParams = Record<string, string | number | boolean>;
-
-const toQueryParams = (
-  params?: Record<string, unknown>
-): QueryParams | undefined => {
-  if (!params) {
-    return undefined;
-  }
-
-  const queryParams: QueryParams = {};
-
-  Object.entries(params).forEach(([key, value]) => {
-    if (value === undefined || value === null) {
-      return;
-    }
-
-    if (Array.isArray(value)) {
-      value
-        .filter(
-          (item): item is string | number | boolean =>
-            typeof item === "string" ||
-            typeof item === "number" ||
-            typeof item === "boolean"
-        )
-        .forEach((item) => {
-          queryParams[key] = item;
-        });
-      return;
-    }
-
-    if (
-      typeof value === "string" ||
-      typeof value === "number" ||
-      typeof value === "boolean"
-    ) {
-      queryParams[key] = value;
-    }
-  });
-
-  return queryParams;
-};
+import { toQueryParams } from "./helpers";
 
 /**
  * Analytics API service backed by materialized views.
