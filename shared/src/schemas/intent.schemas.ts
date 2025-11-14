@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { METRIC_FIELDS } from "../constants/base/metrics";
+import { METRIC_FIELDS, DIMENSION_FIELDS } from "../constants/base";
 import {
   METRIC_FIELD_SCHEMA,
   YEAR_SCHEMA,
@@ -8,7 +8,6 @@ import {
   SECTION_ARRAY_SCHEMA,
   INSEE_CODE_ARRAY_SCHEMA,
 } from "./base.schemas";
-import { DIMENSION_FIELDS } from "../constants/base/dimensions";
 
 // Numeric Filter Schemas
 export const NUMERIC_FILTER_OPERATIONS = ["gte", "lte", "between"] as const;

@@ -9,7 +9,7 @@ import {
   UserIntentSchema,
 } from "@app/shared";
 import type { ModelMessage } from "ai";
-import type { UserIntent } from "./types";
+import type { UserIntent } from "@app/shared";
 
 const userIntentSystemPrompt = createUserIntentSystemPrompt();
 

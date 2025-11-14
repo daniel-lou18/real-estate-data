@@ -4,7 +4,8 @@ import type {
   HouseCompositionField,
   MetricField,
 } from "../types";
-import * as schemas from "../schemas/";
+import * as shared from "./mv_shared.schemas";
+import * as base from "./base.schemas";
 
 // ----------------------------------------------------------------------------
 // Shared numeric helper (allows nulls for pct_change when base==0 or missing)
@@ -33,12 +34,18 @@ export const YearlyDeltasMetricsSchema = z.object<
   Record<MetricField, typeof MetricDeltaSchema>
 >({
   // Counts and totals
-  total_sales: MetricDeltaSchema.describe("Deltas for total number of transactions"),
-  total_price: MetricDeltaSchema.describe("Deltas for sum of transaction prices"),
+  total_sales: MetricDeltaSchema.describe(
+    "Deltas for total number of transactions"
+  ),
+  total_price: MetricDeltaSchema.describe(
+    "Deltas for sum of transaction prices"
+  ),
   avg_price: MetricDeltaSchema.describe("Deltas for average transaction price"),
 
   // Areas
-  total_area: MetricDeltaSchema.describe("Deltas for sum of area for the group"),
+  total_area: MetricDeltaSchema.describe(
+    "Deltas for sum of area for the group"
+  ),
   avg_area: MetricDeltaSchema.describe("Deltas for average area for the group"),
 
   // Weighted price per m²
@@ -53,8 +60,12 @@ export const YearlyDeltasMetricsSchema = z.object<
   median_area: MetricDeltaSchema.describe("Deltas for median area"),
   min_price_m2: MetricDeltaSchema.describe("Deltas for minimum price/m²"),
   max_price_m2: MetricDeltaSchema.describe("Deltas for maximum price/m²"),
-  price_m2_p25: MetricDeltaSchema.describe("Deltas for 25th percentile price/m²"),
-  price_m2_p75: MetricDeltaSchema.describe("Deltas for 75th percentile price/m²"),
+  price_m2_p25: MetricDeltaSchema.describe(
+    "Deltas for 25th percentile price/m²"
+  ),
+  price_m2_p75: MetricDeltaSchema.describe(
+    "Deltas for 75th percentile price/m²"
+  ),
   price_m2_iqr: MetricDeltaSchema.describe("Deltas for IQR of price/m²"),
   price_m2_stddev: MetricDeltaSchema.describe("Deltas for stddev of price/m²"),
 });
@@ -89,9 +100,9 @@ const HouseCompositionDeltas = z.object<
 // ----------------------------------------------------------------------------
 export const YearlyDeltasByInseeSchema = z.object({
   // Dimensions
-  inseeCode: schemas.INSEE_CODE_SCHEMA.describe("INSEE code for the commune"),
-  year: schemas.YEAR_SCHEMA.describe("Comparison year (current period)"),
-  base_year: schemas.YEAR_SCHEMA.describe(
+  inseeCode: base.INSEE_CODE_SCHEMA.describe("INSEE code for the commune"),
+  year: base.YEAR_SCHEMA.describe("Comparison year (current period)"),
+  base_year: base.YEAR_SCHEMA.describe(
     "Base year used for the delta (e.g. year - 1)"
   ),
 
@@ -107,7 +118,7 @@ export const YearlyDeltasByInseeSchema = z.object({
 // Yearly deltas by SECTION (if you want section-level MV rows)
 // ----------------------------------------------------------------------------
 export const YearlyDeltasBySectionSchema = YearlyDeltasByInseeSchema.extend({
-  section: schemas.SECTION_SCHEMA.describe(
+  section: base.SECTION_SCHEMA.describe(
     "Section identifier within the commune"
   ),
   // inseeCode, year, base_year and metrics are inherited
@@ -117,13 +128,13 @@ export const YearlyDeltasBySectionSchema = YearlyDeltasByInseeSchema.extend({
 // Query param schemas for delta endpoints
 // ----------------------------------------------------------------------------
 
-export const YearDeltaParamsSchema = schemas.PaginationParamsSchema.extend({
-  level: schemas.LEVEL_SCHEMA,
-  inseeCode: schemas.INSEE_CODE_ARRAY_SCHEMA,
-  section: schemas.SECTION_ARRAY_SCHEMA,
-  year: schemas.YEAR_SCHEMA.describe("Comparison year (e.g. 2024)").optional(),
-  base_year: schemas.YEAR_SCHEMA.describe("Base year (e.g. 2023)").optional(),
-  metric: schemas.METRIC_FIELD_SCHEMA.optional().describe(
+export const YearDeltaParamsSchema = shared.PaginationParamsSchema.extend({
+  level: base.LEVEL_SCHEMA,
+  inseeCode: base.INSEE_CODE_ARRAY_SCHEMA,
+  section: base.SECTION_ARRAY_SCHEMA,
+  year: base.YEAR_SCHEMA.describe("Comparison year (e.g. 2024)").optional(),
+  base_year: base.YEAR_SCHEMA.describe("Base year (e.g. 2023)").optional(),
+  metric: base.METRIC_FIELD_SCHEMA.optional().describe(
     "If provided, limit sorting/filters to this metric"
   ),
   sortBy: z
@@ -138,7 +149,7 @@ export const YearDeltaParamsSchema = schemas.PaginationParamsSchema.extend({
     ])
     .optional()
     .describe("Sort ordering applied to the returned rows"),
-  sortOrder: schemas.SortOrderSchema,
+  sortOrder: shared.SortOrderSchema,
   tag: z
     .string()
     .optional()

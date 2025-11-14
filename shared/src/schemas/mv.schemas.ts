@@ -1,21 +1,22 @@
 import { z } from "zod";
-import * as schemas from "../schemas/";
+import * as shared from "./mv_shared.schemas";
+import * as base from "./base.schemas";
 
 // ----------------------------------------------------------------------------
 // Yearly aggregates by INSEE
 // ----------------------------------------------------------------------------
 
 export const ApartmentsByInseeYearSchema =
-  schemas.AggregateMetricsMVSchema.extend({
-    inseeCode: schemas.INSEE_CODE_SCHEMA,
-    year: schemas.YEAR_SCHEMA,
-    ...schemas.ApartmentComposition.shape,
+  shared.AggregateMetricsMVSchema.extend({
+    inseeCode: base.INSEE_CODE_SCHEMA,
+    year: base.YEAR_SCHEMA,
+    ...shared.ApartmentComposition.shape,
   });
 
-export const HousesByInseeYearSchema = schemas.AggregateMetricsMVSchema.extend({
-  inseeCode: schemas.INSEE_CODE_SCHEMA,
-  year: schemas.YEAR_SCHEMA,
-  ...schemas.HouseComposition.shape,
+export const HousesByInseeYearSchema = shared.AggregateMetricsMVSchema.extend({
+  inseeCode: base.INSEE_CODE_SCHEMA,
+  year: base.YEAR_SCHEMA,
+  ...shared.HouseComposition.shape,
 });
 
 // ----------------------------------------------------------------------------
@@ -23,39 +24,37 @@ export const HousesByInseeYearSchema = schemas.AggregateMetricsMVSchema.extend({
 // ----------------------------------------------------------------------------
 
 export const ApartmentsByInseeMonthSchema =
-  schemas.AggregateMetricsMVSchema.extend({
-    inseeCode: schemas.INSEE_CODE_SCHEMA,
-    year: schemas.YEAR_SCHEMA,
-    month: schemas.MONTH_SCHEMA,
-    ...schemas.ApartmentComposition.shape,
+  shared.AggregateMetricsMVSchema.extend({
+    inseeCode: base.INSEE_CODE_SCHEMA,
+    year: base.YEAR_SCHEMA,
+    month: base.MONTH_SCHEMA,
+    ...shared.ApartmentComposition.shape,
   });
 
-export const HousesByInseeMonthSchema = schemas.AggregateMetricsMVSchema.extend(
-  {
-    inseeCode: schemas.INSEE_CODE_SCHEMA,
-    year: schemas.YEAR_SCHEMA,
-    month: schemas.MONTH_SCHEMA,
-    ...schemas.HouseComposition.shape,
-  }
-);
+export const HousesByInseeMonthSchema = shared.AggregateMetricsMVSchema.extend({
+  inseeCode: base.INSEE_CODE_SCHEMA,
+  year: base.YEAR_SCHEMA,
+  month: base.MONTH_SCHEMA,
+  ...shared.HouseComposition.shape,
+});
 
 // ----------------------------------------------------------------------------
 // Weekly aggregates by INSEE (ISO year/week)
 // ----------------------------------------------------------------------------
 
 export const ApartmentsByInseeWeekSchema =
-  schemas.AggregateMetricsMVSchema.extend({
-    inseeCode: schemas.INSEE_CODE_SCHEMA,
-    iso_year: schemas.ISO_YEAR_SCHEMA,
-    iso_week: schemas.ISO_WEEK_SCHEMA,
-    ...schemas.ApartmentComposition.shape,
+  shared.AggregateMetricsMVSchema.extend({
+    inseeCode: base.INSEE_CODE_SCHEMA,
+    iso_year: base.ISO_YEAR_SCHEMA,
+    iso_week: base.ISO_WEEK_SCHEMA,
+    ...shared.ApartmentComposition.shape,
   });
 
-export const HousesByInseeWeekSchema = schemas.AggregateMetricsMVSchema.extend({
-  inseeCode: schemas.INSEE_CODE_SCHEMA,
-  iso_year: schemas.ISO_YEAR_SCHEMA,
-  iso_week: schemas.ISO_WEEK_SCHEMA,
-  ...schemas.HouseComposition.shape,
+export const HousesByInseeWeekSchema = shared.AggregateMetricsMVSchema.extend({
+  inseeCode: base.INSEE_CODE_SCHEMA,
+  iso_year: base.ISO_YEAR_SCHEMA,
+  iso_week: base.ISO_WEEK_SCHEMA,
+  ...shared.HouseComposition.shape,
 });
 
 // ----------------------------------------------------------------------------
@@ -63,21 +62,21 @@ export const HousesByInseeWeekSchema = schemas.AggregateMetricsMVSchema.extend({
 // ----------------------------------------------------------------------------
 
 export const ApartmentsBySectionMonthSchema =
-  schemas.AggregateMetricsMVSchema.extend({
-    inseeCode: schemas.INSEE_CODE_SCHEMA,
-    section: schemas.SECTION_SCHEMA,
-    year: schemas.YEAR_SCHEMA,
-    month: schemas.MONTH_SCHEMA,
-    ...schemas.ApartmentComposition.shape,
+  shared.AggregateMetricsMVSchema.extend({
+    inseeCode: base.INSEE_CODE_SCHEMA,
+    section: base.SECTION_SCHEMA,
+    year: base.YEAR_SCHEMA,
+    month: base.MONTH_SCHEMA,
+    ...shared.ApartmentComposition.shape,
   });
 
 export const HousesBySectionMonthSchema =
-  schemas.AggregateMetricsMVSchema.extend({
-    inseeCode: schemas.INSEE_CODE_SCHEMA,
-    section: schemas.SECTION_SCHEMA,
-    year: schemas.YEAR_SCHEMA,
-    month: schemas.MONTH_SCHEMA,
-    ...schemas.HouseComposition.shape,
+  shared.AggregateMetricsMVSchema.extend({
+    inseeCode: base.INSEE_CODE_SCHEMA,
+    section: base.SECTION_SCHEMA,
+    year: base.YEAR_SCHEMA,
+    month: base.MONTH_SCHEMA,
+    ...shared.HouseComposition.shape,
   });
 
 // ----------------------------------------------------------------------------
@@ -85,20 +84,21 @@ export const HousesBySectionMonthSchema =
 // ----------------------------------------------------------------------------
 
 export const ApartmentsBySectionYearSchema =
-  schemas.AggregateMetricsMVSchema.extend({
-    inseeCode: schemas.INSEE_CODE_SCHEMA,
-    section: schemas.SECTION_SCHEMA,
-    year: schemas.YEAR_SCHEMA,
-    ...schemas.ApartmentComposition.shape,
+  shared.AggregateMetricsMVSchema.extend({
+    inseeCode: base.INSEE_CODE_SCHEMA,
+    section: base.SECTION_SCHEMA,
+    year: base.YEAR_SCHEMA,
+    ...shared.ApartmentComposition.shape,
   });
 
-export const HousesBySectionYearSchema =
-  schemas.AggregateMetricsMVSchema.extend({
-    inseeCode: schemas.INSEE_CODE_SCHEMA,
-    section: schemas.SECTION_SCHEMA,
-    year: schemas.YEAR_SCHEMA,
-    ...schemas.HouseComposition.shape,
-  });
+export const HousesBySectionYearSchema = shared.AggregateMetricsMVSchema.extend(
+  {
+    inseeCode: base.INSEE_CODE_SCHEMA,
+    section: base.SECTION_SCHEMA,
+    year: base.YEAR_SCHEMA,
+    ...shared.HouseComposition.shape,
+  }
+);
 
 // ----------------------------------------------------------------------------
 // Query param schemas (MV-focused)
@@ -119,42 +119,42 @@ export const SortBySchema = z.enum([
   "avg_price",
 ]);
 
-export const InseeMonthParamsSchema = schemas.PaginationParamsSchema.extend({
-  inseeCode: schemas.INSEE_CODE_ARRAY_SCHEMA,
-  year: schemas.YEAR_SCHEMA.optional(),
-  month: schemas.MONTH_SCHEMA.optional(),
+export const InseeMonthParamsSchema = shared.PaginationParamsSchema.extend({
+  inseeCode: base.INSEE_CODE_ARRAY_SCHEMA,
+  year: base.YEAR_SCHEMA.optional(),
+  month: base.MONTH_SCHEMA.optional(),
   sortBy: SortBySchema.default("month"),
-  sortOrder: schemas.SortOrderSchema,
+  sortOrder: shared.SortOrderSchema,
 });
 
-export const InseeYearParamsSchema = schemas.PaginationParamsSchema.extend({
-  inseeCode: schemas.INSEE_CODE_ARRAY_SCHEMA,
-  year: schemas.YEAR_SCHEMA.optional(),
+export const InseeYearParamsSchema = shared.PaginationParamsSchema.extend({
+  inseeCode: base.INSEE_CODE_ARRAY_SCHEMA,
+  year: base.YEAR_SCHEMA.optional(),
   sortBy: SortBySchema.default("year"),
-  sortOrder: schemas.SortOrderSchema,
+  sortOrder: shared.SortOrderSchema,
 });
 
-export const InseeWeekParamsSchema = schemas.PaginationParamsSchema.extend({
-  inseeCode: schemas.INSEE_CODE_ARRAY_SCHEMA,
-  iso_year: schemas.ISO_YEAR_SCHEMA.optional(),
-  iso_week: schemas.ISO_WEEK_SCHEMA.optional(),
+export const InseeWeekParamsSchema = shared.PaginationParamsSchema.extend({
+  inseeCode: base.INSEE_CODE_ARRAY_SCHEMA,
+  iso_year: base.ISO_YEAR_SCHEMA.optional(),
+  iso_week: base.ISO_WEEK_SCHEMA.optional(),
   sortBy: SortBySchema.default("iso_week"),
-  sortOrder: schemas.SortOrderSchema,
+  sortOrder: shared.SortOrderSchema,
 });
 
-export const SectionMonthParamsSchema = schemas.PaginationParamsSchema.extend({
-  inseeCode: schemas.INSEE_CODE_ARRAY_SCHEMA,
-  section: schemas.SECTION_ARRAY_SCHEMA,
-  year: schemas.YEAR_SCHEMA.optional(),
-  month: schemas.MONTH_SCHEMA.optional(),
+export const SectionMonthParamsSchema = shared.PaginationParamsSchema.extend({
+  inseeCode: base.INSEE_CODE_ARRAY_SCHEMA,
+  section: base.SECTION_ARRAY_SCHEMA,
+  year: base.YEAR_SCHEMA.optional(),
+  month: base.MONTH_SCHEMA.optional(),
   sortBy: SortBySchema.default("month"),
-  sortOrder: schemas.SortOrderSchema,
+  sortOrder: shared.SortOrderSchema,
 });
 
-export const SectionYearParamsSchema = schemas.PaginationParamsSchema.extend({
-  inseeCode: schemas.INSEE_CODE_ARRAY_SCHEMA,
-  section: schemas.SECTION_ARRAY_SCHEMA,
-  year: schemas.YEAR_SCHEMA.optional(),
+export const SectionYearParamsSchema = shared.PaginationParamsSchema.extend({
+  inseeCode: base.INSEE_CODE_ARRAY_SCHEMA,
+  section: base.SECTION_ARRAY_SCHEMA,
+  year: base.YEAR_SCHEMA.optional(),
   sortBy: SortBySchema.default("year"),
-  sortOrder: schemas.SortOrderSchema,
+  sortOrder: shared.SortOrderSchema,
 });

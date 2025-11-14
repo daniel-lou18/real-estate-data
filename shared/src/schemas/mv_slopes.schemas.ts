@@ -1,5 +1,6 @@
 import { z } from "zod";
-import * as schemas from "../schemas/";
+import * as shared from "./mv_shared.schemas";
+import * as base from "./base.schemas";
 
 // ----------------------------------------------------------------------------
 // Linear regression slope metrics (12-month trailing window)
@@ -93,54 +94,55 @@ export const SlopeSortBySchema = z.enum(slopeSortValues);
 // ----------------------------------------------------------------------------
 
 export const ApartmentsByInseeMonthSlopeSchema = RegressionWindowMeta.extend({
-  inseeCode: schemas.INSEE_CODE_SCHEMA,
-  year: schemas.YEAR_SCHEMA,
-  month: schemas.MONTH_SCHEMA,
+  inseeCode: base.INSEE_CODE_SCHEMA,
+  year: base.YEAR_SCHEMA,
+  month: base.MONTH_SCHEMA,
   ...AggregateSlopeMetricsMV.shape,
   ...ApartmentCompositionSlope.shape,
 });
 
 export const HousesByInseeMonthSlopeSchema = RegressionWindowMeta.extend({
-  inseeCode: schemas.INSEE_CODE_SCHEMA,
-  year: schemas.YEAR_SCHEMA,
-  month: schemas.MONTH_SCHEMA,
+  inseeCode: base.INSEE_CODE_SCHEMA,
+  year: base.YEAR_SCHEMA,
+  month: base.MONTH_SCHEMA,
   ...AggregateSlopeMetricsMV.shape,
   ...HouseCompositionSlope.shape,
 });
 
 export const ApartmentsBySectionMonthSlopeSchema = RegressionWindowMeta.extend({
-  inseeCode: schemas.INSEE_CODE_SCHEMA,
-  section: schemas.SECTION_SCHEMA,
-  year: schemas.YEAR_SCHEMA,
-  month: schemas.MONTH_SCHEMA,
+  inseeCode: base.INSEE_CODE_SCHEMA,
+  section: base.SECTION_SCHEMA,
+  year: base.YEAR_SCHEMA,
+  month: base.MONTH_SCHEMA,
   ...AggregateSlopeMetricsMV.shape,
   ...ApartmentCompositionSlope.shape,
 });
 
 export const HousesBySectionMonthSlopeSchema = RegressionWindowMeta.extend({
-  inseeCode: schemas.INSEE_CODE_SCHEMA,
-  section: schemas.SECTION_SCHEMA,
-  year: schemas.YEAR_SCHEMA,
-  month: schemas.MONTH_SCHEMA,
+  inseeCode: base.INSEE_CODE_SCHEMA,
+  section: base.SECTION_SCHEMA,
+  year: base.YEAR_SCHEMA,
+  month: base.MONTH_SCHEMA,
   ...AggregateSlopeMetricsMV.shape,
   ...HouseCompositionSlope.shape,
 });
 
-export const InseeMonthSlopeParamsSchema =
-  schemas.PaginationParamsSchema.extend({
-    inseeCode: schemas.INSEE_CODE_SCHEMA.optional(),
-    year: schemas.YEAR_SCHEMA.optional(),
-    month: schemas.MONTH_SCHEMA.optional(),
+export const InseeMonthSlopeParamsSchema = shared.PaginationParamsSchema.extend(
+  {
+    inseeCode: base.INSEE_CODE_SCHEMA.optional(),
+    year: base.YEAR_SCHEMA.optional(),
+    month: base.MONTH_SCHEMA.optional(),
     sortBy: SlopeSortBySchema.optional().default("month"),
-    sortOrder: schemas.SortOrderSchema,
-  });
+    sortOrder: shared.SortOrderSchema,
+  }
+);
 
 export const SectionMonthSlopeParamsSchema =
-  schemas.PaginationParamsSchema.extend({
-    inseeCode: schemas.INSEE_CODE_SCHEMA.optional(),
-    section: schemas.SECTION_SCHEMA.optional(),
-    year: schemas.YEAR_SCHEMA.optional(),
-    month: schemas.MONTH_SCHEMA.optional(),
+  shared.PaginationParamsSchema.extend({
+    inseeCode: base.INSEE_CODE_SCHEMA.optional(),
+    section: base.SECTION_SCHEMA.optional(),
+    year: base.YEAR_SCHEMA.optional(),
+    month: base.MONTH_SCHEMA.optional(),
     sortBy: SlopeSortBySchema.optional().default("month"),
-    sortOrder: schemas.SortOrderSchema,
+    sortOrder: shared.SortOrderSchema,
   });

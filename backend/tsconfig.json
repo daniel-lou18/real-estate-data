@@ -13,8 +13,7 @@
     "verbatimModuleSyntax": true,
     "skipLibCheck": true,
     "paths": {
-      "@/*": ["./src/*"],
-      "@app/shared": ["../shared/src"]
+      "@/*": ["./src/*"]
     }
   },
   "exclude": ["node_modules"]

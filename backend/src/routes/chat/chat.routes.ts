@@ -2,6 +2,7 @@ import jsonContent from "@/openapi/helpers/json-content";
 import jsonContentRequired from "@/openapi/helpers/json-content-required";
 import * as HttpStatusCodes from "@/config/http-status-codes";
 import { createRoute, z } from "@hono/zod-openapi";
+import { UserIntentSchema } from "@app/shared";
 
 const tags = ["Chat"];
 
@@ -33,4 +34,26 @@ export const chat = createRoute({
   },
 });
 
+export const intent = createRoute({
+  tags,
+  method: "post",
+  path: "/intent",
+  request: {
+    body: jsonContentRequired(
+      z.object({ messages: z.array(messageSchema) }),
+      "The chat messages to send to the data assistant"
+    ),
+  },
+  responses: {
+    [HttpStatusCodes.OK]: jsonContent(
+      z.object({
+        messages: z.array(messageSchema),
+        data: UserIntentSchema,
+      }),
+      "The intent of the chat messages"
+    ),
+  },
+});
+
 export type ChatRoute = typeof chat;
+export type IntentRoute = typeof intent;
